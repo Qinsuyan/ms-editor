@@ -11,6 +11,7 @@ interface IDrawTableBorderOption {
   ctx: CanvasRenderingContext2D
   startX: number
   startY: number
+  borderWidth: number
   width: number
   height: number
   isDrawFullBorder?: boolean
@@ -100,7 +101,15 @@ export class TableParticle {
   }
 
   private _drawOuterBorder(payload: IDrawTableBorderOption) {
-    const { ctx, startX, startY, width, height, isDrawFullBorder } = payload
+    const {
+      ctx,
+      startX,
+      startY,
+      width,
+      height,
+      isDrawFullBorder,
+      borderWidth
+    } = payload
     ctx.beginPath()
     const x = Math.round(startX)
     const y = Math.round(startY)
@@ -112,6 +121,7 @@ export class TableParticle {
       ctx.lineTo(x, y)
       ctx.lineTo(x + width, y)
     }
+    ctx.lineWidth = borderWidth
     ctx.stroke()
     ctx.translate(-0.5, -0.5)
   }
@@ -146,7 +156,9 @@ export class TableParticle {
     ctx: CanvasRenderingContext2D,
     element: IElement,
     startX: number,
-    startY: number
+    startY: number,
+    borderWidth: number,
+    innerBorderWidth:number,
   ) {
     const { colgroup, trList, borderType } = element
     if (!colgroup || !trList) return
@@ -165,11 +177,14 @@ export class TableParticle {
         ctx,
         startX,
         startY,
+        borderWidth,
         width: tableWidth,
         height: tableHeight,
-        isDrawFullBorder: isExternalBorderType
+        isDrawFullBorder: isExternalBorderType || borderWidth !== 1
       })
     }
+    const lineWidth = innerBorderWidth || 1
+    ctx.lineWidth = lineWidth
     // 渲染单元格
     for (let t = 0; t < trList.length; t++) {
       const tr = trList[t]
@@ -436,9 +451,9 @@ export class TableParticle {
     ctx: CanvasRenderingContext2D,
     element: IElement,
     startX: number,
-    startY: number
+    startY: number,
   ) {
     this._drawBackgroundColor(ctx, element, startX, startY)
-    this._drawBorder(ctx, element, startX, startY)
+    this._drawBorder(ctx, element, startX, startY,element.borderWidth || 1,element.innerBorderWidth || 1)
   }
 }

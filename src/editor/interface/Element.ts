@@ -56,7 +56,9 @@ export interface IListElement {
 export interface ITableAttr {
   colgroup?: IColgroup[]
   trList?: ITr[]
-  borderType?: TableBorder
+  borderType?: TableBorder,
+  borderWidth?: number,
+  innerBorderWidth?: number
 }
 
 export interface ITableElement {

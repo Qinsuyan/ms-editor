@@ -400,7 +400,7 @@ window.onload = function () {
   }
   tablePanel.onclick = function () {
     // 应用选择
-    instance.command.executeInsertTable(rowIndex, colIndex)
+    instance.command.executeInsertTable(rowIndex, colIndex, {outer:5,inner:1})
     recoveryTable()
   }
 

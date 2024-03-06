@@ -736,7 +736,7 @@ export class CommandAdapt {
     this.draw.render({ curIndex, isSetCursor })
   }
 
-  public insertTable(row: number, col: number) {
+  public insertTable(row: number, col: number,borderWidth?:{inner?:number,outer?:number}) {
     const isReadonly = this.draw.isReadonly()
     if (isReadonly) return
     const activeControl = this.control.getActiveControl()
@@ -790,6 +790,8 @@ export class CommandAdapt {
     })
     formatElementContext(elementList, [element], startIndex)
     const curIndex = startIndex + 1
+    element.borderWidth = borderWidth?.outer
+    element.innerBorderWidth = borderWidth?.inner
     this.draw.spliceElementList(
       elementList,
       curIndex,
