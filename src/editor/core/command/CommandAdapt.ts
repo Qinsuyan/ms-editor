@@ -184,6 +184,10 @@ export class CommandAdapt {
     })
   }
 
+  public setVariableDict(dict:Record<string,string>){
+    this.draw.setVariableDict(dict)
+  }
+
   public replaceRange(range: IRange) {
     this.setRange(
       range.startIndex,
@@ -736,7 +740,11 @@ export class CommandAdapt {
     this.draw.render({ curIndex, isSetCursor })
   }
 
-  public insertTable(row: number, col: number,borderWidth?:{inner?:number,outer?:number}) {
+  public insertTable(
+    row: number,
+    col: number,
+    borderWidth?: { inner?: number; outer?: number }
+  ) {
     const isReadonly = this.draw.isReadonly()
     if (isReadonly) return
     const activeControl = this.control.getActiveControl()
@@ -800,6 +808,29 @@ export class CommandAdapt {
     )
     this.range.setRange(curIndex, curIndex)
     this.draw.render({ curIndex, isSetCursor: false })
+  }
+
+  public insertVariable(options: {
+    label: string
+    key: string
+    image?: boolean
+  }) {
+    const isDisabled =
+      this.draw.isReadonly() || this.control.isDisabledControl()
+    if (isDisabled) return
+    const { startIndex, endIndex } = this.range.getRange()
+    if (!~startIndex && !~endIndex) return
+    const { label, key, image } = options
+    this.draw.insertElementList([
+      {
+        value: '',
+        label,
+        key,
+        image,
+        type: ElementType.VARIABLE,
+        id: getUUID()
+      }
+    ])
   }
 
   public insertTableTopRow() {

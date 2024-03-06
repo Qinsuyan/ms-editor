@@ -39,6 +39,7 @@ export class Command {
   public executeInsertTableBottomRow: CommandAdapt['insertTableBottomRow']
   public executeInsertTableLeftCol: CommandAdapt['insertTableLeftCol']
   public executeInsertTableRightCol: CommandAdapt['insertTableRightCol']
+  public executeInsertVariable: CommandAdapt['insertVariable']
   public executeDeleteTableRow: CommandAdapt['deleteTableRow']
   public executeDeleteTableCol: CommandAdapt['deleteTableCol']
   public executeDeleteTable: CommandAdapt['deleteTable']
@@ -109,6 +110,7 @@ export class Command {
   public getGroupIds: CommandAdapt['getGroupIds']
   public getControlValue: CommandAdapt['getControlValue']
   public getContainer: CommandAdapt['getContainer']
+  public setVariableDict:CommandAdapt['setVariableDict']
 
   constructor(adapt: CommandAdapt) {
     // 全局命令
@@ -182,6 +184,9 @@ export class Command {
     this.executeReplaceImageElement = adapt.replaceImageElement.bind(adapt)
     this.executeSaveAsImageElement = adapt.saveAsImageElement.bind(adapt)
     this.executeChangeImageDisplay = adapt.changeImageDisplay.bind(adapt)
+    //自定义功能
+    this.executeInsertVariable = adapt.insertVariable.bind(adapt)
+    this.setVariableDict = adapt.setVariableDict.bind(adapt)
     // 页面模式、页面缩放、纸张大小、纸张方向、页边距
     this.executePageMode = adapt.pageMode.bind(adapt)
     this.executePageScaleRecovery = adapt.pageScaleRecovery.bind(adapt)

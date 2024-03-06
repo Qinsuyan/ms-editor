@@ -45,6 +45,15 @@ export interface ITitleElement {
   titleId?: string
 }
 
+export interface IVariableElement {
+  //Basic中包含的value，用来表示变量的key
+  //label表示变量的字面量，通常是变量的名称
+  //image表示图片变量
+  key?: string
+  image?: boolean
+  label?: string
+}
+
 export interface IListElement {
   valueList?: IElement[]
   listType?: ListType
@@ -56,8 +65,8 @@ export interface IListElement {
 export interface ITableAttr {
   colgroup?: IColgroup[]
   trList?: ITr[]
-  borderType?: TableBorder,
-  borderWidth?: number,
+  borderType?: TableBorder
+  borderWidth?: number
   innerBorderWidth?: number
 }
 
@@ -129,7 +138,8 @@ export type IElement = IElementBasic &
   IImageElement &
   IBlockElement &
   ITitleElement &
-  IListElement
+  IListElement &
+  IVariableElement
 
 export interface IElementMetrics {
   width: number

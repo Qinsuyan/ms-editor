@@ -1,5 +1,6 @@
 import { cloneProperty, deepClone, getUUID, isArrayEqual, splitText } from '.'
 import {
+  EditorMode,
   ElementType,
   IEditorOption,
   IElement,
@@ -50,7 +51,8 @@ interface IFormatElementListOption {
 
 export function formatElementList(
   elementList: IElement[],
-  options: IFormatElementListOption
+  options: IFormatElementListOption,
+  dict?: Record<string, string>
 ) {
   const { isHandleFirstElement, editorOptions } = <IFormatElementListOption>{
     isHandleFirstElement: true,
@@ -60,7 +62,9 @@ export function formatElementList(
   // 非首字符零宽节点文本元素则补偿
   if (
     isHandleFirstElement &&
-    ((startElement?.type && startElement.type !== ElementType.TEXT) ||
+    ((startElement?.type &&
+      startElement.type !== ElementType.TEXT &&
+      startElement.type !== ElementType.VARIABLE) ||
       (startElement?.value !== ZERO && startElement?.value !== '\n'))
   ) {
     elementList.unshift({
@@ -196,6 +200,17 @@ export function formatElementList(
         }
       }
       i--
+    } else if (el.type === ElementType.VARIABLE) {
+      if (options.editorOptions.mode === EditorMode.EDIT) {
+        el.value = '${' + (el.label || '变量名称') + '}'
+      } else {
+        if (dict) {
+          const val = el.key ? dict[el.key] : '变量值'
+          el.value = val || '变量值'
+        } else {
+          el.value = el.key || '变量值'
+        }
+      }
     } else if (el.type === ElementType.CONTROL) {
       // 兼容控件内容类型错误
       if (!el.control) {

@@ -35,29 +35,9 @@ window.onload = function () {
   const instance = new Editor(
     container,
     {
-      header: [
-        {
-          value: '第一人民医院',
-          size: 32,
-          rowFlex: RowFlex.CENTER
-        },
-        {
-          value: '\n门诊病历',
-          size: 18,
-          rowFlex: RowFlex.CENTER
-        },
-        {
-          value: '\n',
-          type: ElementType.SEPARATOR
-        }
-      ],
-      main: <IElement[]>data,
-      footer: [
-        {
-          value: 'canvas-editor',
-          size: 12
-        }
-      ]
+      header: [],
+      main: [],
+      footer: []
     },
     options
   )
@@ -400,7 +380,10 @@ window.onload = function () {
   }
   tablePanel.onclick = function () {
     // 应用选择
-    instance.command.executeInsertTable(rowIndex, colIndex, {outer:5,inner:1})
+    instance.command.executeInsertTable(rowIndex, colIndex, {
+      outer: 5,
+      inner: 1
+    })
     recoveryTable()
   }
 
@@ -1008,6 +991,15 @@ window.onload = function () {
   printDom.onclick = function () {
     console.log('print')
     instance.command.executePrint()
+  }
+
+  const testDom = document.querySelector<HTMLDivElement>('.menu-item__test')!
+  testDom.title = `测试1`
+  testDom.onclick = function () {
+    console.log('test')
+    //instance.command.executePrint()
+    instance.command.setVariableDict({test:"123123123"})
+    instance.command.executeInsertVariable({ label: '测试变量', key: 'test' })
   }
 
   // 6. 目录显隐 | 页面模式 | 纸张缩放 | 纸张大小 | 纸张方向 | 页边距 | 全屏

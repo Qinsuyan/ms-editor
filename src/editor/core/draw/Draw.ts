@@ -88,6 +88,7 @@ import { EventBusMap } from '../../interface/EventBus'
 import { Group } from './interactive/Group'
 import { Override } from '../override/Override'
 import { ImageDisplay } from '../../dataset/enum/Common'
+import { VariableParticle } from './particle/VariableParticle'
 
 export class Draw {
   private container: HTMLDivElement
@@ -123,6 +124,7 @@ export class Draw {
   private laTexParticle: LaTexParticle
   private textParticle: TextParticle
   private tableParticle: TableParticle
+  private variableParticle: VariableParticle
   private tableTool: TableTool
   private pageNumber: PageNumber
   private waterMark: Watermark
@@ -155,6 +157,8 @@ export class Draw {
   private lazyRenderIntersectionObserver: IntersectionObserver | null
   private printModeData: Required<IEditorData> | null
 
+  private variableDict: Record<string, string>
+
   constructor(
     rootContainer: HTMLElement,
     options: DeepRequired<IEditorOption>,
@@ -174,7 +178,7 @@ export class Draw {
     this.listener = listener
     this.eventBus = eventBus
     this.override = override
-
+    this.variableDict = {}
     this._formatContainer()
     this.pageContainer = this._createPageContainer()
     this._createPage(0)
@@ -196,6 +200,7 @@ export class Draw {
     this.laTexParticle = new LaTexParticle(this)
     this.textParticle = new TextParticle(this)
     this.tableParticle = new TableParticle(this)
+    this.variableParticle = new VariableParticle(this)
     this.tableTool = new TableTool(this)
     this.pageNumber = new PageNumber(this)
     this.waterMark = new Watermark(this)
@@ -278,6 +283,14 @@ export class Draw {
       this.printModeData = null
     }
     this.mode = payload
+    formatElementList(
+      this.elementList,
+      {
+        isHandleFirstElement: false,
+        editorOptions: { ...this.options, mode: this.mode }
+      },
+      this.variableDict
+    )
     this.render({
       isSetCursor: false,
       isSubmitHistory: false
@@ -559,7 +572,7 @@ export class Draw {
     formatElementList(payload, {
       isHandleFirstElement: false,
       editorOptions: this.options
-    })
+    },this.variableDict)
     let curIndex = -1
     // 判断是否在控件内
     let activeControl = this.control.getActiveControl()
@@ -582,6 +595,7 @@ export class Draw {
       this.spliceElementList(elementList, start, 0, ...payload)
       curIndex = startIndex + payload.length
     }
+
     if (~curIndex) {
       this.range.setRange(curIndex, curIndex)
       this.render({
@@ -598,7 +612,7 @@ export class Draw {
     formatElementList(elementList, {
       isHandleFirstElement: false,
       editorOptions: this.options
-    })
+    },this.variableDict)
     let curIndex: number
     const { isPrepend } = options
     if (isPrepend) {
@@ -973,7 +987,7 @@ export class Draw {
       if (!data) return
       formatElementList(data, {
         editorOptions: this.options
-      })
+      },this.variableDict)
     })
     this.setEditorData({
       header,
@@ -1560,7 +1574,7 @@ export class Draw {
     this.highlight.render(ctx)
     this.textParticle.complete()
   }
-
+  //绘制具体元素
   public drawRow(ctx: CanvasRenderingContext2D, payload: IDrawRowPayload) {
     const { rowList, pageNo, elementList, positionList, startIndex, zone } =
       payload
@@ -1625,6 +1639,24 @@ export class Draw {
             element.imgDisplay !== ImageDisplay.FLOAT_BOTTOM
           ) {
             this.imageParticle.render(ctx, element, x, y + offsetY)
+          }
+        } else if (element.type === ElementType.VARIABLE) {
+          //TODO:绘制变量
+          if (element.image) {
+            //图片
+          } else {
+            //字符
+            //const el = deepClone(element)
+            // if (this.mode === EditorMode.EDIT) {
+            // } else {
+            //   el.value = el.label || '变量'
+            // }
+            this.variableParticle.render(ctx, element, x, y + offsetY)
+            if (element.left) {
+              this.textParticle.complete()
+            }
+            this.textParticle.record(ctx, element, x, y + offsetY)
+            //this._drawRichText(ctx)
           }
         } else if (element.type === ElementType.LATEX) {
           this._drawRichText(ctx)
@@ -1969,6 +2001,10 @@ export class Draw {
         pageNo: i
       })
     }
+  }
+
+  public setVariableDict(dict: Record<string, string>) {
+    this.variableDict = dict
   }
 
   public render(payload?: IDrawOption) {
