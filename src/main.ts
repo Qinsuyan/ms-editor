@@ -1,4 +1,4 @@
-import { commentList, data, options } from './mock'
+import { commentList, options } from './mock'
 import './style.css'
 import prism from 'prismjs'
 import Editor, {
@@ -998,7 +998,7 @@ window.onload = function () {
   testDom.onclick = function () {
     console.log('test')
     //instance.command.executePrint()
-    instance.command.setVariableDict({test:"123123123"})
+    instance.command.setVariableDict({test:'123123123'})
     instance.command.executeInsertVariable({ label: '测试变量', key: 'test' })
   }
 

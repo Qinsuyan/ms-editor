@@ -88,7 +88,6 @@ import { EventBusMap } from '../../interface/EventBus'
 import { Group } from './interactive/Group'
 import { Override } from '../override/Override'
 import { ImageDisplay } from '../../dataset/enum/Common'
-import { VariableParticle } from './particle/VariableParticle'
 
 export class Draw {
   private container: HTMLDivElement
@@ -124,7 +123,6 @@ export class Draw {
   private laTexParticle: LaTexParticle
   private textParticle: TextParticle
   private tableParticle: TableParticle
-  private variableParticle: VariableParticle
   private tableTool: TableTool
   private pageNumber: PageNumber
   private waterMark: Watermark
@@ -200,7 +198,6 @@ export class Draw {
     this.laTexParticle = new LaTexParticle(this)
     this.textParticle = new TextParticle(this)
     this.tableParticle = new TableParticle(this)
-    this.variableParticle = new VariableParticle(this)
     this.tableTool = new TableTool(this)
     this.pageNumber = new PageNumber(this)
     this.waterMark = new Watermark(this)
@@ -1651,7 +1648,7 @@ export class Draw {
             // } else {
             //   el.value = el.label || '变量'
             // }
-            this.variableParticle.render(ctx, element, x, y + offsetY)
+           
             if (element.left) {
               this.textParticle.complete()
             }
