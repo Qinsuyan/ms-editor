@@ -385,6 +385,7 @@ window.onload = function () {
       outer: 5,
       inner: 1
     })
+    console.log(instance.command.getValue())
     recoveryTable()
   }
 
@@ -997,7 +998,6 @@ window.onload = function () {
   const testDom = document.querySelector<HTMLDivElement>('.menu-item__test')!
   testDom.title = `测试1`
   testDom.onclick = function () {
-    console.log('test')
     //instance.command.executePrint()
     instance.command.setVariableDict({ test: '123123123' })
     instance.command.executeInsertVariable({ label: '测试变量', key: 'test' })

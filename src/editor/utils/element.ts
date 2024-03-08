@@ -1,6 +1,5 @@
 import { cloneProperty, deepClone, getUUID, isArrayEqual, splitText } from '.'
 import {
-  EditorMode,
   ElementType,
   IEditorOption,
   IElement,
@@ -53,7 +52,6 @@ interface IFormatElementListOption {
 export function formatElementList(
   elementList: IElement[],
   options: IFormatElementListOption,
-  dict?: Record<string, string>
 ) {
   const { isHandleFirstElement, editorOptions } = <IFormatElementListOption>{
     isHandleFirstElement: true,
@@ -165,6 +163,7 @@ export function formatElementList(
           }
         }
       }
+      
     } else if (el.type === ElementType.HYPERLINK) {
       // 移除父节点
       elementList.splice(i, 1)
@@ -202,16 +201,6 @@ export function formatElementList(
       }
       i--
     } else if (el.type === ElementType.VARIABLE) {
-      if (options.editorOptions.mode === EditorMode.EDIT) {
-        el.value = '${' + (el.label || '变量名称') + '}'
-      } else {
-        if (dict) {
-          const val = el.key ? dict[el.key] : '变量值'
-          el.value = val || '变量值'
-        } else {
-          el.value = el.key || '变量值'
-        }
-      }
       if (el.width || el.height) {
         el.imgDisplay = ImageDisplay.BLOCK
       }

@@ -1,53 +1,16 @@
 <h1 align="center">md-editor</h1>
-<h2 align="center">forked from canvas-editor</h2>
 
-> belown is original information from [canvas-editor](https://github.com/Hufe921/canvas-editor)
+forked from [canvas-editor](https://github.com/Hufe921/canvas-editor)
 
-<p align="center"> a rich text editor by canvas/svg</p>
+## 更改内容
 
-## tips
+* 表格可指定边框宽度
 
-1. [docs](https://hufe.club/canvas-editor-docs/)
-2. [canvas-editor-plugin](https://github.com/Hufe921/canvas-editor-plugin)
-3. The render layer by svg is under development, see [feature/svg](https://github.com/Hufe921/canvas-editor/tree/feature/svg)
-4. The export pdf feature is available now, see [feature/pdf](https://github.com/Hufe921/canvas-editor/tree/feature/pdf)
-
-## usage
-
-```bash
-npm i @hufe921/canvas-editor --save
-```
-
-```html
-<div class="canvas-editor"></div>
-```
-
-```javascript
-import Editor from '@hufe921/canvas-editor'
-
-new Editor(document.querySelector('.canvas-editor'), {
-  main: [
-    {
-      value: 'Hello World'
-    }
-  ]
-})
-```
-
-## next features
-
-1. table paging
-2. improve performance
-3. control rules
-4. [CRDT](https://github.com/Hufe921/canvas-editor/tree/feature/CRDT)
-
-## snapshot
-
-![image](https://github.com/Hufe921/canvas-editor/blob/main/src/assets/snapshots/main_v0.9.35.png)
+* 增加变量类型
 
 ## install
 
-`yarn`
+`pnpm install`
 
 ## dev
 

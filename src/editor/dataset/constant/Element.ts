@@ -69,7 +69,12 @@ export const EDITOR_ELEMENT_ZIP_ATTR: Array<keyof IElement> = [
   'conceptId',
   'imgDisplay',
   'imgFloatPosition',
-  'textDecoration'
+  'textDecoration',
+  "borderWidth",
+  "innerBorderWidth",
+  "label",
+  "key",
+  "value",
 ]
 
 export const TABLE_TD_ZIP_ATTR: Array<keyof ITd> = [

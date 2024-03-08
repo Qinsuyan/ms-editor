@@ -280,14 +280,7 @@ export class Draw {
       this.printModeData = null
     }
     this.mode = payload
-    formatElementList(
-      this.elementList,
-      {
-        isHandleFirstElement: false,
-        editorOptions: { ...this.options, mode: this.mode }
-      },
-      this.variableDict
-    )
+    this.options.mode = payload
     this.render({
       isSetCursor: false,
       isSubmitHistory: false
@@ -566,14 +559,10 @@ export class Draw {
     if (!isRangeCanInput) return
     const { startIndex, endIndex } = this.range.getRange()
     if (!~startIndex && !~endIndex) return
-    formatElementList(
-      payload,
-      {
-        isHandleFirstElement: false,
-        editorOptions: this.options
-      },
-      this.variableDict
-    )
+    formatElementList(payload, {
+      isHandleFirstElement: false,
+      editorOptions: this.options
+    })
     let curIndex = -1
     // 判断是否在控件内
     let activeControl = this.control.getActiveControl()
@@ -610,14 +599,10 @@ export class Draw {
     options: IAppendElementListOption = {}
   ) {
     if (!elementList.length) return
-    formatElementList(
-      elementList,
-      {
-        isHandleFirstElement: false,
-        editorOptions: this.options
-      },
-      this.variableDict
-    )
+    formatElementList(elementList, {
+      isHandleFirstElement: false,
+      editorOptions: this.options
+    })
     let curIndex: number
     const { isPrepend } = options
     if (isPrepend) {
@@ -969,6 +954,7 @@ export class Draw {
         row => row.elementList
       )
     }
+
     const data: IEditorData = {
       header: zipElementList(this.getHeaderElementList()),
       main: zipElementList(mainElementList),
@@ -990,13 +976,9 @@ export class Draw {
     const pageComponentData = [header, main, footer]
     pageComponentData.forEach(data => {
       if (!data) return
-      formatElementList(
-        data,
-        {
-          editorOptions: this.options
-        },
-        this.variableDict
-      )
+      formatElementList(data, {
+        editorOptions: this.options
+      })
     })
     this.setEditorData({
       header,
@@ -1652,6 +1634,18 @@ export class Draw {
             this.imageParticle.render(ctx, element, x, y + offsetY)
           }
         } else if (element.type === ElementType.VARIABLE) {
+          if (this.mode === EditorMode.EDIT) {
+            element.value = '${' + (element.label || '变量名称') + '}'
+          } else {
+            if (this.variableDict) {
+              const val = element.key
+                ? this.variableDict[element.key]
+                : '变量值'
+              element.value = val || '变量值'
+            } else {
+              element.value = element.key || '变量值'
+            }
+          }
           if (element.width || element.height) {
             this._drawRichText(ctx)
             this.imageParticle.render(ctx, element, x, y + offsetY)

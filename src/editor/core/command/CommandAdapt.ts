@@ -106,6 +106,7 @@ export class CommandAdapt {
 
   public mode(payload: EditorMode) {
     this.draw.setMode(payload)
+    this.options = this.draw.getOptions()
   }
 
   public cut() {
@@ -790,13 +791,10 @@ export class CommandAdapt {
       type: ElementType.TABLE,
       value: '',
       colgroup,
-      trList
+      trList,
+      borderWidth:borderWidth?.outer||1,
+      innerBorderWidth:borderWidth?.inner||1
     }
-    if(borderWidth?.inner && borderWidth.outer){
-      element.innerBorderWidth = borderWidth.inner
-      element.borderWidth = borderWidth.outer
-    }
-    // 格式化element
     formatElementList([element], {
       editorOptions: this.options
     })
