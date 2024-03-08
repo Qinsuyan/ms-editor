@@ -1,10 +1,7 @@
-<h1 align="center">canvas-editor</h1>
+<h1 align="center">md-editor</h1>
+<h2 align="center">forked from canvas-editor</h2>
 
-<p align="center">
-<a href="https://www.npmjs.com/package/@hufe921/canvas-editor"><img src="https://img.shields.io/npm/v/@hufe921/canvas-editor.svg?sanitize=true" alt="Version"></a>
-<a href="https://www.npmjs.com/package/@hufe921/canvas-editor"><img src="https://img.shields.io/npm/l/@hufe921/canvas-editor.svg?sanitize=true" alt="License"></a>
-<a href="https://github.com/Hufe921/canvas-editor/issues/new/choose"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs"></a>
-</p>
+> belown is original information from [canvas-editor](https://github.com/Hufe921/canvas-editor)
 
 <p align="center"> a rich text editor by canvas/svg</p>
 

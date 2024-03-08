@@ -792,6 +792,10 @@ export class CommandAdapt {
       colgroup,
       trList
     }
+    if(borderWidth?.inner && borderWidth.outer){
+      element.innerBorderWidth = borderWidth.inner
+      element.borderWidth = borderWidth.outer
+    }
     // 格式化element
     formatElementList([element], {
       editorOptions: this.options

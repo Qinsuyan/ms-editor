@@ -1652,11 +1652,7 @@ export class Draw {
             this.imageParticle.render(ctx, element, x, y + offsetY)
           }
         } else if (element.type === ElementType.VARIABLE) {
-          //TODO:绘制变量
-
           if (element.width || element.height) {
-            //图片
-            // element.imgDisplay = ImageDisplay.BLOCK
             this._drawRichText(ctx)
             this.imageParticle.render(ctx, element, x, y + offsetY)
           } else {
