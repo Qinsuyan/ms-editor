@@ -810,29 +810,6 @@ export class CommandAdapt {
     this.draw.render({ curIndex, isSetCursor: false })
   }
 
-  public insertVariable(options: {
-    label: string
-    key: string
-    image?: boolean
-  }) {
-    const isDisabled =
-      this.draw.isReadonly() || this.control.isDisabledControl()
-    if (isDisabled) return
-    const { startIndex, endIndex } = this.range.getRange()
-    if (!~startIndex && !~endIndex) return
-    const { label, key, image } = options
-    this.draw.insertElementList([
-      {
-        value: '',
-        label,
-        key,
-        image,
-        type: ElementType.VARIABLE,
-        id: getUUID()
-      }
-    ])
-  }
-
   public insertTableTopRow() {
     const isReadonly = this.draw.isReadonly()
     if (isReadonly) return
@@ -1806,6 +1783,30 @@ export class CommandAdapt {
         height,
         id: getUUID(),
         type: ElementType.IMAGE
+      }
+    ])
+  }
+  public insertVariable(options: {
+    label: string
+    key: string
+    width?:number;
+    height?:number;
+  }) {
+    const isDisabled =
+      this.draw.isReadonly() || this.control.isDisabledControl()
+    if (isDisabled) return
+    const { startIndex, endIndex } = this.range.getRange()
+    if (!~startIndex && !~endIndex) return
+    const { label, key, width,height } = options
+    this.draw.insertElementList([
+      {
+        value: '',
+        label,
+        key,
+        width,
+        height,
+        type: ElementType.VARIABLE,
+        id: getUUID()
       }
     ])
   }

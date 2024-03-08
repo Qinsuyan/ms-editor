@@ -1,5 +1,6 @@
 import { ImageDisplay } from '../../../dataset/enum/Common'
 import { ElementType } from '../../../dataset/enum/Element'
+import { isVariableImage } from '../../../utils/element'
 import { CanvasEvent } from '../CanvasEvent'
 
 export function mousemove(evt: MouseEvent, host: CanvasEvent) {
@@ -29,7 +30,7 @@ export function mousemove(evt: MouseEvent, host: CanvasEvent) {
       // 浮动元素拖拽调整位置
       const dragElement = host.cacheElementList![cacheStartIndex]
       if (
-        dragElement?.type === ElementType.IMAGE &&
+        (dragElement?.type === ElementType.IMAGE||isVariableImage(dragElement)) &&
         (dragElement.imgDisplay === ImageDisplay.FLOAT_TOP ||
           dragElement.imgDisplay === ImageDisplay.FLOAT_BOTTOM)
       ) {

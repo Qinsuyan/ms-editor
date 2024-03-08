@@ -19,6 +19,7 @@ import { Draw } from '../draw/Draw'
 import { EditorMode, EditorZone } from '../../dataset/enum/Editor'
 import { deepClone } from '../../utils'
 import { ImageDisplay } from '../../dataset/enum/Common'
+import { isVariableImage } from '../../utils/element'
 
 export class Position {
   private cursorPosition: IElementPosition | null
@@ -131,7 +132,7 @@ export class Position {
         const metrics = element.metrics
         const offsetY =
           (element.imgDisplay !== ImageDisplay.INLINE &&
-            element.type === ElementType.IMAGE) ||
+           ( element.type === ElementType.IMAGE || isVariableImage(element))) ||
           element.type === ElementType.LATEX
             ? curRow.ascent - metrics.height
             : curRow.ascent
@@ -397,7 +398,7 @@ export class Position {
         // 图片区域均为命中
         if (
           element.type === ElementType.IMAGE ||
-          element.type === ElementType.LATEX
+          element.type === ElementType.LATEX||isVariableImage(element)
         ) {
           return {
             index: curPositionIndex,
@@ -561,7 +562,7 @@ export class Position {
         tdValueIndex
       } = this.floatPositionList[f]
       if (
-        element.type === ElementType.IMAGE &&
+        (element.type === ElementType.IMAGE||isVariableImage(element)) &&
         element.imgDisplay === payload.imgDisplay
       ) {
         const imgFloatPosition = element.imgFloatPosition!

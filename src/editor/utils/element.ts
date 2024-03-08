@@ -4,6 +4,7 @@ import {
   ElementType,
   IEditorOption,
   IElement,
+  ImageDisplay,
   ListStyle,
   ListType,
   RowFlex
@@ -210,6 +211,9 @@ export function formatElementList(
         } else {
           el.value = el.key || '变量值'
         }
+      }
+      if (el.width || el.height) {
+        el.imgDisplay = ImageDisplay.BLOCK
       }
     } else if (el.type === ElementType.CONTROL) {
       // 兼容控件内容类型错误
@@ -1183,4 +1187,13 @@ export function getTextFromElementList(elementList: IElement[]) {
     return text
   }
   return buildText(zipElementList(elementList))
+}
+
+export function isVariableImage(element: IElement|null): boolean {
+  if(!element){
+    return false
+  }
+  return !!(
+    element.type === ElementType.VARIABLE && (element.width || element.height)
+  )
 }

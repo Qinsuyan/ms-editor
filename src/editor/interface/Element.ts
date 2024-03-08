@@ -48,10 +48,11 @@ export interface ITitleElement {
 export interface IVariableElement {
   //Basic中包含的value，用来表示变量的key
   //label表示变量的字面量，通常是变量的名称
-  //image表示图片变量
+  //有宽高表示是图片变量
   key?: string
-  image?: boolean
   label?: string
+  width?: number
+  height?: number
 }
 
 export interface IListElement {

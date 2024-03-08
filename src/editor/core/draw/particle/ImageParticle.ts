@@ -1,5 +1,6 @@
 import { EDITOR_PREFIX } from '../../../dataset/constant/Editor'
 import { ImageDisplay } from '../../../dataset/enum/Common'
+import { ElementType } from '../../../dataset/enum/Element'
 import { IEditorOption } from '../../../interface/Editor'
 import { IElement } from '../../../interface/Element'
 import { convertStringToBase64 } from '../../../utils'
@@ -71,12 +72,22 @@ export class ImageParticle {
     this.draw.getImageObserver().add(promise)
   }
 
-  protected getFallbackImage(width: number, height: number): HTMLImageElement {
+  protected getFallbackImage(
+    width: number,
+    height: number,
+    text?: string
+  ): HTMLImageElement {
     const tileSize = 8
     const x = (width - Math.ceil(width / tileSize) * tileSize) / 2
     const y = (height - Math.ceil(height / tileSize) * tileSize) / 2
+    const textAddon = text
+      ? `<text x="${width / 2}" y="${
+          height / 2
+        }" text-anchor="middle" fill="#000000" font-size="24">${text}</text>`
+      : ''
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
                   <rect width="${width}" height="${height}" fill="url(#mosaic)" />
+
                   <defs>
                     <pattern id="mosaic" x="${x}" y="${y}" width="${
       tileSize * 2
@@ -85,6 +96,7 @@ export class ImageParticle {
                       <rect width="${tileSize}" height="${tileSize}" fill="#cccccc" transform="translate(${tileSize}, ${tileSize})" />
                     </pattern>
                   </defs>
+                  ${textAddon}
                 </svg>`
     const fallbackImage = new Image()
     fallbackImage.src = `data:image/svg+xml;base64,${convertStringToBase64(
@@ -102,7 +114,10 @@ export class ImageParticle {
     const { scale } = this.options
     const width = element.width! * scale
     const height = element.height! * scale
-    if (this.imageCache.has(element.id!)) {
+    if (
+      this.imageCache.has(element.id!) &&
+      element.type !== ElementType.VARIABLE
+    ) {
       const img = this.imageCache.get(element.id!)!
       ctx.drawImage(img, x, y, width, height)
     } else {
@@ -125,12 +140,18 @@ export class ImageParticle {
           }
         }
         img.onerror = error => {
-          const fallbackImage = this.getFallbackImage(width, height)
+          const fallbackImage = this.getFallbackImage(
+            width,
+            height,
+            element.label
+          )
           fallbackImage.onload = () => {
             ctx.drawImage(fallbackImage, x, y, width, height)
             this.imageCache.set(element.id!, fallbackImage)
+            if (!element.key) {
+              reject(error)
+            }
           }
-          reject(error)
         }
       })
       this.addImageObserver(imageLoadPromise)

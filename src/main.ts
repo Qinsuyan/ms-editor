@@ -25,6 +25,7 @@ import { Dialog } from './components/dialog/Dialog'
 import { formatPrismToken } from './utils/prism'
 import { Signature } from './components/signature/Signature'
 import { debounce, nextTick, scrollIntoView } from './utils'
+import { img } from './image'
 
 window.onload = function () {
   const isApple =
@@ -998,8 +999,24 @@ window.onload = function () {
   testDom.onclick = function () {
     console.log('test')
     //instance.command.executePrint()
-    instance.command.setVariableDict({test:'123123123'})
+    instance.command.setVariableDict({ test: '123123123' })
     instance.command.executeInsertVariable({ label: '测试变量', key: 'test' })
+  }
+
+  const imageTestDom = document.querySelector<HTMLDivElement>(
+    '.menu-item__image__test'
+  )!
+  imageTestDom.title = `图片测试`
+  imageTestDom.onclick = function () {
+    console.log('image__test')
+    //instance.command.executePrint()
+    instance.command.setVariableDict({ image: img })
+    instance.command.executeInsertVariable({
+      label: '测试图片',
+      key: 'image',
+      width: 700,
+      height: 200
+    })
   }
 
   // 6. 目录显隐 | 页面模式 | 纸张缩放 | 纸张大小 | 纸张方向 | 页边距 | 全屏

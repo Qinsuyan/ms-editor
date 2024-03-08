@@ -5,6 +5,7 @@ import {
   IContextMenuContext,
   IRegisterContextMenu
 } from '../../../interface/contextmenu/ContextMenu'
+import { isVariableImage } from '../../../utils/element'
 import { Command } from '../../command/Command'
 const {
   IMAGE: {
@@ -27,7 +28,8 @@ export const imageMenus: IRegisterContextMenu[] = [
       return (
         !payload.isReadonly &&
         !payload.editorHasSelection &&
-        payload.startElement?.type === ElementType.IMAGE
+        (payload.startElement?.type === ElementType.IMAGE ||
+          isVariableImage(payload.startElement))
       )
     },
     callback: (command: Command) => {
@@ -55,7 +57,7 @@ export const imageMenus: IRegisterContextMenu[] = [
     when: payload => {
       return (
         !payload.editorHasSelection &&
-        payload.startElement?.type === ElementType.IMAGE
+        (payload.startElement?.type === ElementType.IMAGE|| isVariableImage(payload.startElement))
       )
     },
     callback: (command: Command) => {
@@ -69,7 +71,7 @@ export const imageMenus: IRegisterContextMenu[] = [
       return (
         !payload.isReadonly &&
         !payload.editorHasSelection &&
-        payload.startElement?.type === ElementType.IMAGE
+        (payload.startElement?.type === ElementType.IMAGE|| isVariableImage(payload.startElement))
       )
     },
     childMenus: [

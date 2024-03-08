@@ -62,7 +62,7 @@ import {
   WordBreak
 } from '../../dataset/enum/Editor'
 import { Control } from './control/Control'
-import { zipElementList } from '../../utils/element'
+import { isVariableImage, zipElementList } from '../../utils/element'
 import { CheckboxParticle } from './particle/CheckboxParticle'
 import { DeepRequired, IPadding } from '../../interface/Common'
 import {
@@ -566,10 +566,14 @@ export class Draw {
     if (!isRangeCanInput) return
     const { startIndex, endIndex } = this.range.getRange()
     if (!~startIndex && !~endIndex) return
-    formatElementList(payload, {
-      isHandleFirstElement: false,
-      editorOptions: this.options
-    },this.variableDict)
+    formatElementList(
+      payload,
+      {
+        isHandleFirstElement: false,
+        editorOptions: this.options
+      },
+      this.variableDict
+    )
     let curIndex = -1
     // 判断是否在控件内
     let activeControl = this.control.getActiveControl()
@@ -606,10 +610,14 @@ export class Draw {
     options: IAppendElementListOption = {}
   ) {
     if (!elementList.length) return
-    formatElementList(elementList, {
-      isHandleFirstElement: false,
-      editorOptions: this.options
-    },this.variableDict)
+    formatElementList(
+      elementList,
+      {
+        isHandleFirstElement: false,
+        editorOptions: this.options
+      },
+      this.variableDict
+    )
     let curIndex: number
     const { isPrepend } = options
     if (isPrepend) {
@@ -982,9 +990,13 @@ export class Draw {
     const pageComponentData = [header, main, footer]
     pageComponentData.forEach(data => {
       if (!data) return
-      formatElementList(data, {
-        editorOptions: this.options
-      },this.variableDict)
+      formatElementList(
+        data,
+        {
+          editorOptions: this.options
+        },
+        this.variableDict
+      )
     })
     this.setEditorData({
       header,
@@ -1116,7 +1128,8 @@ export class Draw {
       const availableWidth = innerWidth - offsetX
       if (
         element.type === ElementType.IMAGE ||
-        element.type === ElementType.LATEX
+        element.type === ElementType.LATEX ||
+        isVariableImage(element)
       ) {
         // 浮动图片无需计算数据
         if (
@@ -1370,6 +1383,7 @@ export class Draw {
       const ascent =
         (element.imgDisplay !== ImageDisplay.INLINE &&
           element.type === ElementType.IMAGE) ||
+        isVariableImage(element) ||
         element.type === ElementType.LATEX
           ? metrics.height + rowMargin
           : metrics.boundingBoxAscent + rowMargin
@@ -1639,21 +1653,17 @@ export class Draw {
           }
         } else if (element.type === ElementType.VARIABLE) {
           //TODO:绘制变量
-          if (element.image) {
+
+          if (element.width || element.height) {
             //图片
+            // element.imgDisplay = ImageDisplay.BLOCK
+            this._drawRichText(ctx)
+            this.imageParticle.render(ctx, element, x, y + offsetY)
           } else {
-            //字符
-            //const el = deepClone(element)
-            // if (this.mode === EditorMode.EDIT) {
-            // } else {
-            //   el.value = el.label || '变量'
-            // }
-           
             if (element.left) {
               this.textParticle.complete()
             }
             this.textParticle.record(ctx, element, x, y + offsetY)
-            //this._drawRichText(ctx)
           }
         } else if (element.type === ElementType.LATEX) {
           this._drawRichText(ctx)
@@ -1876,7 +1886,7 @@ export class Draw {
       if (
         pageNo === floatPosition.pageNo &&
         element.imgDisplay === imgDisplay &&
-        element.type === ElementType.IMAGE
+        (element.type === ElementType.IMAGE || isVariableImage(element))
       ) {
         const imgFloatPosition = element.imgFloatPosition!
         this.imageParticle.render(
@@ -2001,7 +2011,7 @@ export class Draw {
   }
 
   public setVariableDict(dict: Record<string, string>) {
-    this.variableDict = dict
+    this.variableDict = { ...this.variableDict, ...dict }
   }
 
   public render(payload?: IDrawOption) {
