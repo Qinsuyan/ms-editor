@@ -7,7 +7,11 @@ import { ControlComponent, ControlType } from '../../../dataset/enum/Control'
 import { ElementType } from '../../../dataset/enum/Element'
 import { IElement } from '../../../interface/Element'
 import { deepClone, getUUID, omitObject } from '../../../utils'
-import { formatElementContext, formatElementList, isVariableImage } from '../../../utils/element'
+import {
+  formatElementContext,
+  formatElementList,
+  isVariableImage
+} from '../../../utils/element'
 import { CanvasEvent } from '../CanvasEvent'
 
 type IDragElement = IElement & { dragId: string }
@@ -79,7 +83,8 @@ export function mouseup(evt: MouseEvent, host: CanvasEvent) {
         const dragElement = cacheElementList[cacheEndIndex]
         if (
           dragElement.type === ElementType.IMAGE ||
-          dragElement.type === ElementType.LATEX||isVariableImage(dragElement)
+          dragElement.type === ElementType.LATEX ||
+          isVariableImage(dragElement)
         ) {
           moveImgPosition(dragElement, evt, host)
           if (
@@ -153,10 +158,14 @@ export function mouseup(evt: MouseEvent, host: CanvasEvent) {
       } else {
         // 移除控件上下文属性
         const newElement = omitObject(deepClone(el), CONTROL_CONTEXT_ATTR)
-        formatElementList([newElement], {
-          isHandleFirstElement: false,
-          editorOptions
-        })
+        formatElementList(
+          [newElement],
+          {
+            isHandleFirstElement: false,
+            editorOptions
+          },
+          draw.getVariableDict()
+        )
         return newElement
       }
     })
@@ -264,7 +273,8 @@ export function mouseup(evt: MouseEvent, host: CanvasEvent) {
       const dragElement = elementList[rangeEndIndex]
       if (
         dragElement.type === ElementType.IMAGE ||
-        dragElement.type === ElementType.LATEX||isVariableImage(dragElement)
+        dragElement.type === ElementType.LATEX ||
+        isVariableImage(dragElement)
       ) {
         moveImgPosition(dragElement, evt, host)
         imgElement = dragElement

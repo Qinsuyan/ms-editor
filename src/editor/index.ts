@@ -220,9 +220,13 @@ export default class Editor {
       footerElementList
     ]
     pageComponentData.forEach(elementList => {
-      formatElementList(elementList, {
-        editorOptions
-      })
+      formatElementList(
+        elementList,
+        {
+          editorOptions
+        },
+        {}
+      )
     })
     // 监听
     this.listener = new Listener()

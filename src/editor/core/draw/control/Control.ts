@@ -617,7 +617,7 @@ export class Control {
           formatElementList(formatValue, {
             isHandleFirstElement: false,
             editorOptions: this.options
-          })
+          },this.draw.getVariableDict())
           const text = new TextControl(element, this)
           if (value) {
             text.setValue(formatValue, controlContext, controlRule)
@@ -745,7 +745,7 @@ export class Control {
       pageComponentData[pageComponentKey] = elementList
       formatElementList(elementList, {
         editorOptions: this.options
-      })
+      },this.draw.getVariableDict())
     }
     this.draw.setEditorData(pageComponentData)
     this.draw.render({

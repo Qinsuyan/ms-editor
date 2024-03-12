@@ -189,6 +189,8 @@ export class CommandAdapt {
     this.draw.setVariableDict(dict)
   }
 
+
+
   public replaceRange(range: IRange) {
     this.setRange(
       range.startIndex,
@@ -797,7 +799,7 @@ export class CommandAdapt {
     }
     formatElementList([element], {
       editorOptions: this.options
-    })
+    },this.draw.getVariableDict())
     formatElementContext(elementList, [element], startIndex)
     const curIndex = startIndex + 1
     element.borderWidth = borderWidth?.outer

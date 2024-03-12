@@ -1,5 +1,6 @@
 import { cloneProperty, deepClone, getUUID, isArrayEqual, splitText } from '.'
 import {
+  EditorMode,
   ElementType,
   IEditorOption,
   IElement,
@@ -52,6 +53,7 @@ interface IFormatElementListOption {
 export function formatElementList(
   elementList: IElement[],
   options: IFormatElementListOption,
+  dict: Record<string, string>
 ) {
   const { isHandleFirstElement, editorOptions } = <IFormatElementListOption>{
     isHandleFirstElement: true,
@@ -82,7 +84,7 @@ export function formatElementList(
       formatElementList(valueList, {
         ...options,
         isHandleFirstElement: false
-      })
+      },dict)
       // 追加节点
       if (valueList.length) {
         const titleId = getUUID()
@@ -115,7 +117,7 @@ export function formatElementList(
       formatElementList(valueList, {
         ...options,
         isHandleFirstElement: true
-      })
+      },dict)
       // 追加节点
       if (valueList.length) {
         const listId = getUUID()
@@ -153,7 +155,7 @@ export function formatElementList(
             formatElementList(td.value, {
               ...options,
               isHandleFirstElement: true
-            })
+            },dict)
             for (let v = 0; v < td.value.length; v++) {
               const value = td.value[v]
               value.tdId = tdId
@@ -163,7 +165,6 @@ export function formatElementList(
           }
         }
       }
-      
     } else if (el.type === ElementType.HYPERLINK) {
       // 移除父节点
       elementList.splice(i, 1)
@@ -203,6 +204,17 @@ export function formatElementList(
     } else if (el.type === ElementType.VARIABLE) {
       if (el.width || el.height) {
         el.imgDisplay = ImageDisplay.BLOCK
+      } else {
+        if (options.editorOptions.mode === EditorMode.EDIT) {
+          el.value = '{X}'
+        } else {
+          if (dict) {
+            const val = el.key ? dict[el.key] : '变量值'
+            el.value = val || '变量值'
+          } else {
+            el.value = el.key || '变量值'
+          }
+        }
       }
     } else if (el.type === ElementType.CONTROL) {
       // 兼容控件内容类型错误
@@ -305,7 +317,7 @@ export function formatElementList(
           formatElementList(valueList, {
             ...options,
             isHandleFirstElement: false
-          })
+          },dict)
           for (let v = 0; v < valueList.length; v++) {
             const element = valueList[v]
             const value = element.value
@@ -1178,11 +1190,12 @@ export function getTextFromElementList(elementList: IElement[]) {
   return buildText(zipElementList(elementList))
 }
 
-export function isVariableImage(element: IElement|null): boolean {
-  if(!element){
+export function isVariableImage(element: IElement | null): boolean {
+  if (!element) {
     return false
   }
   return !!(
-    element.type === ElementType.VARIABLE && (element.width || element.height)
+    element.type === ElementType.VARIABLE &&
+    (element.width || element.height)
   )
 }

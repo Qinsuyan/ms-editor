@@ -76,7 +76,7 @@ export class Placeholder {
     ]
     formatElementList(this.elementList, {
       editorOptions: this.options
-    })
+    },this.draw.getVariableDict())
     // 计算
     this._compute()
     const innerWidth = this.draw.getInnerWidth()

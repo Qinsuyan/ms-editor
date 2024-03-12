@@ -287,6 +287,13 @@ export class Draw {
     this.ctxList.forEach(ctx => {
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
     })
+    formatElementList(
+      this.elementList,
+      {
+        editorOptions: this.options
+      },
+      this.variableDict
+    )
     this.render({
       isSetCursor: false,
       isSubmitHistory: false
@@ -565,10 +572,14 @@ export class Draw {
     if (!isRangeCanInput) return
     const { startIndex, endIndex } = this.range.getRange()
     if (!~startIndex && !~endIndex) return
-    formatElementList(payload, {
-      isHandleFirstElement: false,
-      editorOptions: this.options
-    })
+    formatElementList(
+      payload,
+      {
+        isHandleFirstElement: false,
+        editorOptions: this.options
+      },
+      this.variableDict
+    )
     let curIndex = -1
     // 判断是否在控件内
     let activeControl = this.control.getActiveControl()
@@ -605,10 +616,14 @@ export class Draw {
     options: IAppendElementListOption = {}
   ) {
     if (!elementList.length) return
-    formatElementList(elementList, {
-      isHandleFirstElement: false,
-      editorOptions: this.options
-    })
+    formatElementList(
+      elementList,
+      {
+        isHandleFirstElement: false,
+        editorOptions: this.options
+      },
+      this.variableDict
+    )
     let curIndex: number
     const { isPrepend } = options
     if (isPrepend) {
@@ -986,9 +1001,13 @@ export class Draw {
     const pageComponentData = [header, main, footer]
     pageComponentData.forEach(data => {
       if (!data) return
-      formatElementList(data, {
-        editorOptions: this.options
-      })
+      formatElementList(
+        data,
+        {
+          editorOptions: this.options
+        },
+        this.variableDict
+      )
     })
     this.setEditorData({
       header,
@@ -1644,18 +1663,6 @@ export class Draw {
             this.imageParticle.render(ctx, element, x, y + offsetY)
           }
         } else if (element.type === ElementType.VARIABLE) {
-          if (this.mode === EditorMode.EDIT) {
-            element.value = '{X}'
-          } else {
-            if (this.variableDict) {
-              const val = element.key
-                ? this.variableDict[element.key]
-                : '变量值'
-              element.value = val || '变量值'
-            } else {
-              element.value = element.key || '变量值'
-            }
-          }
           if (element.width || element.height) {
             this._drawRichText(ctx)
             this.imageParticle.render(ctx, element, x, y + offsetY)
@@ -2012,6 +2019,10 @@ export class Draw {
 
   public setVariableDict(dict: Record<string, string>) {
     this.variableDict = { ...this.variableDict, ...dict }
+  }
+
+  public getVariableDict(): Record<string, string> {
+    return this.variableDict
   }
 
   public render(payload?: IDrawOption) {
