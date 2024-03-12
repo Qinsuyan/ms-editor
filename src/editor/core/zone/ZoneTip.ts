@@ -28,7 +28,9 @@ export class ZoneTip {
     this.isDisableMouseMove = true
     this.currentMoveZone = EditorZone.MAIN
     // 监听区域
-    const watchZones: EditorZone[] = []
+    const watchZones: EditorZone[] = [
+      //EditorZone.MAIN
+    ]
     const { header, footer } = draw.getOptions()
     if (!header.disabled) {
       watchZones.push(EditorZone.HEADER)
@@ -56,9 +58,10 @@ export class ZoneTip {
           this.currentMoveZone = mousemoveZone
           // 激活区域是正文，移动区域是页眉、页脚时绘制
           this._updateZoneTip(
-            this.zone.getZone() === EditorZone.MAIN &&
-              (mousemoveZone === EditorZone.HEADER ||
-                mousemoveZone === EditorZone.FOOTER),
+            this.zone.getZone() === EditorZone.MAIN,
+            // this.zone.getZone() === EditorZone.MAIN &&
+            //   (mousemoveZone === EditorZone.HEADER ||
+            //     mousemoveZone === EditorZone.FOOTER),
             evt.x,
             evt.y
           )
@@ -89,16 +92,25 @@ export class ZoneTip {
     }
   }
 
-  private _updateZoneTip(visible: boolean, left?: number, top?: number) {
+  private _updateZoneTip(
+    visible: boolean,
+    left?: number,
+    top?: number,
+    content?: string
+  ) {
     if (visible) {
       this.tipContainer.classList.add('show')
       this.tipContainer.style.left = `${left}px`
       this.tipContainer.style.top = `${top}px`
-      this.tipContent.innerText = this.i18n.t(
-        `zone.${
-          this.currentMoveZone === EditorZone.HEADER ? 'headerTip' : 'footerTip'
-        }`
-      )
+      this.tipContent.innerText =
+        content ||
+        this.i18n.t(
+          `zone.${
+            this.currentMoveZone === EditorZone.HEADER
+              ? 'headerTip'
+              : 'footerTip'
+          }`
+        )
     } else {
       this.tipContainer.classList.remove('show')
     }

@@ -17,7 +17,6 @@ export function setRangeCache(host: CanvasEvent) {
   host.cachePositionList = position.getPositionList()
   host.cachePositionContext = position.getPositionContext()
 }
-
 export function mousedown(evt: MouseEvent, host: CanvasEvent) {
   if (evt.button === MouseEventButton.RIGHT) return
   const draw = host.getDraw()

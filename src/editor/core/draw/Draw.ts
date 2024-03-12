@@ -88,6 +88,7 @@ import { EventBusMap } from '../../interface/EventBus'
 import { Group } from './interactive/Group'
 import { Override } from '../override/Override'
 import { ImageDisplay } from '../../dataset/enum/Common'
+import { VariableParticle } from './particle/VariableParticle'
 
 export class Draw {
   private container: HTMLDivElement
@@ -156,6 +157,7 @@ export class Draw {
   private printModeData: Required<IEditorData> | null
 
   private variableDict: Record<string, string>
+  private variableParticle: VariableParticle
 
   constructor(
     rootContainer: HTMLElement,
@@ -205,6 +207,7 @@ export class Draw {
     this.header = new Header(this, data.header)
     this.footer = new Footer(this, data.footer)
     this.hyperlinkParticle = new HyperlinkParticle(this)
+    this.variableParticle = new VariableParticle(this)
     this.dateParticle = new DateParticle(this)
     this.separatorParticle = new SeparatorParticle(this)
     this.pageBreakParticle = new PageBreakParticle(this)
@@ -281,6 +284,9 @@ export class Draw {
     }
     this.mode = payload
     this.options.mode = payload
+    this.ctxList.forEach(ctx => {
+      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+    })
     this.render({
       isSetCursor: false,
       isSubmitHistory: false
@@ -702,6 +708,10 @@ export class Draw {
 
   public getHyperlinkParticle(): HyperlinkParticle {
     return this.hyperlinkParticle
+  }
+
+  public getVariableParticle(): VariableParticle {
+    return this.variableParticle
   }
 
   public getDateParticle(): DateParticle {
@@ -1635,7 +1645,7 @@ export class Draw {
           }
         } else if (element.type === ElementType.VARIABLE) {
           if (this.mode === EditorMode.EDIT) {
-            element.value = '${' + (element.label || '变量名称') + '}'
+            element.value = '{X}'
           } else {
             if (this.variableDict) {
               const val = element.key

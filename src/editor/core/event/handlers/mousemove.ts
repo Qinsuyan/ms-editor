@@ -2,9 +2,9 @@ import { ImageDisplay } from '../../../dataset/enum/Common'
 import { ElementType } from '../../../dataset/enum/Element'
 import { isVariableImage } from '../../../utils/element'
 import { CanvasEvent } from '../CanvasEvent'
-
 export function mousemove(evt: MouseEvent, host: CanvasEvent) {
   const draw = host.getDraw()
+  const isReadonly = draw.isReadonly()
   // 是否是拖拽文字
   if (host.isAllowDrag) {
     // 是否允许拖拽到选区
@@ -30,7 +30,8 @@ export function mousemove(evt: MouseEvent, host: CanvasEvent) {
       // 浮动元素拖拽调整位置
       const dragElement = host.cacheElementList![cacheStartIndex]
       if (
-        (dragElement?.type === ElementType.IMAGE||isVariableImage(dragElement)) &&
+        (dragElement?.type === ElementType.IMAGE ||
+          isVariableImage(dragElement)) &&
         (dragElement.imgDisplay === ImageDisplay.FLOAT_TOP ||
           dragElement.imgDisplay === ImageDisplay.FLOAT_BOTTOM)
       ) {
@@ -65,7 +66,17 @@ export function mousemove(evt: MouseEvent, host: CanvasEvent) {
     trIndex: startTrIndex,
     tableId: startTableId
   } = host.mouseDownStartPosition
+  const elementList = draw.getElementList()
+  const positionList = position.getPositionList()
   const endIndex = isTable ? tdValueIndex! : index
+  const curElement = elementList[endIndex]
+  //变量tooltip
+  
+  const variableParticle = draw.getVariableParticle()
+  variableParticle.clearVariablePopup()
+  if (curElement.type === ElementType.VARIABLE && !isReadonly) {
+    variableParticle.drawVariablePopup(curElement, positionList[endIndex])
+  }
   // 判断是否是表格跨行/列
   const rangeManager = draw.getRange()
   if (
@@ -95,6 +106,7 @@ export function mousemove(evt: MouseEvent, host: CanvasEvent) {
     if (start === end) return
     rangeManager.setRange(start, end)
   }
+
   // 绘制
   draw.render({
     isSubmitHistory: false,
