@@ -81,10 +81,14 @@ export function formatElementList(
       elementList.splice(i, 1)
       // 格式化元素
       const valueList = el.valueList || []
-      formatElementList(valueList, {
-        ...options,
-        isHandleFirstElement: false
-      },dict)
+      formatElementList(
+        valueList,
+        {
+          ...options,
+          isHandleFirstElement: false
+        },
+        dict
+      )
       // 追加节点
       if (valueList.length) {
         const titleId = getUUID()
@@ -114,10 +118,14 @@ export function formatElementList(
       elementList.splice(i, 1)
       // 格式化元素
       const valueList = el.valueList || []
-      formatElementList(valueList, {
-        ...options,
-        isHandleFirstElement: true
-      },dict)
+      formatElementList(
+        valueList,
+        {
+          ...options,
+          isHandleFirstElement: true
+        },
+        dict
+      )
       // 追加节点
       if (valueList.length) {
         const listId = getUUID()
@@ -152,10 +160,14 @@ export function formatElementList(
             const td = tr.tdList[d]
             const tdId = getUUID()
             td.id = tdId
-            formatElementList(td.value, {
-              ...options,
-              isHandleFirstElement: true
-            },dict)
+            formatElementList(
+              td.value,
+              {
+                ...options,
+                isHandleFirstElement: true
+              },
+              dict
+            )
             for (let v = 0; v < td.value.length; v++) {
               const value = td.value[v]
               value.tdId = tdId
@@ -204,16 +216,15 @@ export function formatElementList(
     } else if (el.type === ElementType.VARIABLE) {
       if (el.width || el.height) {
         el.imgDisplay = ImageDisplay.BLOCK
+      }
+      if (options.editorOptions.mode === EditorMode.EDIT) {
+        el.value = '{X}'
       } else {
-        if (options.editorOptions.mode === EditorMode.EDIT) {
-          el.value = '{X}'
+        if (dict) {
+          const val = el.key ? dict[el.key] : '变量值'
+          el.value = val || '变量值'
         } else {
-          if (dict) {
-            const val = el.key ? dict[el.key] : '变量值'
-            el.value = val || '变量值'
-          } else {
-            el.value = el.key || '变量值'
-          }
+          el.value = el.key || '变量值'
         }
       }
     } else if (el.type === ElementType.CONTROL) {
@@ -314,10 +325,14 @@ export function formatElementList(
               }
             }
           }
-          formatElementList(valueList, {
-            ...options,
-            isHandleFirstElement: false
-          },dict)
+          formatElementList(
+            valueList,
+            {
+              ...options,
+              isHandleFirstElement: false
+            },
+            dict
+          )
           for (let v = 0; v < valueList.length; v++) {
             const element = valueList[v]
             const value = element.value
