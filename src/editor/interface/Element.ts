@@ -53,6 +53,7 @@ export interface IVariableElement {
   label?: string
   width?: number
   height?: number
+  originalKey?: string
 }
 
 export interface IListElement {

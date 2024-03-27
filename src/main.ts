@@ -999,7 +999,7 @@ window.onload = function () {
   testDom.title = `测试1`
   testDom.onclick = function () {
     //instance.command.executePrint()
-    instance.command.setVariableDict({ test: '123123123' })
+    instance.command.setVariableDict({ test: '测试一段非常长的文字，希望在表格里面可以自动换行' })
     instance.command.executeInsertVariable({ label: '测试变量', key: 'test' })
   }
 

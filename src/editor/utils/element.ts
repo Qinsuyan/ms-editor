@@ -213,6 +213,23 @@ export function formatElementList(
         }
       }
       i--
+    } else if (el.type === ElementType.TEXT && el.originalKey) {
+    
+      if (options.editorOptions.mode === EditorMode.EDIT) {
+        const key = el.originalKey
+        let endIndex = i
+        for (endIndex; endIndex < elementList.length; endIndex++) {
+          if (elementList[endIndex].originalKey !== key) {
+            break
+          }
+        }
+        elementList.splice(i, endIndex - i, {
+          ...el,
+          type: ElementType.VARIABLE,
+          key:key.split("*#@")[0]
+        })
+        i--
+      }
     } else if (el.type === ElementType.VARIABLE) {
       if (el.width || el.height) {
         el.imgDisplay = ImageDisplay.BLOCK
@@ -223,9 +240,23 @@ export function formatElementList(
         if (dict) {
           const val = el.key ? dict[el.key] : '变量值'
           el.value = val || '变量值'
+         
         } else {
           el.value = el.key || '变量值'
         }
+
+        elementList.splice(i, 1)
+        const valueList = splitText(el.value)
+        const uuid = getUUID()
+        for (let v = 0; v < valueList.length; v++) {
+          elementList.splice(i + v, 0, {
+            ...el,
+            value: valueList[v],
+            type: ElementType.TEXT,
+            originalKey: el.key +"*#@"+ uuid
+          })
+        }
+        el = elementList[i]
       }
     } else if (el.type === ElementType.CONTROL) {
       // 兼容控件内容类型错误
