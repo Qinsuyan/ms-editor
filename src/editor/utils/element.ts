@@ -244,19 +244,20 @@ export function formatElementList(
         } else {
           el.value = el.key || '变量值'
         }
-
-        elementList.splice(i, 1)
-        const valueList = splitText(el.value)
-        const uuid = getUUID()
-        for (let v = 0; v < valueList.length; v++) {
-          elementList.splice(i + v, 0, {
-            ...el,
-            value: valueList[v],
-            type: ElementType.TEXT,
-            originalKey: el.key +"*#@"+ uuid
-          })
+        if(el.imgDisplay !== ImageDisplay.BLOCK){
+          elementList.splice(i, 1)
+          const valueList = splitText(el.value)
+          const uuid = getUUID()
+          for (let v = 0; v < valueList.length; v++) {
+            elementList.splice(i + v, 0, {
+              ...el,
+              value: valueList[v],
+              type: ElementType.TEXT,
+              originalKey: el.key +"*#@"+ uuid
+            })
+          }
+          el = elementList[i]
         }
-        el = elementList[i]
       }
     } else if (el.type === ElementType.CONTROL) {
       // 兼容控件内容类型错误
