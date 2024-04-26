@@ -185,11 +185,9 @@ export class CommandAdapt {
     })
   }
 
-  public setVariableDict(dict:Record<string,string>){
+  public setVariableDict(dict: Record<string, string>) {
     this.draw.setVariableDict(dict)
   }
-
-
 
   public replaceRange(range: IRange) {
     this.setRange(
@@ -794,12 +792,16 @@ export class CommandAdapt {
       value: '',
       colgroup,
       trList,
-      borderWidth:borderWidth?.outer||1,
-      innerBorderWidth:borderWidth?.inner||1
+      borderWidth: borderWidth?.outer || 1,
+      innerBorderWidth: borderWidth?.inner || 1
     }
-    formatElementList([element], {
-      editorOptions: this.options
-    },this.draw.getVariableDict())
+    formatElementList(
+      [element],
+      {
+        editorOptions: this.options
+      },
+      this.draw.getVariableDict()
+    )
     formatElementContext(elementList, [element], startIndex)
     const curIndex = startIndex + 1
     element.borderWidth = borderWidth?.outer
@@ -1742,6 +1744,32 @@ export class CommandAdapt {
     ])
   }
 
+  public loopStart() {
+    const isReadonly = this.draw.isReadonly()
+    if (isReadonly) return
+    const activeControl = this.control.getActiveControl()
+    if (activeControl) return
+    this.insertElementList([
+      {
+        type: ElementType.LOOPSTART,
+        value: ''
+      }
+    ])
+  }
+
+  public loopEnd() {
+    const isReadonly = this.draw.isReadonly()
+    if (isReadonly) return
+    const activeControl = this.control.getActiveControl()
+    if (activeControl) return
+    this.insertElementList([
+      {
+        type: ElementType.LOOPEND,
+        value: ''
+      }
+    ])
+  }
+
   public addWatermark(payload: IWatermark) {
     const isReadonly = this.draw.isReadonly()
     if (isReadonly) return
@@ -1790,18 +1818,19 @@ export class CommandAdapt {
       }
     ])
   }
+
   public insertVariable(options: {
     label: string
     key: string
-    width?:number;
-    height?:number;
+    width?: number
+    height?: number
   }) {
     const isDisabled =
       this.draw.isReadonly() || this.control.isDisabledControl()
     if (isDisabled) return
     const { startIndex, endIndex } = this.range.getRange()
     if (!~startIndex && !~endIndex) return
-    const { label, key, width,height } = options
+    const { label, key, width, height } = options
     this.draw.insertElementList([
       {
         value: '',

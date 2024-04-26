@@ -1018,6 +1018,40 @@ window.onload = function () {
       height: 200
     })
   }
+// 循环
+  const loopStartDom = document.querySelector<HTMLDivElement>(
+    '.menu-item__loop__start'
+  )!
+  loopStartDom.title = `循环开始测试`
+  loopStartDom.onclick = function () {
+    instance.command.executeLoopStart()
+  }
+
+  const loopEndDom = document.querySelector<HTMLDivElement>(
+    '.menu-item__loop__end'
+  )!
+  loopEndDom.title = `循环结束测试`
+  loopEndDom.onclick = function () {
+    instance.command.executeLoopEnd()
+  }  
+  
+  const imageArrDom = document.querySelector<HTMLDivElement>(
+    '.menu-item__image__arr__test'
+  )!
+  imageArrDom.title = `图片循环测试`
+  imageArrDom.onclick = function () {
+    console.log("图片循环测试")
+  }
+
+  const textArrDom = document.querySelector<HTMLDivElement>(
+    '.menu-item__text__arr__test'
+  )!
+  textArrDom.title = `文字循环测试`
+  textArrDom.onclick = function () {
+    console.log("文字循环测试")
+  }
+
+
 
   // 6. 目录显隐 | 页面模式 | 纸张缩放 | 纸张大小 | 纸张方向 | 页边距 | 全屏
   async function updateCatalog() {

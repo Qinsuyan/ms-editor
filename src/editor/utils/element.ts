@@ -10,7 +10,7 @@ import {
   RowFlex
 } from '..'
 import { LaTexParticle } from '../core/draw/particle/latex/LaTexParticle'
-import { NON_BREAKING_SPACE, ZERO } from '../dataset/constant/Common'
+import { NON_BREAKING_SPACE, WRAP, ZERO } from '../dataset/constant/Common'
 import {
   EDITOR_ELEMENT_CONTEXT_ATTR,
   EDITOR_ELEMENT_ZIP_ATTR,
@@ -73,6 +73,7 @@ export function formatElementList(
     })
   }
   let i = 0
+  let loopId = getUUID()
   while (i < elementList.length) {
     let el = elementList[i]
     // 优先处理虚拟元素
@@ -214,7 +215,6 @@ export function formatElementList(
       }
       i--
     } else if (el.type === ElementType.TEXT && el.originalKey) {
-    
       if (options.editorOptions.mode === EditorMode.EDIT) {
         const key = el.originalKey
         let endIndex = i
@@ -226,9 +226,49 @@ export function formatElementList(
         elementList.splice(i, endIndex - i, {
           ...el,
           type: ElementType.VARIABLE,
-          key:key.split("*#@")[0]
+          key: key.split('*#@')[0]
         })
         i--
+      }
+    } else if (el.type === ElementType.LOOPSTART) {
+      elementList.splice(
+        i,
+        1,
+        {
+          type: ElementType.LOOPSTART,
+          value: '{循环开始}',
+          loopId: loopId
+        },
+        {
+          type: ElementType.TEXT,
+          value: WRAP,
+          loopId: loopId
+        }
+      )
+      //TODO:找到下一个loopEnd;开启循环
+    } else if (el.type === ElementType.LOOPEND) {
+      if (!el.loopId) {
+        elementList.splice(
+          i,
+          1,
+          {
+            type: ElementType.TEXT,
+            value: WRAP,
+            loopId: loopId
+          },
+          {
+            type: ElementType.LOOPEND,
+            value: '{循环结束}',
+            loopId: loopId
+          },
+          {
+            type: ElementType.TEXT,
+            value: WRAP,
+            loopId: loopId
+          }
+        )
+        i--
+        loopId = getUUID()
       }
     } else if (el.type === ElementType.VARIABLE) {
       if (el.width || el.height) {
@@ -240,11 +280,10 @@ export function formatElementList(
         if (dict) {
           const val = el.key ? dict[el.key] : '变量值'
           el.value = val || '变量值'
-         
         } else {
           el.value = el.key || '变量值'
         }
-        if(el.imgDisplay !== ImageDisplay.BLOCK){
+        if (el.imgDisplay !== ImageDisplay.BLOCK) {
           elementList.splice(i, 1)
           const valueList = splitText(el.value)
           const uuid = getUUID()
@@ -253,7 +292,7 @@ export function formatElementList(
               ...el,
               value: valueList[v],
               type: ElementType.TEXT,
-              originalKey: el.key +"*#@"+ uuid
+              originalKey: el.key + '*#@' + uuid
             })
           }
           el = elementList[i]

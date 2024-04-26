@@ -58,6 +58,8 @@ export class Command {
   public executeEditHyperlink: CommandAdapt['editHyperlink']
   public executeSeparator: CommandAdapt['separator']
   public executePageBreak: CommandAdapt['pageBreak']
+  public executeLoopStart: CommandAdapt['loopStart']
+  public executeLoopEnd: CommandAdapt['loopEnd']
   public executeAddWatermark: CommandAdapt['addWatermark']
   public executeDeleteWatermark: CommandAdapt['deleteWatermark']
   public executeSearch: CommandAdapt['search']
@@ -110,7 +112,7 @@ export class Command {
   public getGroupIds: CommandAdapt['getGroupIds']
   public getControlValue: CommandAdapt['getControlValue']
   public getContainer: CommandAdapt['getContainer']
-  public setVariableDict:CommandAdapt['setVariableDict']
+  public setVariableDict: CommandAdapt['setVariableDict']
 
   constructor(adapt: CommandAdapt) {
     // 全局命令
@@ -233,5 +235,8 @@ export class Command {
     this.executeSetControlProperties = adapt.setControlProperties.bind(adapt)
     this.executeSetControlHighlight = adapt.setControlHighlight.bind(adapt)
     this.getControlValue = adapt.getControlValue.bind(adapt)
+    //循环
+    this.executeLoopStart = adapt.loopStart.bind(adapt)
+    this.executeLoopEnd = adapt.loopEnd.bind(adapt)
   }
 }

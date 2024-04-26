@@ -1632,7 +1632,7 @@ export class Draw {
         } = positionList[curRow.startIndex + j]
         const preElement = curRow.elementList[j - 1]
         // 元素高亮记录
-        if (element.highlight) {
+        if (element.highlight || element.loopId) {
           // 高亮元素相连需立即绘制，并记录下一元素坐标
           if (
             preElement &&
@@ -1647,7 +1647,7 @@ export class Draw {
             y,
             metrics.width,
             curRow.height,
-            element.highlight
+            element.loopId ? '#bfbfbf' : element.highlight
           )
         } else if (preElement?.highlight) {
           this.highlight.render(ctx)

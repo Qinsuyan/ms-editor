@@ -56,6 +56,10 @@ export interface IVariableElement {
   originalKey?: string
 }
 
+export interface ILoopElement {
+  loopId?: string
+}
+
 export interface IListElement {
   valueList?: IElement[]
   listType?: ListType
@@ -141,7 +145,8 @@ export type IElement = IElementBasic &
   IBlockElement &
   ITitleElement &
   IListElement &
-  IVariableElement
+  IVariableElement &
+  ILoopElement
 
 export interface IElementMetrics {
   width: number
