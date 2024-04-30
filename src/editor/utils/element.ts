@@ -1,4 +1,11 @@
-import { cloneProperty, deepClone, getUUID, isArrayEqual, splitText } from '.'
+import {
+  cloneProperty,
+  deepClone,
+  getUUID,
+  isArray,
+  isArrayEqual,
+  splitText
+} from '.'
 import {
   EditorMode,
   ElementType,
@@ -53,7 +60,7 @@ interface IFormatElementListOption {
 export function formatElementList(
   elementList: IElement[],
   options: IFormatElementListOption,
-  dict: Record<string, string>
+  dict: Record<string, string | string[]>
 ) {
   const { isHandleFirstElement, editorOptions } = <IFormatElementListOption>{
     isHandleFirstElement: true,
@@ -77,6 +84,17 @@ export function formatElementList(
   while (i < elementList.length) {
     let el = elementList[i]
     // 优先处理虚拟元素
+    if (
+      el.loopId &&
+      el.type !== ElementType.LOOPSTART &&
+      el.type !== ElementType.LOOPEND &&
+      !el.loopAnchor
+    ) {
+      if (options.editorOptions.mode === EditorMode.EDIT) {
+        elementList.splice(i, 1)
+        continue
+      }
+    }
     if (el.type === ElementType.TITLE) {
       // 移除父节点
       elementList.splice(i, 1)
@@ -231,21 +249,66 @@ export function formatElementList(
         i--
       }
     } else if (el.type === ElementType.LOOPSTART) {
-      elementList.splice(
-        i,
-        1,
-        {
-          type: ElementType.LOOPSTART,
-          value: '{循环开始}',
-          loopId: loopId
-        },
-        {
-          type: ElementType.TEXT,
-          value: WRAP,
-          loopId: loopId
+      if (!el.loopId) {
+        elementList.splice(
+          i,
+          1,
+          {
+            type: ElementType.LOOPSTART,
+            value: '{循环开始}',
+            loopId: loopId
+          },
+          {
+            type: ElementType.TEXT,
+            value: WRAP,
+            loopId: loopId,
+            loopAnchor: true
+          }
+        )
+      } else {
+        if (!el.loopAnchor) {
+          el.loopAnchor = true
+          //找出所有循环
+          const loopElements: IElement[] = []
+          let loopCount = 1
+          for (let loopIndex = i + 2; i < elementList.length - 1; loopIndex++) {
+            const el = elementList[loopIndex]
+            if (!el) {
+              loopCount = 0
+              break
+            }
+            if (elementList[loopIndex].type === ElementType.LOOPSTART) {
+              console.error('recursive loop is not allowed!')
+              loopCount = 0
+              break
+            }
+            if (elementList[loopIndex].type === ElementType.LOOPEND) {
+              break
+            }
+            //找出循环里面最多的循环次数
+            if (el.type === ElementType.VARIABLE && el.key) {
+              const val = dict[el.key]
+              if (isArray(val) && val.length > loopCount) {
+                loopCount = val.length
+              }
+            }
+            loopElements.push(elementList[loopIndex])
+          }
+          //添加循环的元素
+          const realLoopElements: IElement[] = []
+          for (let loopIndex = 0; loopIndex < loopCount; loopIndex++) {
+            loopElements.forEach(el => {
+              realLoopElements.push({
+                ...el,
+                loopId,
+                loopIndex,
+                loopAnchor: loopIndex === 0 ? true : false
+              })
+            })
+          }
+          elementList.splice(i + 2, loopElements.length, ...realLoopElements)
         }
-      )
-      //TODO:找到下一个loopEnd;开启循环
+      }
     } else if (el.type === ElementType.LOOPEND) {
       if (!el.loopId) {
         elementList.splice(
@@ -254,7 +317,8 @@ export function formatElementList(
           {
             type: ElementType.TEXT,
             value: WRAP,
-            loopId: loopId
+            loopId: loopId,
+            loopAnchor: true
           },
           {
             type: ElementType.LOOPEND,
@@ -264,7 +328,8 @@ export function formatElementList(
           {
             type: ElementType.TEXT,
             value: WRAP,
-            loopId: loopId
+            loopId: loopId,
+            loopAnchor: true
           }
         )
         i--
@@ -279,7 +344,19 @@ export function formatElementList(
       } else {
         if (dict) {
           const val = el.key ? dict[el.key] : '变量值'
-          el.value = val || '变量值'
+          if (!isArray(val)) {
+            el.value = val || '变量值'
+          } else {
+            if (el.loopIndex) {
+              const thisVal =
+                el.loopIndex < val.length
+                  ? val[el.loopIndex]
+                  : val[val.length - 1]
+              el.value = thisVal || '变量值'
+            } else {
+              el.value = val[0] || '变量值'
+            }
+          }
         } else {
           el.value = el.key || '变量值'
         }

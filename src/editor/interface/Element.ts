@@ -58,6 +58,8 @@ export interface IVariableElement {
 
 export interface ILoopElement {
   loopId?: string
+  loopIndex?: number
+  loopAnchor?: boolean
 }
 
 export interface IListElement {

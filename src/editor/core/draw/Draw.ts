@@ -156,7 +156,7 @@ export class Draw {
   private lazyRenderIntersectionObserver: IntersectionObserver | null
   private printModeData: Required<IEditorData> | null
 
-  private variableDict: Record<string, string>
+  private variableDict: Record<string, string | string[]>
   private variableParticle: VariableParticle
 
   constructor(
@@ -1632,7 +1632,11 @@ export class Draw {
         } = positionList[curRow.startIndex + j]
         const preElement = curRow.elementList[j - 1]
         // 元素高亮记录
-        if (element.highlight || element.loopId) {
+        if (
+          element.highlight ||
+          element.type === ElementType.LOOPSTART ||
+          element.type === ElementType.LOOPEND
+        ) {
           // 高亮元素相连需立即绘制，并记录下一元素坐标
           if (
             preElement &&
@@ -1647,7 +1651,10 @@ export class Draw {
             y,
             metrics.width,
             curRow.height,
-            element.loopId ? '#bfbfbf' : element.highlight
+            element.type === ElementType.LOOPSTART ||
+              element.type === ElementType.LOOPEND
+              ? '#bfbfbf'
+              : element.highlight
           )
         } else if (preElement?.highlight) {
           this.highlight.render(ctx)
@@ -2017,11 +2024,11 @@ export class Draw {
     }
   }
 
-  public setVariableDict(dict: Record<string, string>) {
+  public setVariableDict(dict: Record<string, string | string[]>) {
     this.variableDict = { ...this.variableDict, ...dict }
   }
 
-  public getVariableDict(): Record<string, string> {
+  public getVariableDict(): Record<string, string | string[]> {
     return this.variableDict
   }
 

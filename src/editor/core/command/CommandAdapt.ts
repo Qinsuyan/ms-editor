@@ -185,7 +185,7 @@ export class CommandAdapt {
     })
   }
 
-  public setVariableDict(dict: Record<string, string>) {
+  public setVariableDict(dict: Record<string, string|string[]>) {
     this.draw.setVariableDict(dict)
   }
 
