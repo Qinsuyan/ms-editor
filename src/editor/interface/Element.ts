@@ -15,7 +15,8 @@ import { ITr } from './table/Tr'
 export interface IElementBasic {
   id?: string
   type?: ElementType
-  value: string
+  value: string,
+  _flag?:string
 }
 
 export interface IElementStyle {

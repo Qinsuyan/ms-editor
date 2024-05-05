@@ -72,7 +72,9 @@ export function formatElementList(
     isHandleFirstElement &&
     ((startElement?.type &&
       startElement.type !== ElementType.TEXT &&
-      startElement.type !== ElementType.VARIABLE) ||
+      startElement.type !== ElementType.VARIABLE &&
+      startElement.type !== ElementType.LOOPSTART &&
+      startElement.type !== ElementType.LOOPEND) ||
       (startElement?.value !== ZERO && startElement?.value !== '\n'))
   ) {
     elementList.unshift({
@@ -84,15 +86,26 @@ export function formatElementList(
   while (i < elementList.length) {
     let el = elementList[i]
     // 优先处理虚拟元素
-    if (
-      el.loopId &&
-      el.type !== ElementType.LOOPSTART &&
-      el.type !== ElementType.LOOPEND &&
-      !el.loopAnchor
-    ) {
+    if (el.loopId) {
       if (options.editorOptions.mode === EditorMode.EDIT) {
-        elementList.splice(i, 1)
-        continue
+        if (
+          el.type !== ElementType.LOOPSTART &&
+          el.type !== ElementType.LOOPEND &&
+          !el.loopAnchor
+        ) {
+          elementList.splice(i, 1)
+          i--
+          continue
+        } else {
+          if (el.type === ElementType.LOOPSTART) {
+            elementList.splice(i + 1, 1)
+          }
+          if (el.type !== ElementType.LOOPEND) {
+            delete el.loopId
+            delete el.loopAnchor
+            delete el.loopIndex
+          }
+        }
       }
     }
     if (el.type === ElementType.TITLE) {
@@ -161,6 +174,57 @@ export function formatElementList(
     } else if (el.type === ElementType.TABLE) {
       const tableId = getUUID()
       el.id = tableId
+      // if (el.loopId) {
+      //   el.trList?.forEach(row => {
+      //     row.tdList.forEach(col => {
+      //       // col.value.forEach(cEl => {
+      //       //   let 
+      //       //   if (cEl.width || cEl.height) {
+      //       //     el.imgDisplay = ImageDisplay.BLOCK
+      //       //   }
+      //       //   if (options.editorOptions.mode === EditorMode.EDIT) {
+      //       //     cEl.value = '{X}'
+      //       //   } else {
+      //       //     if (dict) {
+      //       //       const val = cEl.key ? dict[cEl.key] : '变量值'
+      //       //       if (!isArray(val)) {
+      //       //         cEl.value = val || '变量值'
+      //       //       } else {
+      //       //         if (cEl.loopIndex) {
+      //       //           const thisVal =
+      //       //           cEl.loopIndex < val.length
+      //       //               ? val[cEl.loopIndex]
+      //       //               : val[val.length - 1]
+      //       //               cEl.value = thisVal || '变量值'
+      //       //         } else {
+      //       //           cEl.value = val[0] || '变量值'
+      //       //         }
+      //       //       }
+      //       //     } else {
+      //       //       cEl.value = cEl.key || '变量值'
+      //       //     }
+      //       //     if (cEl.imgDisplay !== ImageDisplay.BLOCK) {
+      //       //       elementList.splice(i, 1)
+      //       //       const valueList = splitText(el.value)
+      //       //       const uuid = getUUID()
+      //       //       for (let v = 0; v < valueList.length; v++) {
+      //       //         elementList.splice(i + v, 0, {
+      //       //           ...el,
+      //       //           value: valueList[v],
+      //       //           type: ElementType.TEXT,
+      //       //           originalKey: el.key + '*#@' + uuid
+      //       //         })
+      //       //       }
+      //       //       el = elementList[i]
+      //       //     }
+      //       //   }
+      //       // })
+      //       console.log(col.value)
+      //       console.log("__________--")
+      //       formatElementList(col.value,{...options,isHandleFirstElement:false,},dict)
+      //     })
+      //   })
+      // }
       if (el.trList) {
         for (let t = 0; t < el.trList.length; t++) {
           const tr = el.trList[t]
@@ -189,6 +253,48 @@ export function formatElementList(
             )
             for (let v = 0; v < td.value.length; v++) {
               const value = td.value[v]
+              if(el.loopIndex !==undefined && value.key){
+                if (value.width || value.height) {
+                  value.imgDisplay = ImageDisplay.BLOCK
+                }
+                if (options.editorOptions.mode === EditorMode.EDIT) {
+                  value.value = '{X}'
+                } else {
+                
+                  if (dict) {
+                    const val = value.key ? dict[value.key] : '变量值'
+                    if (!isArray(val)) {
+                      value.value = val || '变量值'
+                    } else {
+                      if (el.loopIndex) {
+                        const thisVal =
+                          el.loopIndex < val.length
+                            ? val[el.loopIndex]
+                            : val[val.length - 1]
+                            value.value = thisVal || '变量值'
+                      } else {
+                        value.value = val[0] || '变量值'
+                      }
+                    }
+                  } else {
+                    value.value = value.key || '变量值'
+                  }
+                  // if (value.imgDisplay !== ImageDisplay.BLOCK) {
+                  //   td.value.splice(i, 1)
+                  //   const valueList = splitText(value.value)
+                  //   const uuid = getUUID()
+                  //   for (let v = 0; v < valueList.length; v++) {
+                  //     td.value.splice(i + v, 0, {
+                  //       ...value,
+                  //       value: valueList[v],
+                  //       type: ElementType.TEXT,
+                  //       originalKey: value.key + '*#@' + uuid
+                  //     })
+                  //   }
+                  //   //value = elementList[i]
+                  // }
+                }
+              }
               value.tdId = tdId
               value.trId = trId
               value.tableId = tableId
@@ -249,6 +355,7 @@ export function formatElementList(
         i--
       }
     } else if (el.type === ElementType.LOOPSTART) {
+      
       if (!el.loopId) {
         elementList.splice(
           i,
@@ -262,11 +369,11 @@ export function formatElementList(
             type: ElementType.TEXT,
             value: WRAP,
             loopId: loopId,
-            loopAnchor: true
+            loopAnchor: true,
           }
         )
       } else {
-        if (!el.loopAnchor) {
+        if (el.loopAnchor === undefined) {
           el.loopAnchor = true
           //找出所有循环
           const loopElements: IElement[] = []
@@ -276,6 +383,9 @@ export function formatElementList(
             if (!el) {
               loopCount = 0
               break
+            }
+            if (el.loopAnchor) {
+              continue
             }
             if (elementList[loopIndex].type === ElementType.LOOPSTART) {
               console.error('recursive loop is not allowed!')
@@ -291,6 +401,22 @@ export function formatElementList(
               if (isArray(val) && val.length > loopCount) {
                 loopCount = val.length
               }
+            } else {
+              if (el.type === ElementType.TABLE) {
+                const rows = el.trList!
+                rows.forEach(row => {
+                  row.tdList.forEach(col => {
+                    col.value.forEach(cEl => {
+                      if (cEl.type === ElementType.VARIABLE && cEl.key) {
+                        const val = dict[cEl.key]
+                        if (isArray(val) && val.length > loopCount) {
+                          loopCount = val.length
+                        }
+                      }
+                    })
+                  })
+                })
+              }
             }
             loopElements.push(elementList[loopIndex])
           }
@@ -298,12 +424,39 @@ export function formatElementList(
           const realLoopElements: IElement[] = []
           for (let loopIndex = 0; loopIndex < loopCount; loopIndex++) {
             loopElements.forEach(el => {
-              realLoopElements.push({
-                ...el,
-                loopId,
-                loopIndex,
-                loopAnchor: loopIndex === 0 ? true : false
-              })
+              if (el.type === ElementType.TABLE) {
+                //TABLE中的每一个变量value分配loopIndex
+                const rows = el.trList!
+                rows.forEach(row => {
+                  row.tdList.forEach(col => {
+                    col.value.forEach(cEl => {
+                      // if (cEl.type === ElementType.VARIABLE && cEl.key) {
+                      //   const val = dict[cEl.key]
+                      //   if (isArray(val) && val.length > loopCount) {
+                      //     loopCount = val.length
+                      //   }
+                      // }
+                      cEl = {
+                        ...cEl,
+                        loopId,
+                        loopIndex,
+                        loopAnchor: loopIndex === 0 ? true : false
+                      }
+                    })
+                  })
+                })
+                ;(el.loopId = loopId),
+                  (el.loopIndex = loopIndex),
+                  (el.loopAnchor = loopIndex === 0 ? true : false)
+                realLoopElements.push(JSON.parse(JSON.stringify(el)))
+              } else {
+                realLoopElements.push({
+                  ...el,
+                  loopId,
+                  loopIndex,
+                  loopAnchor: loopIndex === 0 ? true : false
+                })
+              }
             })
           }
           elementList.splice(i + 2, loopElements.length, ...realLoopElements)
@@ -316,20 +469,12 @@ export function formatElementList(
           1,
           {
             type: ElementType.TEXT,
-            value: WRAP,
-            loopId: loopId,
-            loopAnchor: true
+            value: WRAP
           },
           {
             type: ElementType.LOOPEND,
             value: '{循环结束}',
             loopId: loopId
-          },
-          {
-            type: ElementType.TEXT,
-            value: WRAP,
-            loopId: loopId,
-            loopAnchor: true
           }
         )
         i--

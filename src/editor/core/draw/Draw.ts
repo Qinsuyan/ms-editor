@@ -1634,8 +1634,9 @@ export class Draw {
         // 元素高亮记录
         if (
           element.highlight ||
-          element.type === ElementType.LOOPSTART ||
-          element.type === ElementType.LOOPEND
+          ((element.type === ElementType.LOOPSTART ||
+            element.type === ElementType.LOOPEND) &&
+            this.mode === EditorMode.EDIT)
         ) {
           // 高亮元素相连需立即绘制，并记录下一元素坐标
           if (
@@ -1669,6 +1670,18 @@ export class Draw {
           ) {
             this.imageParticle.render(ctx, element, x, y + offsetY)
           }
+        } else if (
+          element.type === ElementType.LOOPSTART ||
+          element.type === ElementType.LOOPEND
+        ) {
+          // 绘制富文本及文字
+
+          if (this.mode !== EditorMode.EDIT) {
+            continue
+          } else {
+            this._drawRichText(ctx)
+            this.textParticle.record(ctx, element, x, y + offsetY)
+          }
         } else if (element.type === ElementType.VARIABLE) {
           if (element.width || element.height) {
             this._drawRichText(ctx)
@@ -1688,6 +1701,10 @@ export class Draw {
             rangeRecord.y = y
             tableRangeElement = element
           }
+          // if(element.loopId){
+          //   //所有的变量改变值
+
+          // }
           this.tableParticle.render(ctx, element, x, y)
         } else if (element.type === ElementType.HYPERLINK) {
           this._drawRichText(ctx)
