@@ -1,5 +1,6 @@
 import { EDITOR_PREFIX } from '../../../dataset/constant/Editor'
 import { ImageDisplay } from '../../../dataset/enum/Common'
+import { GraphType } from '../../../dataset/enum/Editor'
 import { ElementType } from '../../../dataset/enum/Element'
 import { IEditorOption } from '../../../interface/Editor'
 import { IElement } from '../../../interface/Element'
@@ -105,6 +106,49 @@ export class ImageParticle {
     return fallbackImage
   }
 
+  protected calculateArrowEndpoints(
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number
+  ) {
+    // 计算原始线段的向量
+    const dx = x2 - x1
+    const dy = y2 - y1
+
+    // 计算线段长度
+    const scale = 8 / Math.sqrt(dx ** 2 + dy ** 2)
+
+    // 计算60度角对应的弧度
+    const angle = (Math.PI * 5) / 6
+
+    // 计算箭头两侧线条的向量
+    // 使用旋转矩阵旋转原始向量得到新向量，旋转角度为±60度
+    const arrowVector1 = [
+      dx * Math.cos(angle) - dy * Math.sin(angle),
+      dx * Math.sin(angle) + dy * Math.cos(angle)
+    ]
+    const arrowVector2 = [
+      dx * Math.cos(-angle) - dy * Math.sin(-angle),
+      dx * Math.sin(-angle) + dy * Math.cos(-angle)
+    ]
+
+    // 计算箭头两端的终点坐标
+    const endpoint1 = [
+      x2 + arrowVector1[0] * scale,
+      y2 + arrowVector1[1] * scale
+    ]
+    const endpoint2 = [
+      x2 + arrowVector2[0] * scale,
+      y2 + arrowVector2[1] * scale
+    ]
+
+    return [
+      { x: endpoint1[0], y: endpoint1[1] },
+      { x: endpoint2[0], y: endpoint2[1] }
+    ]
+  }
+
   public render(
     ctx: CanvasRenderingContext2D,
     element: IElement,
@@ -120,41 +164,89 @@ export class ImageParticle {
     ) {
       const img = this.imageCache.get(element.id!)!
       ctx.drawImage(img, x, y, width, height)
+    } else if (element.type === ElementType.GRAPH) {
+      const {
+        startX,
+        startY,
+        endX,
+        endY,
+        strokeColor,
+        strokeWidth,
+        graphType
+      } = element
+      element.imgFloatPosition = {
+        x: startX! < endX! ? startX! : endX!,
+        y: startY! < endY! ? startY! : endY!
+      }
+      element.width = startX! < endX! ? endX! - startX! : startX! - endX!
+      element.height = startY! < endY! ? endY! - startY! : startY! - endY!
+      element.imgFloatPosition.x *= this.options.scale
+      element.imgFloatPosition.y *= this.options.scale
+      ctx.beginPath()
+      ctx.strokeStyle = strokeColor || '#f00'
+      ctx.lineWidth = strokeWidth || 1
+      ctx.moveTo(startX! * this.options.scale, startY! * this.options.scale)
+      ctx.lineTo(endX! * this.options.scale, endY! * this.options.scale)
+      if (graphType === GraphType.ARROW) {
+        ctx.moveTo(endX! * this.options.scale, endY! * this.options.scale)
+        const ends = this.calculateArrowEndpoints(
+          startX!,
+          startY!,
+          endX!,
+          endY!
+        )
+        ctx.lineTo(
+          ends[0].x * this.options.scale,
+          ends[0].y * this.options.scale
+        )
+        ctx.moveTo(endX! * this.options.scale, endY! * this.options.scale)
+        ctx.lineTo(
+          ends[1].x * this.options.scale,
+          ends[1].y * this.options.scale
+        )
+      }
+      ctx.stroke()
     } else {
-      const imageLoadPromise = new Promise((resolve, reject) => {
-        const img = new Image()
-        img.setAttribute('crossOrigin', 'Anonymous')
-        img.src = element.value
-        img.onload = () => {
-          this.imageCache.set(element.id!, img)
-          resolve(element)
-          // 衬于文字下方图片需要重新首先绘制
-          if (element.imgDisplay === ImageDisplay.FLOAT_BOTTOM) {
-            this.draw.render({
-              isCompute: false,
-              isSetCursor: false,
-              isSubmitHistory: false
-            })
-          } else {
-            ctx.drawImage(img, x, y, width, height)
-          }
-        }
-        img.onerror = error => {
-          const fallbackImage = this.getFallbackImage(
-            width,
-            height,
-            element.label
-          )
-          fallbackImage.onload = () => {
-            ctx.drawImage(fallbackImage, x, y, width, height)
-            this.imageCache.set(element.id!, fallbackImage)
-            if (!element.key) {
-              reject(error)
+      const id = element.id + '-' + this.draw.getMode()
+      if (this.imageCache.has(id)) {
+        const img = this.imageCache.get(id)!
+        ctx.drawImage(img, x, y, width, height)
+      } else {
+        const imageLoadPromise = new Promise((resolve, reject) => {
+          const img = new Image()
+          img.setAttribute('crossOrigin', 'Anonymous')
+          img.src = element.value
+          img.onload = () => {
+            this.imageCache.set(id, img)
+            resolve(element)
+            // 衬于文字下方图片需要重新首先绘制
+            if (element.imgDisplay === ImageDisplay.FLOAT_BOTTOM) {
+              this.draw.render({
+                isCompute: false,
+                isSetCursor: false,
+                isSubmitHistory: false
+              })
+            } else {
+              ctx.drawImage(img, x, y, width, height)
             }
           }
-        }
-      })
-      this.addImageObserver(imageLoadPromise)
+          img.onerror = error => {
+            const fallbackImage = this.getFallbackImage(
+              width,
+              height,
+              element.label
+            )
+            fallbackImage.onload = () => {
+              ctx.drawImage(fallbackImage, x, y, width, height)
+              this.imageCache.set(id, fallbackImage)
+              if (!element.key) {
+                reject(error)
+              }
+            }
+          }
+        })
+        this.addImageObserver(imageLoadPromise)
+      }
     }
   }
 }

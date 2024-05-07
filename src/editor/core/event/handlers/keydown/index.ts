@@ -37,6 +37,14 @@ export function keydown(evt: KeyboardEvent, host: CanvasEvent) {
         evt.preventDefault()
         return
       }
+      // if (
+      //   elementList[index].type === ElementType.IMAGE &&
+      //   (elementList[index].imgDisplay === ImageDisplay.FLOAT_BOTTOM ||
+      //     elementList[index].imgDisplay === ImageDisplay.FLOAT_TOP)
+      // ) {
+      //   evt.preventDefault()
+      //   return
+      // }
       //  清空当前行对齐方式
       const startElement = elementList[startIndex]
       if (isCollapsed && startElement.rowFlex && startElement.value === ZERO) {

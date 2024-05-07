@@ -33,6 +33,7 @@ function moveImgPosition(
   host: CanvasEvent
 ) {
   const draw = host.getDraw()
+
   if (
     element.imgDisplay === ImageDisplay.FLOAT_TOP ||
     element.imgDisplay === ImageDisplay.FLOAT_BOTTOM
@@ -49,9 +50,14 @@ function moveImgPosition(
 }
 
 export function mouseup(evt: MouseEvent, host: CanvasEvent) {
+  const draw = host.getDraw()
+  if (draw.getDrawingGraph()) {
+    draw.modifyDrawingGraph({ x: evt.offsetX, y: evt.offsetY })
+    draw.endDrawingGraph()
+    return
+  }
   // 判断是否允许拖放
   if (host.isAllowDrop) {
-    const draw = host.getDraw()
     if (draw.isReadonly()) return
     const position = draw.getPosition()
     const positionList = position.getPositionList()

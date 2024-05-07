@@ -1,5 +1,6 @@
 import { ImageDisplay } from '../dataset/enum/Common'
 import { ControlComponent } from '../dataset/enum/Control'
+import { GraphType } from '../dataset/enum/Editor'
 import { ElementType } from '../dataset/enum/Element'
 import { ListStyle, ListType } from '../dataset/enum/List'
 import { RowFlex } from '../dataset/enum/Row'
@@ -15,8 +16,8 @@ import { ITr } from './table/Tr'
 export interface IElementBasic {
   id?: string
   type?: ElementType
-  value: string,
-  _flag?:string
+  value: string
+  _flag?: string
 }
 
 export interface IElementStyle {
@@ -61,6 +62,16 @@ export interface ILoopElement {
   loopId?: string
   loopIndex?: number
   loopAnchor?: boolean
+}
+
+export interface IGraphElement {
+  startX?: number
+  startY?: number
+  endX?: number
+  endY?: number
+  strokeColor?: string
+  strokeWidth?: number
+  graphType?: GraphType
 }
 
 export interface IListElement {
@@ -149,7 +160,8 @@ export type IElement = IElementBasic &
   ITitleElement &
   IListElement &
   IVariableElement &
-  ILoopElement
+  ILoopElement &
+  IGraphElement
 
 export interface IElementMetrics {
   width: number

@@ -132,7 +132,7 @@ export class Position {
         const metrics = element.metrics
         const offsetY =
           (element.imgDisplay !== ImageDisplay.INLINE &&
-           ( element.type === ElementType.IMAGE || isVariableImage(element))) ||
+            (element.type === ElementType.IMAGE || isVariableImage(element))) ||
           element.type === ElementType.LATEX
             ? curRow.ascent - metrics.height
             : curRow.ascent
@@ -162,7 +162,7 @@ export class Position {
         // 缓存浮动元素信息
         if (
           element.imgDisplay === ImageDisplay.FLOAT_TOP ||
-          element.imgDisplay === ImageDisplay.FLOAT_BOTTOM
+          element.imgDisplay === ImageDisplay.FLOAT_BOTTOM || element.type === ElementType.GRAPH
         ) {
           // 浮动元素使用上一位置信息
           const prePosition = positionList[positionList.length - 1]
@@ -398,7 +398,9 @@ export class Position {
         // 图片区域均为命中
         if (
           element.type === ElementType.IMAGE ||
-          element.type === ElementType.LATEX||isVariableImage(element)
+          element.type === ElementType.LATEX ||
+          isVariableImage(element) ||
+          element.type === ElementType.GRAPH
         ) {
           return {
             index: curPositionIndex,
@@ -562,9 +564,10 @@ export class Position {
         tdValueIndex
       } = this.floatPositionList[f]
       if (
-        (element.type === ElementType.IMAGE||isVariableImage(element)) &&
-        element.imgDisplay === payload.imgDisplay
+        ((element.type === ElementType.IMAGE || isVariableImage(element)) &&
+        element.imgDisplay === payload.imgDisplay ) || element.type === ElementType.GRAPH
       ) {
+        
         const imgFloatPosition = element.imgFloatPosition!
         if (
           x >= imgFloatPosition.x &&

@@ -42,3 +42,8 @@ export enum WordBreak {
   BREAK_ALL = 'break-all',
   BREAK_WORD = 'break-word'
 }
+
+export enum GraphType {
+  LINE = 'line',
+  ARROW = 'arrow'
+}

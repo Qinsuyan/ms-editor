@@ -57,6 +57,7 @@ import {
   EditorComponent,
   EditorMode,
   EditorZone,
+  GraphType,
   PageMode,
   PaperDirection,
   WordBreak
@@ -159,6 +160,12 @@ export class Draw {
   private variableDict: Record<string, string | string[]>
   private variableParticle: VariableParticle
 
+  //图形
+  private drawingGraph: boolean
+  private drawingType: GraphType
+  private drawingGraphId: string
+  private drawingPoints: { x: number; y: number }[]
+
   constructor(
     rootContainer: HTMLElement,
     options: DeepRequired<IEditorOption>,
@@ -167,6 +174,10 @@ export class Draw {
     eventBus: EventBus<EventBusMap>,
     override: Override
   ) {
+    this.drawingGraph = false
+    this.drawingType = GraphType.LINE
+    this.drawingPoints = []
+    this.drawingGraphId = ''
     this.container = this._wrapContainer(rootContainer)
     this.pageList = []
     this.ctxList = []
@@ -248,6 +259,67 @@ export class Draw {
       isInit: true,
       isSetCursor: false
     })
+  }
+
+  public setGraphType(payload: GraphType) {
+    this.drawingType = payload
+  }
+
+  public startDrawingGraph() {
+    this.drawingGraph = true
+    this.pageList.forEach(p => {
+      p.style.cursor = 'crosshair'
+    })
+  }
+  public endDrawingGraph() {
+    this.drawingGraph = false
+    this.drawingPoints = []
+    this.drawingGraphId = ''
+    this.pageList.forEach(p => {
+      p.style.cursor = 'text'
+    })
+  }
+
+  public addDrawingPoint(x: number, y: number) {
+    this.drawingPoints.push({ x, y })
+  }
+
+  public modifyDrawingGraph(point: { x: number; y: number }, id?: string) {
+    if (!this.drawingPoints.length) {
+      return
+    }
+    if (!id) {
+      const elIndex = this.elementList.findIndex(
+        e => e.id === this.drawingGraphId
+      )
+      if (elIndex > -1) {
+        const el = this.elementList[elIndex]
+        this.spliceElementList(this.elementList, elIndex, 1, {
+          ...el,
+          endX: point.x,
+          endY: point.y
+        })
+        this.render({ curIndex: elIndex })
+      }
+    } else {
+      this.drawingGraphId = id
+      this.insertElementList([
+        {
+          type: ElementType.GRAPH,
+          value: '',
+          startX: this.drawingPoints[0].x,
+          startY: this.drawingPoints[0].y,
+          endX: point.x,
+          endY: point.y,
+          id: id,
+          graphType: this.drawingType
+        }
+      ])
+    }
+  }
+
+  public getDrawingGraph() {
+    return this.drawingGraph
   }
 
   public getLetterReg(): RegExp {
@@ -1670,6 +1742,9 @@ export class Draw {
           ) {
             this.imageParticle.render(ctx, element, x, y + offsetY)
           }
+        } else if (element.type === ElementType.GRAPH) {
+          this._drawRichText(ctx)
+          this.imageParticle.render(ctx, element, x, y + offsetY)
         } else if (
           element.type === ElementType.LOOPSTART ||
           element.type === ElementType.LOOPEND

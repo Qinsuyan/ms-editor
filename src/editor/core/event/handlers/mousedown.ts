@@ -1,7 +1,7 @@
 import { ImageDisplay } from '../../../dataset/enum/Common'
 import { ElementType } from '../../../dataset/enum/Element'
 import { MouseEventButton } from '../../../dataset/enum/Event'
-import { deepClone } from '../../../utils'
+import { deepClone, getUUID } from '../../../utils'
 import { isMod } from '../../../utils/hotkey'
 import { CheckboxControl } from '../../draw/control/checkbox/CheckboxControl'
 import { CanvasEvent } from '../CanvasEvent'
@@ -20,6 +20,12 @@ export function setRangeCache(host: CanvasEvent) {
 export function mousedown(evt: MouseEvent, host: CanvasEvent) {
   if (evt.button === MouseEventButton.RIGHT) return
   const draw = host.getDraw()
+  if (draw.getDrawingGraph()) {
+    draw.addDrawingPoint(evt.offsetX, evt.offsetY)
+    const id = getUUID()
+    draw.modifyDrawingGraph({ x: evt.offsetX, y: evt.offsetY }, id)
+    return
+  }
   const isReadonly = draw.isReadonly()
   const rangeManager = draw.getRange()
   const position = draw.getPosition()
@@ -48,6 +54,7 @@ export function mousedown(evt: MouseEvent, host: CanvasEvent) {
     x: evt.offsetX,
     y: evt.offsetY
   })
+
   if (!positionResult) return
   const {
     index,
@@ -135,7 +142,8 @@ export function mousedown(evt: MouseEvent, host: CanvasEvent) {
     // 浮动元素创建镜像图片
     if (
       curElement.imgDisplay === ImageDisplay.FLOAT_TOP ||
-      curElement.imgDisplay === ImageDisplay.FLOAT_BOTTOM
+      curElement.imgDisplay === ImageDisplay.FLOAT_BOTTOM ||
+      curElement.type === ElementType.GRAPH
     ) {
       draw.getImageParticle().createFloatImage(curElement)
     }

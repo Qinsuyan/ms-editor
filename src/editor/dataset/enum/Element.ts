@@ -17,5 +17,6 @@ export enum ElementType {
   LIST = 'list',
   VARIABLE = 'variable',
   LOOPSTART = 'loopStart',
-  LOOPEND = 'loopEnd'
+  LOOPEND = 'loopEnd',
+  GRAPH = 'graph'
 }

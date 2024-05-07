@@ -8,6 +8,7 @@ import {
   EditorContext,
   EditorMode,
   EditorZone,
+  GraphType,
   PageMode,
   PaperDirection
 } from '../../dataset/enum/Editor'
@@ -185,7 +186,7 @@ export class CommandAdapt {
     })
   }
 
-  public setVariableDict(dict: Record<string, string|string[]>) {
+  public setVariableDict(dict: Record<string, string | string[]>) {
     this.draw.setVariableDict(dict)
   }
 
@@ -2432,5 +2433,10 @@ export class CommandAdapt {
 
   public getContainer(): HTMLDivElement {
     return this.draw.getContainer()
+  }
+
+  public startGraph(type: GraphType) {
+    this.draw.setGraphType(type)
+    this.draw.startDrawingGraph()
   }
 }

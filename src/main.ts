@@ -26,6 +26,7 @@ import { formatPrismToken } from './utils/prism'
 import { Signature } from './components/signature/Signature'
 import { debounce, nextTick, scrollIntoView } from './utils'
 import { img } from './image'
+import { GraphType } from './editor/dataset/enum/Editor'
 
 window.onload = function () {
   const isApple =
@@ -1037,14 +1038,6 @@ window.onload = function () {
     instance.command.executeLoopEnd()
   }
 
-  const imageArrDom = document.querySelector<HTMLDivElement>(
-    '.menu-item__image__arr__test'
-  )!
-  imageArrDom.title = `图片循环测试`
-  imageArrDom.onclick = function () {
-    console.log('图片循环测试')
-  }
-
   const textArrDom = document.querySelector<HTMLDivElement>(
     '.menu-item__text__arr__test'
   )!
@@ -1060,6 +1053,23 @@ window.onload = function () {
       label: '文字循环测试a',
       key: 'arrText2'
     })
+  }
+
+  const lineDom = document.querySelector<HTMLDivElement>(
+    '.menu-item__line__test'
+  )!
+  lineDom.title = `横线测试`
+  lineDom.onclick = function () {
+    instance.command.executeStartGraph(GraphType.LINE)
+  }
+
+
+  const arrowDom = document.querySelector<HTMLDivElement>(
+    '.menu-item__arrow__test'
+  )!
+  arrowDom.title = `箭头测试`
+  arrowDom.onclick = function () {
+   instance.command.executeStartGraph(GraphType.ARROW)
   }
 
   // 6. 目录显隐 | 页面模式 | 纸张缩放 | 纸张大小 | 纸张方向 | 页边距 | 全屏

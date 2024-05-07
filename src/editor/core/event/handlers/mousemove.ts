@@ -4,6 +4,10 @@ import { isVariableImage } from '../../../utils/element'
 import { CanvasEvent } from '../CanvasEvent'
 export function mousemove(evt: MouseEvent, host: CanvasEvent) {
   const draw = host.getDraw()
+  if (draw.getDrawingGraph()) {
+    draw.modifyDrawingGraph({x:evt.offsetX,y:evt.offsetY})
+    return
+  }
   const isReadonly = draw.isReadonly()
   // 是否是拖拽文字
   if (host.isAllowDrag) {

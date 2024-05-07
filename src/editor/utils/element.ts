@@ -66,6 +66,7 @@ export function formatElementList(
     isHandleFirstElement: true,
     ...options
   }
+
   const startElement = elementList[0]
   // 非首字符零宽节点文本元素则补偿
   if (
@@ -83,6 +84,7 @@ export function formatElementList(
   }
   let i = 0
   let loopId = getUUID()
+  //特殊处理的元素：变量、循环
   while (i < elementList.length) {
     let el = elementList[i]
     // 优先处理虚拟元素
@@ -178,7 +180,7 @@ export function formatElementList(
       //   el.trList?.forEach(row => {
       //     row.tdList.forEach(col => {
       //       // col.value.forEach(cEl => {
-      //       //   let 
+      //       //   let
       //       //   if (cEl.width || cEl.height) {
       //       //     el.imgDisplay = ImageDisplay.BLOCK
       //       //   }
@@ -253,14 +255,13 @@ export function formatElementList(
             )
             for (let v = 0; v < td.value.length; v++) {
               const value = td.value[v]
-              if(el.loopIndex !==undefined && value.key){
+              if (el.loopIndex !== undefined && value.key) {
                 if (value.width || value.height) {
                   value.imgDisplay = ImageDisplay.BLOCK
                 }
                 if (options.editorOptions.mode === EditorMode.EDIT) {
                   value.value = '{X}'
                 } else {
-                
                   if (dict) {
                     const val = value.key ? dict[value.key] : '变量值'
                     if (!isArray(val)) {
@@ -271,7 +272,7 @@ export function formatElementList(
                           el.loopIndex < val.length
                             ? val[el.loopIndex]
                             : val[val.length - 1]
-                            value.value = thisVal || '变量值'
+                        value.value = thisVal || '变量值'
                       } else {
                         value.value = val[0] || '变量值'
                       }
@@ -355,7 +356,6 @@ export function formatElementList(
         i--
       }
     } else if (el.type === ElementType.LOOPSTART) {
-      
       if (!el.loopId) {
         elementList.splice(
           i,
@@ -369,7 +369,7 @@ export function formatElementList(
             type: ElementType.TEXT,
             value: WRAP,
             loopId: loopId,
-            loopAnchor: true,
+            loopAnchor: true
           }
         )
       } else {

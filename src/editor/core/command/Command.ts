@@ -53,7 +53,7 @@ export class Command {
   public executeTableSelectAll: CommandAdapt['tableSelectAll']
   public executeImage: CommandAdapt['image']
   public executeHyperlink: CommandAdapt['hyperlink']
-  public executeDeleteHyperlink: CommandAdapt['deleteHyperlink']
+  public executeDeleteHyperlink: CommandAdapt['deleteHyperlink'] 
   public executeCancelHyperlink: CommandAdapt['cancelHyperlink']
   public executeEditHyperlink: CommandAdapt['editHyperlink']
   public executeSeparator: CommandAdapt['separator']
@@ -113,6 +113,7 @@ export class Command {
   public getControlValue: CommandAdapt['getControlValue']
   public getContainer: CommandAdapt['getContainer']
   public setVariableDict: CommandAdapt['setVariableDict']
+  public executeStartGraph: CommandAdapt['startGraph']
 
   constructor(adapt: CommandAdapt) {
     // 全局命令
@@ -238,5 +239,6 @@ export class Command {
     //循环
     this.executeLoopStart = adapt.loopStart.bind(adapt)
     this.executeLoopEnd = adapt.loopEnd.bind(adapt)
+    this.executeStartGraph = adapt.startGraph.bind(adapt)
   }
 }

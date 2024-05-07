@@ -1,4 +1,5 @@
 import { EDITOR_PREFIX } from '../../../../dataset/constant/Editor'
+import { ElementType } from '../../../../dataset/enum/Element'
 import { IEditorOption } from '../../../../interface/Editor'
 import { IElement, IElementPosition } from '../../../../interface/Element'
 import {
@@ -428,7 +429,15 @@ export class Previewer {
     const elementWidth = element.width! * scale
     const elementHeight = element.height! * scale
     // 尺寸预览
-    this._updateResizerSizeView(elementWidth, elementHeight)
+    if (element.type !== ElementType.GRAPH) {
+      this._updateResizerSizeView(elementWidth, elementHeight)
+      this.resizerSelection.style.opacity = '1'
+      this.resizerSelection.style.pointerEvents = 'all'
+    } else {
+      this.resizerSelection.style.opacity = '0'
+      this.resizerSelection.style.pointerEvents = 'none'
+    }
+
     // 优先使用浮动位置信息
     const { x: resizerLeft, y: resizerTop } = this._getElementPosition(
       element,
