@@ -163,6 +163,8 @@ export class Draw {
   //图形
   private drawingGraph: boolean
   private drawingType: GraphType
+  private drawingWidth: number
+  private drawingColor: string
   private drawingGraphId: string
   private drawingPoints: { x: number; y: number }[]
 
@@ -178,6 +180,8 @@ export class Draw {
     this.drawingType = GraphType.LINE
     this.drawingPoints = []
     this.drawingGraphId = ''
+    this.drawingWidth = 1
+    this.drawingColor = '#f00'
     this.container = this._wrapContainer(rootContainer)
     this.pageList = []
     this.ctxList = []
@@ -265,6 +269,22 @@ export class Draw {
     this.drawingType = payload
   }
 
+  public setGraphColor(payload: string) {
+    if (/^#(?:[0-9a-fA-F]{3}){1,2}$/gi.test(payload)) {
+      this.drawingColor = payload
+    } else {
+      this.drawingColor = '#f00'
+    }
+  }
+
+  public setGraphWidth(payload: number) {
+    if (payload > 1) {
+      this.drawingWidth = payload
+    } else {
+      this.drawingWidth = 1
+    }
+  }
+
   public startDrawingGraph() {
     this.drawingGraph = true
     this.pageList.forEach(p => {
@@ -311,6 +331,8 @@ export class Draw {
           startY: this.drawingPoints[0].y,
           endX: point.x,
           endY: point.y,
+          strokeColor:this.drawingColor,
+          strokeWidth:this.drawingWidth,
           id: id,
           graphType: this.drawingType
         }

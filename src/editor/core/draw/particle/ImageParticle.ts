@@ -110,14 +110,15 @@ export class ImageParticle {
     x1: number,
     y1: number,
     x2: number,
-    y2: number
+    y2: number,
+    len: number
   ) {
     // 计算原始线段的向量
     const dx = x2 - x1
     const dy = y2 - y1
 
     // 计算线段长度
-    const scale = 8 / Math.sqrt(dx ** 2 + dy ** 2)
+    const scale = len / Math.sqrt(dx ** 2 + dy ** 2)
 
     // 计算60度角对应的弧度
     const angle = (Math.PI * 5) / 6
@@ -182,6 +183,7 @@ export class ImageParticle {
       element.height = startY! < endY! ? endY! - startY! : startY! - endY!
       element.imgFloatPosition.x *= this.options.scale
       element.imgFloatPosition.y *= this.options.scale
+      ctx.save()
       ctx.beginPath()
       ctx.strokeStyle = strokeColor || '#f00'
       ctx.lineWidth = strokeWidth || 1
@@ -193,7 +195,8 @@ export class ImageParticle {
           startX!,
           startY!,
           endX!,
-          endY!
+          endY!,
+          8 + element.strokeWidth!
         )
         ctx.lineTo(
           ends[0].x * this.options.scale,
@@ -206,6 +209,7 @@ export class ImageParticle {
         )
       }
       ctx.stroke()
+      ctx.restore()
     } else {
       const id = element.id + '-' + this.draw.getMode()
       if (this.imageCache.has(id)) {

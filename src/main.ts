@@ -1060,16 +1060,15 @@ window.onload = function () {
   )!
   lineDom.title = `横线测试`
   lineDom.onclick = function () {
-    instance.command.executeStartGraph(GraphType.LINE)
+    instance.command.executeStartGraph(GraphType.LINE, 5, '#ccc')
   }
-
 
   const arrowDom = document.querySelector<HTMLDivElement>(
     '.menu-item__arrow__test'
   )!
   arrowDom.title = `箭头测试`
   arrowDom.onclick = function () {
-   instance.command.executeStartGraph(GraphType.ARROW)
+    instance.command.executeStartGraph(GraphType.ARROW, 5, '#ccc')
   }
 
   // 6. 目录显隐 | 页面模式 | 纸张缩放 | 纸张大小 | 纸张方向 | 页边距 | 全屏

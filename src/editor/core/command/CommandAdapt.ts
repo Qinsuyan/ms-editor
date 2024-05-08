@@ -2435,8 +2435,10 @@ export class CommandAdapt {
     return this.draw.getContainer()
   }
 
-  public startGraph(type: GraphType) {
+  public startGraph(type: GraphType, width: number, color: string) {
     this.draw.setGraphType(type)
+    this.draw.setGraphWidth(width)
+    this.draw.setGraphColor(color)
     this.draw.startDrawingGraph()
   }
 }

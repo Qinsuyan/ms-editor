@@ -24,6 +24,11 @@ export class Previewer {
   private resizerImageContainer: HTMLDivElement
   private resizerImage: HTMLImageElement
   private resizerSize: HTMLSpanElement
+
+  //Graph的resizer
+  private graphResizerSelection: HTMLDivElement
+  private graphResizerHandleList: HTMLDivElement[]
+
   private width: number
   private height: number
   private mousedownX: number
@@ -50,6 +55,10 @@ export class Previewer {
       resizerImage,
       resizerSize
     } = this._createResizerDom()
+    const { graphResizerHandleList, graphResizerSelection } =
+      this._createGraphResizerDom()
+    this.graphResizerHandleList = graphResizerHandleList
+    this.graphResizerSelection = graphResizerSelection
     this.resizerSelection = resizerSelection
     this.resizerHandleList = resizerHandleList
     this.resizerImageContainer = resizerImageContainer
@@ -131,9 +140,39 @@ export class Previewer {
     }
   }
 
+  private _createGraphResizerDom(): {
+    graphResizerSelection: HTMLDivElement
+    graphResizerHandleList: HTMLDivElement[]
+  } {
+    const graphResizerSelection = document.createElement('div')
+    graphResizerSelection.classList.add(
+      `${EDITOR_PREFIX}-graph-resizer-selection`
+    )
+    graphResizerSelection.onmousedown = this._mousedown.bind(this)
+    const graphResizerHandleList: HTMLDivElement[] = []
+    for (let i = 0; i < 2; i++) {
+      const handleDom = document.createElement('div')
+      handleDom.style.background = this.options.resizerColor
+      handleDom.classList.add(`graph-resizer-handle`)
+      handleDom.classList.add(`graph-handle-${i}`)
+      handleDom.setAttribute('data-index', String(i))
+      handleDom.onmousedown = this._mousedown.bind(this)
+      graphResizerSelection.append(handleDom)
+      graphResizerHandleList.push(handleDom)
+    }
+    this.container.append(graphResizerSelection)
+    return {
+      graphResizerSelection,
+      graphResizerHandleList
+    }
+  }
+
   private _keydown = () => {
     // 有键盘事件触发时，主动销毁拖拽选区
-    if (this.resizerSelection.style.display === 'block') {
+    if (
+      this.resizerSelection.style.display === 'block' ||
+      this.graphResizerSelection.style.display === 'block'
+    ) {
       this.clearResizer()
       document.removeEventListener('keydown', this._keydown)
     }
@@ -141,7 +180,10 @@ export class Previewer {
 
   private _mousedown(evt: MouseEvent) {
     this.canvas = this.draw.getPage()
-    if (!this.curElement) return
+    if (!this.curElement) {
+      return
+    }
+    evt.preventDefault()
     const { scale } = this.options
     this.mousedownX = evt.x
     this.mousedownY = evt.y
@@ -151,46 +193,74 @@ export class Previewer {
     const cursor = window.getComputedStyle(target).cursor
     document.body.style.cursor = cursor
     this.canvas.style.cursor = cursor
-    // 拖拽图片镜像
-    this.resizerImage.src = this.curElementSrc
-    this.resizerImageContainer.style.display = 'block'
-    // 优先使用浮动位置信息
-    const { x: resizerLeft, y: resizerTop } = this._getElementPosition(
-      this.curElement,
-      this.curPosition
-    )
-    this.resizerImageContainer.style.left = `${resizerLeft}px`
-    this.resizerImageContainer.style.top = `${resizerTop}px`
-    this.resizerImage.style.width = `${this.curElement.width! * scale}px`
-    this.resizerImage.style.height = `${this.curElement.height! * scale}px`
-    // 追加全局事件
-    const mousemoveFn = this._mousemove.bind(this)
-    document.addEventListener('mousemove', mousemoveFn)
-    document.addEventListener(
-      'mouseup',
-      () => {
-        // 改变尺寸
-        if (this.curElement) {
-          this.curElement.width = this.width
-          this.curElement.height = this.height
-          this.draw.render({ isSetCursor: false })
-          this.drawResizer(
-            this.curElement,
-            this.curPosition,
-            this.previewerDrawOption
-          )
+    if (this.curElement.type !== ElementType.GRAPH) {
+      // 拖拽图片镜像
+      this.resizerImage.src = this.curElementSrc
+      this.resizerImageContainer.style.display = 'block'
+      // 优先使用浮动位置信息
+      const { x: resizerLeft, y: resizerTop } = this._getElementPosition(
+        this.curElement,
+        this.curPosition
+      )
+      this.resizerImageContainer.style.left = `${resizerLeft}px`
+      this.resizerImageContainer.style.top = `${resizerTop}px`
+      this.resizerImage.style.width = `${this.curElement.width! * scale}px`
+      this.resizerImage.style.height = `${this.curElement.height! * scale}px`
+      // 追加全局事件
+      const mousemoveFn = this._mousemove.bind(this)
+      document.addEventListener('mousemove', mousemoveFn)
+      document.addEventListener(
+        'mouseup',
+        () => {
+          // 改变尺寸
+          if (this.curElement) {
+            this.curElement.width = this.width
+            this.curElement.height = this.height
+            this.draw.render({ isSetCursor: false })
+            this.drawResizer(
+              this.curElement,
+              this.curPosition,
+              this.previewerDrawOption
+            )
+          }
+          // 还原副作用
+          this.resizerImageContainer.style.display = 'none'
+          document.removeEventListener('mousemove', mousemoveFn)
+          document.body.style.cursor = ''
+          this.canvas.style.cursor = 'text'
+        },
+        {
+          once: true
         }
-        // 还原副作用
-        this.resizerImageContainer.style.display = 'none'
-        document.removeEventListener('mousemove', mousemoveFn)
-        document.body.style.cursor = ''
-        this.canvas.style.cursor = 'text'
-      },
-      {
-        once: true
-      }
-    )
-    evt.preventDefault()
+      )
+    } else {
+      const mousemoveFn = this._mousemove.bind(this)
+      document.addEventListener('mousemove', mousemoveFn)
+      document.addEventListener(
+        'mouseup',
+        () => {
+          // 改变尺寸
+          // if (this.curElement) {
+          //   this.curElement.width = this.width
+          //   this.curElement.height = this.height
+          //   this.draw.render({ isSetCursor: false })
+          //   this.drawResizer(
+          //     this.curElement,
+          //     this.curPosition,
+          //     this.previewerDrawOption
+          //   )
+          // }
+          // // 还原副作用
+          // this.resizerImageContainer.style.display = 'none'
+          document.removeEventListener('mousemove', mousemoveFn)
+          document.body.style.cursor = ''
+          this.canvas.style.cursor = 'text'
+        },
+        {
+          once: true
+        }
+      )
+    }
   }
 
   private _mousemove(evt: MouseEvent) {
@@ -198,69 +268,100 @@ export class Previewer {
     const { scale } = this.options
     let dx = 0
     let dy = 0
-    switch (this.curHandleIndex) {
-      case 0:
-        {
-          const offsetX = this.mousedownX - evt.x
-          const offsetY = this.mousedownY - evt.y
-          dx = Math.cbrt(offsetX ** 3 + offsetY ** 3)
-          dy = (this.curElement.height! * dx) / this.curElement.width!
-        }
-        break
-      case 1:
-        dy = this.mousedownY - evt.y
-        break
-      case 2:
-        {
-          const offsetX = evt.x - this.mousedownX
-          const offsetY = this.mousedownY - evt.y
-          dx = Math.cbrt(offsetX ** 3 + offsetY ** 3)
-          dy = (this.curElement.height! * dx) / this.curElement.width!
-        }
-        break
-      case 4:
-        {
-          const offsetX = evt.x - this.mousedownX
-          const offsetY = evt.y - this.mousedownY
-          dx = Math.cbrt(offsetX ** 3 + offsetY ** 3)
-          dy = (this.curElement.height! * dx) / this.curElement.width!
-        }
-        break
-      case 3:
-        dx = evt.x - this.mousedownX
-        break
-      case 5:
-        dy = evt.y - this.mousedownY
-        break
-      case 6:
-        {
-          const offsetX = this.mousedownX - evt.x
-          const offsetY = evt.y - this.mousedownY
-          dx = Math.cbrt(offsetX ** 3 + offsetY ** 3)
-          dy = (this.curElement.height! * dx) / this.curElement.width!
-        }
-        break
-      case 7:
-        dx = this.mousedownX - evt.x
-        break
-    }
-    // 图片实际宽高（变化大小除掉缩放比例）
-    const dw = this.curElement.width! + dx / scale
-    const dh = this.curElement.height! + dy / scale
-    if (dw <= 0 || dh <= 0) return
-    this.width = dw
-    this.height = dh
-    // 图片显示宽高
-    const elementWidth = dw * scale
-    const elementHeight = dh * scale
-    // 更新影子图片尺寸
-    this.resizerImage.style.width = `${elementWidth}px`
-    this.resizerImage.style.height = `${elementHeight}px`
-    // 更新预览包围框尺寸
-    this._updateResizerRect(elementWidth, elementHeight)
-    // 尺寸预览
-    this._updateResizerSizeView(elementWidth, elementHeight)
     evt.preventDefault()
+    if (this.curElement.type !== ElementType.GRAPH) {
+      switch (this.curHandleIndex) {
+        case 0:
+          {
+            const offsetX = this.mousedownX - evt.x
+            const offsetY = this.mousedownY - evt.y
+            dx = Math.cbrt(offsetX ** 3 + offsetY ** 3)
+            dy = (this.curElement.height! * dx) / this.curElement.width!
+          }
+          break
+        case 1:
+          dy = this.mousedownY - evt.y
+          break
+        case 2:
+          {
+            const offsetX = evt.x - this.mousedownX
+            const offsetY = this.mousedownY - evt.y
+            dx = Math.cbrt(offsetX ** 3 + offsetY ** 3)
+            dy = (this.curElement.height! * dx) / this.curElement.width!
+          }
+          break
+        case 4:
+          {
+            const offsetX = evt.x - this.mousedownX
+            const offsetY = evt.y - this.mousedownY
+            dx = Math.cbrt(offsetX ** 3 + offsetY ** 3)
+            dy = (this.curElement.height! * dx) / this.curElement.width!
+          }
+          break
+        case 3:
+          dx = evt.x - this.mousedownX
+          break
+        case 5:
+          dy = evt.y - this.mousedownY
+          break
+        case 6:
+          {
+            const offsetX = this.mousedownX - evt.x
+            const offsetY = evt.y - this.mousedownY
+            dx = Math.cbrt(offsetX ** 3 + offsetY ** 3)
+            dy = (this.curElement.height! * dx) / this.curElement.width!
+          }
+          break
+        case 7:
+          dx = this.mousedownX - evt.x
+          break
+      }
+      // 图片实际宽高（变化大小除掉缩放比例）
+      const dw = this.curElement.width! + dx / scale
+      const dh = this.curElement.height! + dy / scale
+      if (dw <= 0 || dh <= 0) return
+      this.width = dw
+      this.height = dh
+      // 图片显示宽高
+      const elementWidth = dw * scale
+      const elementHeight = dh * scale
+      // 更新影子图片尺寸
+      this.resizerImage.style.width = `${elementWidth}px`
+      this.resizerImage.style.height = `${elementHeight}px`
+      // 更新预览包围框尺寸
+      this._updateResizerRect(elementWidth, elementHeight)
+      // 尺寸预览
+      this._updateResizerSizeView(elementWidth, elementHeight)
+    } else {
+      dx = evt.x - this.mousedownX
+      dy = evt.y - this.mousedownY
+      this.mousedownX = evt.x
+      this.mousedownY = evt.y
+      if (isNaN(this.curHandleIndex)) {
+        //整体移动
+        this.curElement.startX! += dx / scale
+        this.curElement.endX! += dx / scale
+        this.curElement.startY! += dy / scale
+        this.curElement.endY! += dy / scale
+      } else {
+        //端点
+        if (this.curHandleIndex === 0) {
+          //start
+          this.curElement.startX! += dx / scale
+          this.curElement.startY! += dy / scale
+        } else {
+          //end
+          this.curElement.endX! += dx / scale
+          this.curElement.endY! += dy / scale
+        }
+      }
+      this.drawResizer(
+        this.curElement,
+        this.curPosition,
+        this.previewerDrawOption
+      )
+      this.draw.render({ isSetCursor: false })
+    }
   }
 
   private _drawPreviewer() {
@@ -410,6 +511,66 @@ export class Previewer {
     }
   }
 
+  public _updateGraphResizerRect(width: number, height: number) {
+    if (!this.curElement) {
+      return
+    }
+    const handleSize = this.options.resizerSize
+    this.graphResizerSelection.style.width = `${width}px`
+    this.graphResizerSelection.style.height = `${height}px`
+    let direction = 0
+    if (this.curElement.startX! < this.curElement.endX!) {
+      if (this.curElement.startY! < this.curElement.endY!) {
+        direction = 4
+      } else {
+        direction = 1
+      }
+    } else {
+      if (this.curElement.startY! < this.curElement.endY!) {
+        direction = 3
+      } else {
+        direction = 2
+      }
+    }
+    // handle
+    // for (let i = 0; i < 2; i++) {
+    //   const left = i === 0 ? -handleSize : width - handleSize
+    //   const top = i === 0 ? -handleSize : height - handleSize
+    //   this.graphResizerHandleList[i].style.left = `${left}px`
+    //   this.graphResizerHandleList[i].style.top = `${top}px`
+    // }
+    switch (direction) {
+      case 1: {
+        this.graphResizerHandleList[0].style.left = `${-handleSize}px`
+        this.graphResizerHandleList[0].style.top = `${height - handleSize}px`
+        this.graphResizerHandleList[1].style.left = `${width - handleSize}px`
+        this.graphResizerHandleList[1].style.top = `${-handleSize}px`
+        break
+      }
+      case 2: {
+        this.graphResizerHandleList[0].style.left = `${width - handleSize}px`
+        this.graphResizerHandleList[0].style.top = `${height - handleSize}px`
+        this.graphResizerHandleList[1].style.left = `${-handleSize}px`
+        this.graphResizerHandleList[1].style.top = `${-handleSize}px`
+        break
+      }
+      case 3: {
+        this.graphResizerHandleList[0].style.left = `${width - handleSize}px`
+        this.graphResizerHandleList[0].style.top = `${-handleSize}px`
+        this.graphResizerHandleList[1].style.left = `${-handleSize}px`
+        this.graphResizerHandleList[1].style.top = `${height - handleSize}px`
+        break
+      }
+      case 4: {
+        this.graphResizerHandleList[0].style.left = `${-handleSize}px`
+        this.graphResizerHandleList[0].style.top = `${-handleSize}px`
+        this.graphResizerHandleList[1].style.left = `${width - handleSize}px`
+        this.graphResizerHandleList[1].style.top = `${height - handleSize}px`
+        break
+      }
+    }
+  }
+
   public _updateResizerSizeView(width: number, height: number) {
     this.resizerSize.innerText = `${Math.round(width)} × ${Math.round(height)}`
   }
@@ -433,31 +594,49 @@ export class Previewer {
       this._updateResizerSizeView(elementWidth, elementHeight)
       this.resizerSelection.style.opacity = '1'
       this.resizerSelection.style.pointerEvents = 'all'
+      this.graphResizerSelection.style.opacity = '0'
+      this.graphResizerSelection.style.pointerEvents = 'none'
+      // 优先使用浮动位置信息
+      const { x: resizerLeft, y: resizerTop } = this._getElementPosition(
+        element,
+        position
+      )
+      this.resizerSelection.style.left = `${resizerLeft}px`
+      this.resizerSelection.style.top = `${resizerTop}px`
+      // 更新预览包围框尺寸
+      this._updateResizerRect(elementWidth, elementHeight)
+      this.resizerSelection.style.display = 'block'
+      this.curElement = element
+      this.curElementSrc = element[options.srcKey || 'value'] || ''
+      this.curPosition = position
+      this.width = this.curElement.width! * scale
+      this.height = this.curElement.height! * scale
+      document.addEventListener('keydown', this._keydown)
     } else {
       this.resizerSelection.style.opacity = '0'
       this.resizerSelection.style.pointerEvents = 'none'
+      this.graphResizerSelection.style.opacity = '1'
+      this.graphResizerSelection.style.pointerEvents = 'all'
+      const { x: resizerLeft, y: resizerTop } = this._getElementPosition(
+        element,
+        position
+      )
+      this.graphResizerSelection.style.left = `${resizerLeft}px`
+      this.graphResizerSelection.style.top = `${resizerTop}px`
+      this.graphResizerSelection.style.display = 'block'
+      this.curElement = element
+      this.curElementSrc = element[options.srcKey || 'value'] || ''
+      this.curPosition = position
+      this.width = this.curElement.width! * scale
+      this.height = this.curElement.height! * scale
+      this._updateGraphResizerRect(elementWidth, elementHeight)
+      document.addEventListener('keydown', this._keydown)
     }
-
-    // 优先使用浮动位置信息
-    const { x: resizerLeft, y: resizerTop } = this._getElementPosition(
-      element,
-      position
-    )
-    this.resizerSelection.style.left = `${resizerLeft}px`
-    this.resizerSelection.style.top = `${resizerTop}px`
-    // 更新预览包围框尺寸
-    this._updateResizerRect(elementWidth, elementHeight)
-    this.resizerSelection.style.display = 'block'
-    this.curElement = element
-    this.curElementSrc = element[options.srcKey || 'value'] || ''
-    this.curPosition = position
-    this.width = this.curElement.width! * scale
-    this.height = this.curElement.height! * scale
-    document.addEventListener('keydown', this._keydown)
   }
 
   public clearResizer() {
     this.resizerSelection.style.display = 'none'
+    this.graphResizerSelection.style.display = 'none'
     document.removeEventListener('keydown', this._keydown)
   }
 }
