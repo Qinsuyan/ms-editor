@@ -1,0 +1,11 @@
+.textbox-resizer-dom {
+  cursor: pointer;
+  display: none;
+}
+.textbox-resizer-dom.show {
+  box-shadow: 0 1px 4px 0 rgb(0 0 0 / 30%);
+  display: block;
+  position: absolute;
+  transform: translateY(-50%);
+  color: transparent;
+}

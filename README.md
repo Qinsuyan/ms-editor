@@ -1,4 +1,4 @@
-<h1 align="center">md-editor</h1>
+<h1 align="center">ms-editor</h1>
 
 forked from [canvas-editor](https://github.com/Hufe921/canvas-editor)
 
@@ -7,6 +7,12 @@ forked from [canvas-editor](https://github.com/Hufe921/canvas-editor)
 * 表格可指定边框宽度
 
 * 增加变量类型
+
+* 增加循环功能
+
+* 增加绘制横线和箭头
+
+* 增加文本框
 
 ## install
 

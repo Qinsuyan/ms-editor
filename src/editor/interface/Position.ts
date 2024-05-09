@@ -11,6 +11,8 @@ export interface ICurrentPosition {
   isCheckbox?: boolean
   isControl?: boolean
   isImage?: boolean
+  isTextBox?: boolean
+  isVariable?: boolean
   isTable?: boolean
   isDirectHit?: boolean
   trIndex?: number

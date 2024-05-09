@@ -90,6 +90,7 @@ import { Group } from './interactive/Group'
 import { Override } from '../override/Override'
 import { ImageDisplay } from '../../dataset/enum/Common'
 import { VariableParticle } from './particle/VariableParticle'
+import { TextBoxParticle } from './particle/textBox/TextBoxParticle'
 
 export class Draw {
   private container: HTMLDivElement
@@ -124,6 +125,7 @@ export class Draw {
   private imageParticle: ImageParticle
   private laTexParticle: LaTexParticle
   private textParticle: TextParticle
+  private textBoxParticle: TextBoxParticle
   private tableParticle: TableParticle
   private tableTool: TableTool
   private pageNumber: PageNumber
@@ -168,6 +170,12 @@ export class Draw {
   private drawingGraphId: string
   private drawingPoints: { x: number; y: number }[]
 
+  //文本框
+  private addingTextBox: boolean
+  private addingTextBoxBorder: boolean
+  private addingTextBoxBorderWidth: number
+  private addingTextBoxBorderColor: string
+
   constructor(
     rootContainer: HTMLElement,
     options: DeepRequired<IEditorOption>,
@@ -182,6 +190,12 @@ export class Draw {
     this.drawingGraphId = ''
     this.drawingWidth = 1
     this.drawingColor = '#f00'
+
+    this.addingTextBox = false
+    this.addingTextBoxBorder = false
+    this.addingTextBoxBorderWidth = 1
+    this.addingTextBoxBorderColor = '#000'
+
     this.container = this._wrapContainer(rootContainer)
     this.pageList = []
     this.ctxList = []
@@ -214,6 +228,7 @@ export class Draw {
     this.imageParticle = new ImageParticle(this)
     this.laTexParticle = new LaTexParticle(this)
     this.textParticle = new TextParticle(this)
+    this.textBoxParticle = new TextBoxParticle(this)
     this.tableParticle = new TableParticle(this)
     this.tableTool = new TableTool(this)
     this.pageNumber = new PageNumber(this)
@@ -265,6 +280,13 @@ export class Draw {
     })
   }
 
+  private clearDrawingAndTextBoxStatus() {
+    this.drawingGraph = false
+    this.addingTextBox = false
+    this.drawingPoints = []
+    this.drawingGraphId = ''
+  }
+
   public setGraphType(payload: GraphType) {
     this.drawingType = payload
   }
@@ -286,22 +308,75 @@ export class Draw {
   }
 
   public startDrawingGraph() {
+    this.clearDrawingAndTextBoxStatus()
     this.drawingGraph = true
     this.pageList.forEach(p => {
       p.style.cursor = 'crosshair'
     })
   }
+
   public endDrawingGraph() {
-    this.drawingGraph = false
-    this.drawingPoints = []
-    this.drawingGraphId = ''
+    this.clearDrawingAndTextBoxStatus()
     this.pageList.forEach(p => {
       p.style.cursor = 'text'
     })
   }
 
+  public setAddingTextBoxBorder(has: boolean) {
+    this.addingTextBoxBorder = has
+  }
+
+  public setAddingTextBoxBorderWidth(payload: number) {
+    if (payload > 1) {
+      this.addingTextBoxBorderWidth = payload
+    } else {
+      this.addingTextBoxBorderWidth = 1
+    }
+  }
+
+  public setAddingTextBorderColor(payload: string) {
+    if (/^#(?:[0-9a-fA-F]{3}){1,2}$/gi.test(payload)) {
+      this.addingTextBoxBorderColor = payload
+    }
+  }
+
+  public startAddingTextBox() {
+    this.clearDrawingAndTextBoxStatus()
+    this.addingTextBox = true
+  }
+
+  public endAddingTextBox() {
+    this.addingTextBox = false
+  }
+
+  public showTextBoxControl(el: IElement) {
+    this.textBoxParticle.showControl(el)
+  }
+
+  public hideTextBoxControl() {
+    this.textBoxParticle.hideControl()
+  }
+
+  public addTextBox(x: number, y: number) {
+    const el: IElement = {
+      id:getUUID(),
+      type: ElementType.TEXTBOX,
+      value: '',
+      x: x / this.options.scale,
+      y: y / this.options.scale
+    }
+    if (this.addingTextBoxBorder) {
+      el.borderColor = this.addingTextBoxBorderColor
+      el.borderWidth = this.addingTextBoxBorderWidth
+    }
+    this.insertElementList([el])
+  }
+
   public addDrawingPoint(x: number, y: number) {
-    this.drawingPoints.push({ x, y })
+    this.drawingPoints.push({
+      x: x / this.options.scale,
+      y: y / this.options.scale
+    })
   }
 
   public modifyDrawingGraph(point: { x: number; y: number }, id?: string) {
@@ -316,8 +391,8 @@ export class Draw {
         const el = this.elementList[elIndex]
         this.spliceElementList(this.elementList, elIndex, 1, {
           ...el,
-          endX: point.x,
-          endY: point.y
+          endX: point.x / this.options.scale,
+          endY: point.y / this.options.scale
         })
         this.render({ curIndex: elIndex })
       }
@@ -329,10 +404,10 @@ export class Draw {
           value: '',
           startX: this.drawingPoints[0].x,
           startY: this.drawingPoints[0].y,
-          endX: point.x,
-          endY: point.y,
-          strokeColor:this.drawingColor,
-          strokeWidth:this.drawingWidth,
+          endX: point.x / this.options.scale,
+          endY: point.y / this.options.scale,
+          strokeColor: this.drawingColor,
+          strokeWidth: this.drawingWidth,
           id: id,
           graphType: this.drawingType
         }
@@ -342,6 +417,10 @@ export class Draw {
 
   public getDrawingGraph() {
     return this.drawingGraph
+  }
+
+  public getAddingTextBox() {
+    return this.addingTextBox
   }
 
   public getLetterReg(): RegExp {
@@ -1234,9 +1313,12 @@ export class Draw {
       if (
         element.type === ElementType.IMAGE ||
         element.type === ElementType.LATEX ||
-        isVariableImage(element)
+        isVariableImage(element) ||
+        element.type === ElementType.GRAPH ||
+        element.type === ElementType.TEXTBOX
       ) {
         // 浮动图片无需计算数据
+
         if (
           element.imgDisplay === ImageDisplay.FLOAT_TOP ||
           element.imgDisplay === ImageDisplay.FLOAT_BOTTOM
@@ -1245,31 +1327,46 @@ export class Draw {
           metrics.height = 0
           metrics.boundingBoxDescent = 0
         } else {
-          const elementWidth = element.width! * scale
-          const elementHeight = element.height! * scale
-          // 图片超出尺寸后自适应
-          const curRowWidth =
-            element.imgDisplay === ImageDisplay.INLINE ? 0 : curRow.width
-          if (curRowWidth + elementWidth > availableWidth) {
-            // 计算剩余大小
-            const surplusWidth = availableWidth - curRowWidth
-            const adaptiveWidth =
-              surplusWidth > 0
-                ? surplusWidth
-                : Math.min(elementWidth, availableWidth)
-            const adaptiveHeight =
-              (elementHeight * adaptiveWidth) / elementWidth
-            element.width = adaptiveWidth / scale
-            element.height = adaptiveHeight / scale
-            metrics.width = adaptiveWidth
-            metrics.height = adaptiveHeight
-            metrics.boundingBoxDescent = adaptiveHeight
-          } else {
-            metrics.width = elementWidth
-            metrics.height = elementHeight
-            metrics.boundingBoxDescent = elementHeight
+          if (
+            element.type === ElementType.GRAPH ||
+            element.type === ElementType.TEXTBOX
+          ) {
+            metrics.width = 0
+            metrics.height = 0
+            metrics.boundingBoxDescent = 0
           }
         }
+        // } else {
+        //   if (element.type === ElementType.TEXTBOX) {
+        //     //const fontMetrics = this.textParticle.measureText(ctx, element)
+        //     //element.width = fontMetrics.
+        //   } else {
+        //     const elementWidth = element.width! * scale
+        //     const elementHeight = element.height! * scale
+        //     // 图片超出尺寸后自适应
+        //     const curRowWidth =
+        //       element.imgDisplay === ImageDisplay.INLINE ? 0 : curRow.width
+        //     if (curRowWidth + elementWidth > availableWidth) {
+        //       // 计算剩余大小
+        //       const surplusWidth = availableWidth - curRowWidth
+        //       const adaptiveWidth =
+        //         surplusWidth > 0
+        //           ? surplusWidth
+        //           : Math.min(elementWidth, availableWidth)
+        //       const adaptiveHeight =
+        //         (elementHeight * adaptiveWidth) / elementWidth
+        //       element.width = adaptiveWidth / scale
+        //       element.height = adaptiveHeight / scale
+        //       metrics.width = adaptiveWidth
+        //       metrics.height = adaptiveHeight
+        //       metrics.boundingBoxDescent = adaptiveHeight
+        //     } else {
+        //       metrics.width = elementWidth
+        //       metrics.height = elementHeight
+        //       metrics.boundingBoxDescent = elementHeight
+        //     }
+        //   }
+        // }
         metrics.boundingBoxAscent = 0
       } else if (element.type === ElementType.TABLE) {
         const tdPaddingWidth = tdPadding[1] + tdPadding[3]
@@ -1772,7 +1869,6 @@ export class Draw {
           element.type === ElementType.LOOPEND
         ) {
           // 绘制富文本及文字
-
           if (this.mode !== EditorMode.EDIT) {
             continue
           } else {
@@ -1803,6 +1899,8 @@ export class Draw {
 
           // }
           this.tableParticle.render(ctx, element, x, y)
+        } else if (element.type === ElementType.TEXTBOX) {
+          this.textBoxParticle.render(ctx, element)
         } else if (element.type === ElementType.HYPERLINK) {
           this._drawRichText(ctx)
           this.hyperlinkParticle.render(ctx, element, x, y + offsetY)

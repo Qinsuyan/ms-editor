@@ -4,10 +4,14 @@ import { isVariableImage } from '../../../utils/element'
 import { CanvasEvent } from '../CanvasEvent'
 export function mousemove(evt: MouseEvent, host: CanvasEvent) {
   const draw = host.getDraw()
+  const variableParticle = draw.getVariableParticle()
+  variableParticle.clearVariablePopup()
+  draw.hideTextBoxControl()
   if (draw.getDrawingGraph()) {
-    draw.modifyDrawingGraph({x:evt.offsetX,y:evt.offsetY})
+    draw.modifyDrawingGraph({ x: evt.offsetX, y: evt.offsetY })
     return
   }
+
   const isReadonly = draw.isReadonly()
   // 是否是拖拽文字
   if (host.isAllowDrag) {
@@ -47,22 +51,51 @@ export function mousemove(evt: MouseEvent, host: CanvasEvent) {
     host.isAllowDrop = true
     return
   }
-  if (!host.isAllowSelection || !host.mouseDownStartPosition) return
-  const target = evt.target as HTMLDivElement
-  const pageIndex = target.dataset.index
-  // 设置pageNo
-  if (pageIndex) {
-    draw.setPageNo(Number(pageIndex))
-  }
   // 结束位置
   const position = draw.getPosition()
   const positionResult = position.getPositionByXY({
     x: evt.offsetX,
     y: evt.offsetY
   })
-  if (!~positionResult.index) return
-  const { index, isTable, tdValueIndex, tdIndex, trIndex, tableId } =
-    positionResult
+  if (!~positionResult.index) {
+    return
+  }
+  const {
+    index,
+    isTable,
+    tdValueIndex,
+    tdIndex,
+    trIndex,
+    tableId,
+    isVariable,
+    isTextBox
+  } = positionResult
+  if (isVariable && !isReadonly) {
+    //对于变量
+    //变量tooltip
+    const position = draw.getPosition()
+    const elementList = draw.getElementList()
+    const positionList = position.getPositionList()
+    const endIndex = isTable ? tdValueIndex! : index
+    const curElement = elementList[endIndex]
+    variableParticle.drawVariablePopup(curElement, positionList[endIndex])
+  }
+  if (isTextBox) {
+    const elementList = draw.getElementList()
+    const curElement = elementList[index!]
+    draw.showTextBoxControl(curElement)
+  }
+  if (!host.isAllowSelection || !host.mouseDownStartPosition) {
+    return
+  }
+
+  const target = evt.target as HTMLDivElement
+  const pageIndex = target.dataset.index
+  // 设置pageNo
+  if (pageIndex) {
+    draw.setPageNo(Number(pageIndex))
+  }
+
   const {
     index: startIndex,
     isTable: startIsTable,
@@ -70,17 +103,8 @@ export function mousemove(evt: MouseEvent, host: CanvasEvent) {
     trIndex: startTrIndex,
     tableId: startTableId
   } = host.mouseDownStartPosition
-  const elementList = draw.getElementList()
-  const positionList = position.getPositionList()
   const endIndex = isTable ? tdValueIndex! : index
-  const curElement = elementList[endIndex]
-  //变量tooltip
-  
-  const variableParticle = draw.getVariableParticle()
-  variableParticle.clearVariablePopup()
-  if (curElement.type === ElementType.VARIABLE && !isReadonly) {
-    variableParticle.drawVariablePopup(curElement, positionList[endIndex])
-  }
+
   // 判断是否是表格跨行/列
   const rangeManager = draw.getRange()
   if (

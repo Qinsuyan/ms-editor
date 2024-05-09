@@ -162,7 +162,9 @@ export class Position {
         // 缓存浮动元素信息
         if (
           element.imgDisplay === ImageDisplay.FLOAT_TOP ||
-          element.imgDisplay === ImageDisplay.FLOAT_BOTTOM || element.type === ElementType.GRAPH
+          element.imgDisplay === ImageDisplay.FLOAT_BOTTOM ||
+          element.type === ElementType.GRAPH ||
+          element.type === ElementType.TEXTBOX
         ) {
           // 浮动元素使用上一位置信息
           const prePosition = positionList[positionList.length - 1]
@@ -395,6 +397,17 @@ export class Position {
             }
           }
         }
+
+        if (
+          element.type === ElementType.VARIABLE &&
+          !isVariableImage(element)
+        ) {
+          return {
+            index: curPositionIndex,
+            isDirectHit: true,
+            isVariable: true
+          }
+        }
         // 图片区域均为命中
         if (
           element.type === ElementType.IMAGE ||
@@ -475,7 +488,9 @@ export class Position {
         pageNo,
         coordinate: { leftTop, leftBottom }
       } = lastLetterList[j]
-      if (positionNo !== pageNo) continue
+      if (positionNo !== pageNo) {
+        continue
+      }
       if (y > leftTop[1] && y <= leftBottom[1]) {
         const isHead = x < this.options.margins[3]
         // 是否在头部
@@ -563,11 +578,13 @@ export class Position {
         tdIndex,
         tdValueIndex
       } = this.floatPositionList[f]
+
       if (
         ((element.type === ElementType.IMAGE || isVariableImage(element)) &&
-        element.imgDisplay === payload.imgDisplay ) || element.type === ElementType.GRAPH
+          element.imgDisplay === payload.imgDisplay) ||
+        element.type === ElementType.GRAPH ||
+        element.type === ElementType.TEXTBOX
       ) {
-        
         const imgFloatPosition = element.imgFloatPosition!
         if (
           x >= imgFloatPosition.x &&
@@ -587,6 +604,14 @@ export class Position {
               tdId: element.tdId,
               trId: element.trId,
               tableId: element.tableId
+            }
+          }
+
+          if (element.type === ElementType.TEXTBOX) {
+            return {
+              index: position.index!,
+              isDirectHit: true,
+              isTextBox: true
             }
           }
           return {

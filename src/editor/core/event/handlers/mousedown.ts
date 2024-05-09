@@ -26,6 +26,11 @@ export function mousedown(evt: MouseEvent, host: CanvasEvent) {
     draw.modifyDrawingGraph({ x: evt.offsetX, y: evt.offsetY }, id)
     return
   }
+  if (draw.getAddingTextBox()) {
+    draw.addTextBox(evt.offsetX, evt.offsetY)
+    draw.endAddingTextBox()
+    return
+  }
   const isReadonly = draw.isReadonly()
   const rangeManager = draw.getRange()
   const position = draw.getPosition()

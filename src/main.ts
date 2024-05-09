@@ -1070,6 +1070,16 @@ window.onload = function () {
   arrowDom.onclick = function () {
     instance.command.executeStartGraph(GraphType.ARROW, 5, '#ccc')
   }
+  const textBoxDom = document.querySelector<HTMLDivElement>(
+    '.menu-item__text__box__test'
+  )!
+  textBoxDom.title = `文本框测试`
+  textBoxDom.onclick = function () {
+    instance.command.executeStartTextBox({
+      width: 1,
+      color: '#ccc'
+    })
+  }
 
   // 6. 目录显隐 | 页面模式 | 纸张缩放 | 纸张大小 | 纸张方向 | 页边距 | 全屏
   async function updateCatalog() {

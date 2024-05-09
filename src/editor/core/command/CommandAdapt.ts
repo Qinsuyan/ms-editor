@@ -2441,4 +2441,19 @@ export class CommandAdapt {
     this.draw.setGraphColor(color)
     this.draw.startDrawingGraph()
   }
+
+  public startTextBox(borderOptions?: { color?: string; width?: number }) {
+    if (borderOptions) {
+      this.draw.setAddingTextBoxBorder(true)
+    } else {
+      this.draw.setAddingTextBoxBorder(false)
+    }
+    if (borderOptions?.color) {
+      this.draw.setAddingTextBorderColor(borderOptions.color)
+    }
+    if (borderOptions?.width) {
+      this.draw.setAddingTextBoxBorderWidth(borderOptions.width)
+    }
+    this.draw.startAddingTextBox()
+  }
 }

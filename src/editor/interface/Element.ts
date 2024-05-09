@@ -74,6 +74,14 @@ export interface IGraphElement {
   graphType?: GraphType
 }
 
+export interface ITextBoxElement {
+  x?: number
+  y?: number
+  width?: number
+  borderColor?: string
+  borderWidth?: number
+}
+
 export interface IListElement {
   valueList?: IElement[]
   listType?: ListType
@@ -161,7 +169,8 @@ export type IElement = IElementBasic &
   IListElement &
   IVariableElement &
   ILoopElement &
-  IGraphElement
+  IGraphElement &
+  ITextBoxElement
 
 export interface IElementMetrics {
   width: number

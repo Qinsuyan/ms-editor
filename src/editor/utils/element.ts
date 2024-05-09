@@ -176,57 +176,6 @@ export function formatElementList(
     } else if (el.type === ElementType.TABLE) {
       const tableId = getUUID()
       el.id = tableId
-      // if (el.loopId) {
-      //   el.trList?.forEach(row => {
-      //     row.tdList.forEach(col => {
-      //       // col.value.forEach(cEl => {
-      //       //   let
-      //       //   if (cEl.width || cEl.height) {
-      //       //     el.imgDisplay = ImageDisplay.BLOCK
-      //       //   }
-      //       //   if (options.editorOptions.mode === EditorMode.EDIT) {
-      //       //     cEl.value = '{X}'
-      //       //   } else {
-      //       //     if (dict) {
-      //       //       const val = cEl.key ? dict[cEl.key] : '变量值'
-      //       //       if (!isArray(val)) {
-      //       //         cEl.value = val || '变量值'
-      //       //       } else {
-      //       //         if (cEl.loopIndex) {
-      //       //           const thisVal =
-      //       //           cEl.loopIndex < val.length
-      //       //               ? val[cEl.loopIndex]
-      //       //               : val[val.length - 1]
-      //       //               cEl.value = thisVal || '变量值'
-      //       //         } else {
-      //       //           cEl.value = val[0] || '变量值'
-      //       //         }
-      //       //       }
-      //       //     } else {
-      //       //       cEl.value = cEl.key || '变量值'
-      //       //     }
-      //       //     if (cEl.imgDisplay !== ImageDisplay.BLOCK) {
-      //       //       elementList.splice(i, 1)
-      //       //       const valueList = splitText(el.value)
-      //       //       const uuid = getUUID()
-      //       //       for (let v = 0; v < valueList.length; v++) {
-      //       //         elementList.splice(i + v, 0, {
-      //       //           ...el,
-      //       //           value: valueList[v],
-      //       //           type: ElementType.TEXT,
-      //       //           originalKey: el.key + '*#@' + uuid
-      //       //         })
-      //       //       }
-      //       //       el = elementList[i]
-      //       //     }
-      //       //   }
-      //       // })
-      //       console.log(col.value)
-      //       console.log("__________--")
-      //       formatElementList(col.value,{...options,isHandleFirstElement:false,},dict)
-      //     })
-      //   })
-      // }
       if (el.trList) {
         for (let t = 0; t < el.trList.length; t++) {
           const tr = el.trList[t]
