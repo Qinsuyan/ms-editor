@@ -47,6 +47,7 @@ import {
 } from '../../interface/Editor'
 import { IElement, IElementStyle } from '../../interface/Element'
 import { IPasteOption } from '../../interface/Event'
+import { ITextBoxEditStart } from '../../interface/Listener'
 import { IMargin } from '../../interface/Margin'
 import { IRange, RangeContext, RangeRect } from '../../interface/Range'
 import { IColgroup } from '../../interface/table/Colgroup'
@@ -2455,5 +2456,9 @@ export class CommandAdapt {
       this.draw.setAddingTextBoxBorderWidth(borderOptions.width)
     }
     this.draw.startAddingTextBox()
+  }
+
+  public setTextBoxEditStartListener(payload: ITextBoxEditStart) {
+    this.draw.setTextBoxEditStartListener(payload)
   }
 }

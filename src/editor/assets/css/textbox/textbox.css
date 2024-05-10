@@ -1,11 +1,25 @@
 .textbox-resizer-dom {
   cursor: pointer;
   display: none;
+  outline: none;
 }
-.textbox-resizer-dom.show {
+.textbox-resizer-dom.hover {
   box-shadow: 0 1px 4px 0 rgb(0 0 0 / 30%);
   display: block;
   position: absolute;
-  transform: translateY(-50%);
   color: transparent;
+}
+
+.textbox-resizer-dom.show {
+  box-shadow: none;
+  display: block;
+  position: absolute;
+  color: transparent;
+}
+.textbox-resizer-dom.active {
+  box-shadow: none;
+  display: block;
+  position: absolute;
+  color: transparent;
+  border:1px dashed #000
 }

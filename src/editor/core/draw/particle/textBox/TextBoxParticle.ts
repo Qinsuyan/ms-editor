@@ -1,4 +1,5 @@
-import { EDITOR_PREFIX } from '../../../../dataset/constant/Editor'
+import { EditorMode } from '../../../../dataset/enum/Editor'
+import { KeyMap } from '../../../../dataset/enum/KeyMap'
 import { IEditorOption } from '../../../../interface/Editor'
 import { IElement } from '../../../../interface/Element'
 import { IRowElement } from '../../../../interface/Row'
@@ -10,21 +11,120 @@ export class TextBoxParticle {
   private resizerDom: HTMLDivElement
   private container: HTMLDivElement
   private curElement: IElement | null
-  private curElementIndex: number
   private editing: boolean
-  private tempHandler: any
+  private mouseStart: { x: number; y: number } | null
+  private curElementIndex: number
+  private fakePosition: { x: number; y: number } | null
+  private mousemoveHandler: ((evt: MouseEvent) => void) | null
+  private mouseupHandler: ((evt: MouseEvent) => void) | null
+  private clearActiveHandler: ((evt: MouseEvent) => void) | null
   constructor(draw: Draw) {
     this.container = draw.getContainer()
     this.draw = draw
     this.options = draw.getOptions()
     this.resizerDom = document.createElement('div')
+    this.resizerDom.tabIndex = 2
     this.resizerDom.title = '双击编辑'
     this.resizerDom.classList.add('textbox-resizer-dom')
     this.container.append(this.resizerDom)
     this.curElement = null
     this.editing = false
-    this.tempHandler = null
+    this.mouseStart = null
     this.curElementIndex = -1
+    this.fakePosition = null
+    this.resizerDom.addEventListener('mousedown', this._mousedown.bind(this))
+    this.resizerDom.addEventListener('keydown', this._keydownHandler.bind(this))
+    this.mousemoveHandler = null
+    this.mouseupHandler = null
+    this.clearActiveHandler = null
+  }
+  private _keydownHandler(evt: KeyboardEvent) {
+    if (evt.key === KeyMap.Backspace) {
+      //删除
+      if (this.curElementIndex > -1) {
+        this.editing = false
+        this.mousemoveHandler = null
+        this.resizerDom.classList.remove('active')
+        this.hideControl()
+        this.draw.spliceElementList(
+          this.draw.getElementList(),
+          this.curElementIndex,
+          1
+        )
+        this.draw.render({ isSetCursor: false })
+      }
+    }
+  }
+  private _mousedown(evt: MouseEvent) {
+    evt.stopPropagation()
+    if (this.curElement && this.options.mode === EditorMode.EDIT) {
+      this.resizerDom.classList.add('active')
+      this.fakePosition = { x: this.curElement.x!, y: this.curElement.y! }
+      this.mouseStart = { x: evt.clientX, y: evt.clientY }
+      this.mousemoveHandler = this._mousemove.bind(this)
+      this.mouseupHandler = this._mouseleave.bind(this)
+      this.clearActiveHandler = this._clearActive.bind(this)
+      document.body.addEventListener('mousemove', this.mousemoveHandler)
+      document.body.addEventListener('mouseup', this.mouseupHandler)
+      document.body.addEventListener('click', this.clearActiveHandler)
+    }
+  }
+  private _clearActive(evt: MouseEvent) {
+    if (
+      (evt.target as HTMLDivElement)?.classList?.contains('textbox-resizer-dom')
+    ) {
+      return
+    }
+    this.resizerDom.classList.remove('active')
+    if (this.clearActiveHandler) {
+      document.body.removeEventListener('click', this.clearActiveHandler)
+      this.clearActiveHandler = null
+    }
+  }
+  private _mousemove(evt: MouseEvent) {
+    if (!this.mouseStart) {
+      return
+    }
+    if (!this.curElement) {
+      return
+    }
+    if (this.fakePosition) {
+      this.fakePosition.x +=
+        (evt.clientX - this.mouseStart.x) / this.options.scale
+      this.fakePosition.y! +=
+        (evt.clientY - this.mouseStart.y) / this.options.scale
+      this.mouseStart.x = evt.clientX
+      this.mouseStart.y = evt.clientY
+      //移动control
+      const x =
+        (this.fakePosition.x! - this.curElement.borderWidth! / 2) *
+        this.options.scale
+      const len = this.curElement.value.split(/[\n|\t]+/gi).length
+      const y =
+        (this.fakePosition.y! - this.curElement.borderWidth! / 2) *
+          this.options.scale -
+        (this.curElement.height! - this.curElement.borderWidth!) / len / 2
+      this.resizerDom.style.left = `${x}px`
+      this.resizerDom.style.top = `${y}px`
+    }
+  }
+  private _mouseleave() {
+    if (this.mousemoveHandler) {
+      document.body.removeEventListener('mousemove', this.mousemoveHandler)
+      this.mousemoveHandler = null
+    }
+    if (this.mouseupHandler) {
+      document.body.removeEventListener('mouseup', this.mouseupHandler)
+      this.mouseupHandler = null
+    }
+    if (this.curElement && this.fakePosition) {
+      this.curElement.x = this.fakePosition.x
+      this.curElement.y = this.fakePosition.y
+      this.fakePosition = null
+    }
+    if (this.curElementIndex > -1) {
+      this.draw.render({ curIndex: this.curElementIndex, isSetCursor: false })
+    }
   }
   private _drawBorder(
     ctx: CanvasRenderingContext2D,
@@ -37,23 +137,36 @@ export class TextBoxParticle {
     const { scale } = this.options
     const metrics = {
       width: 0,
-      height: 0
+      height: 0,
+      length: 1
     }
     if (!element.value?.length) {
       const m = ctx.measureText('请输入文本框内容')
-      metrics.width = m.actualBoundingBoxLeft + m.actualBoundingBoxRight
-      metrics.height =
-        m.fontBoundingBoxAscent +
-        m.fontBoundingBoxDescent +
-        element.metrics.height
-    } else {
-      const m = ctx.measureText(element.value)
       metrics.width =
-        m.actualBoundingBoxLeft * scale + m.actualBoundingBoxRight * scale
+        m.actualBoundingBoxLeft * scale +
+        m.actualBoundingBoxRight * scale +
+        lineWidth!
       metrics.height =
         m.fontBoundingBoxAscent * scale +
         m.fontBoundingBoxDescent * scale +
-        element.metrics.height
+        lineWidth!
+    } else {
+      const lines = element.value.split(/[\n|\t]+/gi)
+      metrics.length = lines.length
+      lines.forEach(line => {
+        const m = ctx.measureText(line)
+        if (
+          m.actualBoundingBoxLeft * scale + m.actualBoundingBoxRight * scale >
+          metrics.width
+        ) {
+          metrics.width =
+            m.actualBoundingBoxLeft * scale + m.actualBoundingBoxRight * scale
+        }
+        metrics.height +=
+          m.fontBoundingBoxAscent * scale + m.fontBoundingBoxDescent * scale
+      })
+      metrics.width += lineWidth!
+      metrics.height += lineWidth!
     }
     element.width = metrics.width
     element.height = metrics.height
@@ -64,74 +177,72 @@ export class TextBoxParticle {
     if (!color || !lineWidth) {
       return
     }
+    //ctx.save()
     ctx.strokeStyle = color
     ctx.lineWidth = lineWidth
     ctx.strokeRect(
       (x - lineWidth / 2) * scale,
-      (y - lineWidth / 2) * scale - metrics.height / 2,
+      (y - lineWidth / 2) * scale -
+        (metrics.height - lineWidth) / metrics.length / 2,
       metrics.width,
       metrics.height
     )
-    ctx.stroke()
+    ctx.restore()
   }
   private _drawContent(ctx: CanvasRenderingContext2D, element: IRowElement) {
     const { scale } = this.options
+    const metrics = {
+      width: 0,
+      height: 0
+    }
+    ctx.save()
+    ctx.textBaseline = 'middle'
+    if (!element.value?.length) {
+      const m = ctx.measureText('请输入文本框内容')
+      metrics.width =
+        m.actualBoundingBoxLeft * scale + m.actualBoundingBoxRight * scale
+      metrics.height =
+        m.fontBoundingBoxAscent * scale + m.fontBoundingBoxDescent * scale
+    } else {
+      const m = ctx.measureText(element.value)
+      metrics.width =
+        m.actualBoundingBoxLeft * scale + m.actualBoundingBoxRight * scale
+      metrics.height =
+        m.fontBoundingBoxAscent * scale + m.fontBoundingBoxDescent * scale
+    }
     if (!element.value) {
-      ctx.font = ' italic ' + element.style
+      ctx.font = element.style
       ctx.fillStyle = '#CCC'
     } else {
       ctx.font = element.style
       ctx.fillStyle = element.color || this.options.defaultColor
     }
     const val = element.value || '请输入文本框内容'
-    ctx.textBaseline = 'middle'
-    ctx.fillText(val, element.x! * scale, element.y! * scale)
-  }
-  private _endEdit() {
-    document.body.removeEventListener('click', this.tempHandler)
-    this.editing = false
-    this.hideControl()
-    this.draw.render()
+    const height = metrics.height
+    const lines = val.split(/[\n|\t]+/gi)
+    lines.forEach((line, index) => {
+      ctx.fillText(
+        line,
+        element.x! * scale,
+        element.y! * scale + index * 1.5 * height!
+      )
+    })
+    //ctx.restore()
   }
   private _dbclick() {
     if (!this.curElement) {
       return
     }
-    const textArea = document.createElement('textarea')
-    textArea.style.position = 'absolute'
-    textArea.style.top = '0px'
-    textArea.style.left = '0px'
-    textArea.style.width = '100%'
-    textArea.style.height = '100%'
-    textArea.style.border = 'none'
-    textArea.style.outline = 'none'
-    textArea.style.resize = 'none'
-    textArea.style.background = 'transparent'
-    textArea.autocomplete = 'off'
-    textArea.classList.add(`${EDITOR_PREFIX}-inputarea`)
-    textArea.value = this.curElement.value
-    this.resizerDom.append(textArea)
-    this.editing = true
-    textArea.click()
-    textArea.focus()
-    textArea.onclick = e => e.stopPropagation()
-    this.tempHandler = this._endEdit.bind(this)
-    document.body.addEventListener('click', this.tempHandler)
-    textArea.oninput = e => {
-      const val = (e.target as HTMLTextAreaElement).value
-      this.curElement!.value = val
-
-      this.draw.render({ curIndex: this.curElementIndex, isSetCursor: false })
-      const x = this.curElement!.x! * this.options.scale
-      const y = this.curElement!.y! * this.options.scale
-      this.resizerDom.style.left = `${x}px`
-      this.resizerDom.style.top = `${y}px`
-      this.resizerDom.style.width = `${this.curElement!.width}px`
-      this.resizerDom.style.height = `${this.curElement!.height}px`
+    const listener = this.draw.getTextBoxEditStartListener()
+    if (listener) {
+      listener(this.curElement.value, val => {
+        if (this.curElement) {
+          this.curElement.value = val
+        }
+      })
     }
   }
   public render(ctx: CanvasRenderingContext2D, element: IRowElement) {
-    ctx.save()
     this._drawContent(ctx, element)
     this._drawBorder(
       ctx,
@@ -141,12 +252,26 @@ export class TextBoxParticle {
       element.borderColor,
       element.borderWidth
     )
-    ctx.restore()
+    const x = (element.x! - element.borderWidth! / 2) * this.options.scale
+    const len = element.value.split(/[\n|\t]+/gi).length
+    const y =
+      (element.y! - element.borderWidth! / 2) * this.options.scale -
+      (element.height! - element.borderWidth!) / len / 2
+    this.resizerDom.style.left = `${x}px`
+    this.resizerDom.style.top = `${y}px`
+    this.resizerDom.style.width = `${element.width}px`
+    this.resizerDom.style.height = `${element.height}px`
   }
   public showControl(element: IElement) {
-    const x = element.x! * this.options.scale
-    const y = element.y! * this.options.scale
-    this.resizerDom.classList.add('show')
+    if (this.options.mode !== EditorMode.EDIT) {
+      return
+    }
+    const x = (element.x! - element.borderWidth! / 2) * this.options.scale
+    const len = element.value.split(/[\n|\t]+/gi).length
+    const y =
+      (element.y! - element.borderWidth! / 2) * this.options.scale -
+      (element.height! - element.borderWidth!) / len / 2
+    this.resizerDom.classList.add('hover')
     this.resizerDom.style.left = `${x}px`
     this.resizerDom.style.top = `${y}px`
     this.resizerDom.style.width = `${element.width}px`
@@ -154,16 +279,20 @@ export class TextBoxParticle {
     this.curElement = element
     this.curElementIndex = this.draw
       .getElementList()
-      .findIndex(i => i.id === element.id)
+      .findIndex(e => e.id === element.id)
     this.resizerDom.ondblclick = this._dbclick.bind(this)
   }
   public hideControl() {
     if (this.editing) {
       return
     }
+    if (this.mousemoveHandler) {
+      return
+    }
     this.curElement = null
     this.resizerDom.ondblclick = null
     this.resizerDom.classList.remove('show')
+    this.resizerDom.classList.remove('hover')
     this.resizerDom.innerHTML = ''
   }
 }

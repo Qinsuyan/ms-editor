@@ -18,7 +18,9 @@ export function setRangeCache(host: CanvasEvent) {
   host.cachePositionContext = position.getPositionContext()
 }
 export function mousedown(evt: MouseEvent, host: CanvasEvent) {
-  if (evt.button === MouseEventButton.RIGHT) return
+  if (evt.button === MouseEventButton.RIGHT) {
+    return
+  }
   const draw = host.getDraw()
   if (draw.getDrawingGraph()) {
     draw.addDrawingPoint(evt.offsetX, evt.offsetY)
@@ -60,7 +62,9 @@ export function mousedown(evt: MouseEvent, host: CanvasEvent) {
     y: evt.offsetY
   })
 
-  if (!positionResult) return
+  if (!positionResult) {
+    return
+  }
   const {
     index,
     isDirectHit,

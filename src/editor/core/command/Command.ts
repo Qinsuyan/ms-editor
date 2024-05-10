@@ -115,6 +115,7 @@ export class Command {
   public setVariableDict: CommandAdapt['setVariableDict']
   public executeStartGraph: CommandAdapt['startGraph']
   public executeStartTextBox: CommandAdapt['startTextBox']
+  public setTextBoxEditStartListener: CommandAdapt['setTextBoxEditStartListener']
 
   constructor(adapt: CommandAdapt) {
     // 全局命令
@@ -242,5 +243,8 @@ export class Command {
     this.executeLoopEnd = adapt.loopEnd.bind(adapt)
     this.executeStartGraph = adapt.startGraph.bind(adapt)
     this.executeStartTextBox = adapt.startTextBox.bind(adapt)
+    //事件
+    this.setTextBoxEditStartListener =
+      adapt.setTextBoxEditStartListener.bind(adapt)
   }
 }

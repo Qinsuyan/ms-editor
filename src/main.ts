@@ -1076,10 +1076,16 @@ window.onload = function () {
   textBoxDom.title = `文本框测试`
   textBoxDom.onclick = function () {
     instance.command.executeStartTextBox({
-      width: 1,
-      color: '#ccc'
+      color: '#f00',
+      width: 20
     })
   }
+  instance.command.setTextBoxEditStartListener((text, setter) => {
+    console.log(text)
+    setter(
+      '你好，\n这是一段测试文本!\n啦啦啦啦\n这是一段测试文本!\n啦啦啦啦\n这是一段测试文本!\n啦啦啦啦\n这是一段测试文本!\n啦啦啦啦'
+    )
+  })
 
   // 6. 目录显隐 | 页面模式 | 纸张缩放 | 纸张大小 | 纸张方向 | 页边距 | 全屏
   async function updateCatalog() {

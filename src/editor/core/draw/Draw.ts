@@ -91,6 +91,7 @@ import { Override } from '../override/Override'
 import { ImageDisplay } from '../../dataset/enum/Common'
 import { VariableParticle } from './particle/VariableParticle'
 import { TextBoxParticle } from './particle/textBox/TextBoxParticle'
+import { ITextBoxEditStart } from '../../interface/Listener'
 
 export class Draw {
   private container: HTMLDivElement
@@ -359,7 +360,7 @@ export class Draw {
 
   public addTextBox(x: number, y: number) {
     const el: IElement = {
-      id:getUUID(),
+      id: getUUID(),
       type: ElementType.TEXTBOX,
       value: '',
       x: x / this.options.scale,
@@ -368,6 +369,9 @@ export class Draw {
     if (this.addingTextBoxBorder) {
       el.borderColor = this.addingTextBoxBorderColor
       el.borderWidth = this.addingTextBoxBorderWidth
+    } else {
+      el.borderColor = 'transparent'
+      el.borderWidth = 1
     }
     this.insertElementList([el])
   }
@@ -1337,7 +1341,7 @@ export class Draw {
           }
         }
         // } else {
-        //   if (element.type === ElementType.TEXTBOX) {
+        //   if (element.type === ) {
         //     //const fontMetrics = this.textParticle.measureText(ctx, element)
         //     //element.width = fontMetrics.
         //   } else {
@@ -2400,5 +2404,13 @@ export class Draw {
     this.getHyperlinkParticle().clearHyperlinkPopup()
     // 日期控件
     this.getDateParticle().clearDatePicker()
+  }
+
+  public setTextBoxEditStartListener(payload: ITextBoxEditStart) {
+    this.listener.textBoxEditStart = payload
+  }
+
+  public getTextBoxEditStartListener() {
+    return this.listener.textBoxEditStart
   }
 }
