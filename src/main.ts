@@ -1075,15 +1075,26 @@ window.onload = function () {
   )!
   textBoxDom.title = `文本框测试`
   textBoxDom.onclick = function () {
-    instance.command.executeStartTextBox({
-      color: '#f00',
-      width: 20
-    })
+    instance.command.executeStartTextBox()
   }
   instance.command.setTextBoxEditStartListener((text, setter) => {
     console.log(text)
     setter(
-      '你好，\n这是一段测试文本!\n啦啦啦啦\n这是一段测试文本!\n啦啦啦啦\n这是一段测试文本!\n啦啦啦啦\n这是一段测试文本!\n啦啦啦啦'
+      '你好，\n这是一段测试文本!\n啦啦啦啦\n这是一段测试文本!\n啦啦啦啦\n这是一段测试文本!\n啦啦啦啦\n这是一段测试文本!\n啦啦啦啦',
+      {
+        borderOption: {
+          borderColor: '#f00',
+          borderWidth: 2,
+          show:true
+        },
+        font: {
+          italic: true,
+          bold: true,
+          fontColor: '#00f',
+          fontSize: 30,
+          fontFamily: '宋体'
+        }
+      }
     )
   })
 

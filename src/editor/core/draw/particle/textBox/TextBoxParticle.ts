@@ -140,33 +140,32 @@ export class TextBoxParticle {
       height: 0,
       length: 1
     }
+    if (!color || !lineWidth) {
+      return
+    }
+    ctx.strokeStyle = color
+    ctx.lineWidth = lineWidth
     if (!element.value?.length) {
       const m = ctx.measureText('请输入文本框内容')
       metrics.width =
-        m.actualBoundingBoxLeft * scale +
-        m.actualBoundingBoxRight * scale +
-        lineWidth!
+        m.actualBoundingBoxLeft + m.actualBoundingBoxRight + lineWidth!
       metrics.height =
-        m.fontBoundingBoxAscent * scale +
-        m.fontBoundingBoxDescent * scale +
-        lineWidth!
+        m.fontBoundingBoxAscent + m.fontBoundingBoxDescent + lineWidth!
     } else {
       const lines = element.value.split(/[\n|\t]+/gi)
       metrics.length = lines.length
       lines.forEach(line => {
         const m = ctx.measureText(line)
         if (
-          m.actualBoundingBoxLeft * scale + m.actualBoundingBoxRight * scale >
+          m.actualBoundingBoxLeft + m.actualBoundingBoxRight >
           metrics.width
         ) {
-          metrics.width =
-            m.actualBoundingBoxLeft * scale + m.actualBoundingBoxRight * scale
+          metrics.width = m.actualBoundingBoxLeft + m.actualBoundingBoxRight
         }
-        metrics.height +=
-          m.fontBoundingBoxAscent * scale + m.fontBoundingBoxDescent * scale
+        metrics.height += m.fontBoundingBoxAscent + m.fontBoundingBoxDescent
       })
       metrics.width += lineWidth!
-      metrics.height += lineWidth!
+      metrics.height = metrics.height * 1.2+ lineWidth!
     }
     element.width = metrics.width
     element.height = metrics.height
@@ -174,12 +173,6 @@ export class TextBoxParticle {
       x: element.x! * scale,
       y: element.y! * scale
     }
-    if (!color || !lineWidth) {
-      return
-    }
-    //ctx.save()
-    ctx.strokeStyle = color
-    ctx.lineWidth = lineWidth
     ctx.strokeRect(
       (x - lineWidth / 2) * scale,
       (y - lineWidth / 2) * scale -
@@ -197,19 +190,6 @@ export class TextBoxParticle {
     }
     ctx.save()
     ctx.textBaseline = 'middle'
-    if (!element.value?.length) {
-      const m = ctx.measureText('请输入文本框内容')
-      metrics.width =
-        m.actualBoundingBoxLeft * scale + m.actualBoundingBoxRight * scale
-      metrics.height =
-        m.fontBoundingBoxAscent * scale + m.fontBoundingBoxDescent * scale
-    } else {
-      const m = ctx.measureText(element.value)
-      metrics.width =
-        m.actualBoundingBoxLeft * scale + m.actualBoundingBoxRight * scale
-      metrics.height =
-        m.fontBoundingBoxAscent * scale + m.fontBoundingBoxDescent * scale
-    }
     if (!element.value) {
       ctx.font = element.style
       ctx.fillStyle = '#CCC'
@@ -217,6 +197,16 @@ export class TextBoxParticle {
       ctx.font = element.style
       ctx.fillStyle = element.color || this.options.defaultColor
     }
+    if (!element.value?.length) {
+      const m = ctx.measureText('请输入文本框内容')
+      metrics.width = m.actualBoundingBoxLeft + m.actualBoundingBoxRight
+      metrics.height = m.fontBoundingBoxAscent + m.fontBoundingBoxDescent
+    } else {
+      const m = ctx.measureText(element.value)
+      metrics.width = m.actualBoundingBoxLeft + m.actualBoundingBoxRight
+      metrics.height = m.fontBoundingBoxAscent + m.fontBoundingBoxDescent
+    }
+
     const val = element.value || '请输入文本框内容'
     const height = metrics.height
     const lines = val.split(/[\n|\t]+/gi)
@@ -224,10 +214,9 @@ export class TextBoxParticle {
       ctx.fillText(
         line,
         element.x! * scale,
-        element.y! * scale + index * 1.5 * height!
+        element.y! * scale + index * 1.2 * height!
       )
     })
-    //ctx.restore()
   }
   private _dbclick() {
     if (!this.curElement) {
@@ -235,9 +224,52 @@ export class TextBoxParticle {
     }
     const listener = this.draw.getTextBoxEditStartListener()
     if (listener) {
-      listener(this.curElement.value, val => {
+      listener(this.curElement.value, (val, styles) => {
         if (this.curElement) {
           this.curElement.value = val
+          if (styles?.borderOption) {
+            if (styles.borderOption.show) {
+              if (styles.borderOption.borderWidth) {
+                this.curElement.borderWidth =
+                  styles.borderOption.borderWidth > 1
+                    ? styles.borderOption.borderWidth
+                    : 1
+              }
+              if (styles.borderOption.borderColor) {
+                if (
+                  /^#(?:[0-9a-fA-F]{3}){1,2}$/gi.test(
+                    styles.borderOption.borderColor
+                  )
+                ) {
+                  this.curElement.borderColor = styles.borderOption.borderColor
+                }
+              }
+            } else {
+              this.curElement.borderWidth = 1
+              this.curElement.borderColor = 'transparent'
+            }
+          }
+          if (styles?.font) {
+            if (styles.font.italic !== undefined) {
+              this.curElement.italic = styles.font.italic
+            }
+            if (styles.font.bold !== undefined) {
+              this.curElement.bold = styles.font.bold
+            }
+            if (styles.font.fontColor !== undefined) {
+              this.curElement.color = styles.font.fontColor
+            }
+            if (styles.font.fontSize !== undefined) {
+              this.curElement.size = styles.font.fontSize
+            }
+            if (styles.font.fontFamily !== undefined) {
+              this.curElement.font = styles.font.fontFamily
+            }
+          }
+          this.draw.render({
+            isSetCursor: false,
+            curIndex: this.curElementIndex
+          })
         }
       })
     }

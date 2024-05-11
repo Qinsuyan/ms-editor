@@ -56,5 +56,21 @@ export type IZoneChange = (payload: EditorZone) => void
 
 export type ITextBoxEditStart = (
   payload: string,
-  setter: (val: string) => any
+  setter: (
+    val: string,
+    styles?: {
+      borderOption?: {
+        borderColor?: string
+        borderWidth?: number
+        show?: boolean
+      }
+      font?: {
+        fontSize?: number
+        fontFamily?: string
+        fontColor?: string
+        bold?: boolean
+        italic?: boolean
+      }
+    }
+  ) => any
 ) => any
