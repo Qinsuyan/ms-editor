@@ -140,7 +140,17 @@ export class TextBoxParticle {
       height: 0,
       length: 1
     }
+    ctx.save()
+    ctx.textBaseline = 'middle'
+    if (!element.value) {
+      ctx.font = element.style
+      ctx.fillStyle = '#CCC'
+    } else {
+      ctx.font = element.style
+      ctx.fillStyle = element.color || this.options.defaultColor
+    }
     if (!color || !lineWidth) {
+      ctx.restore()
       return
     }
     ctx.strokeStyle = color
@@ -217,6 +227,7 @@ export class TextBoxParticle {
         element.y! * scale + index * 1.2 * height!
       )
     })
+    ctx.restore()
   }
   private _dbclick() {
     if (!this.curElement) {

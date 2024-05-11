@@ -1322,7 +1322,6 @@ export class Draw {
         element.type === ElementType.TEXTBOX
       ) {
         // 浮动图片无需计算数据
-
         if (
           element.imgDisplay === ImageDisplay.FLOAT_TOP ||
           element.imgDisplay === ImageDisplay.FLOAT_BOTTOM
@@ -1338,39 +1337,33 @@ export class Draw {
             metrics.width = 0
             metrics.height = 0
             metrics.boundingBoxDescent = 0
+          } else {
+            const elementWidth = element.width! * scale
+            const elementHeight = element.height! * scale
+            // 图片超出尺寸后自适应
+            const curRowWidth =
+              element.imgDisplay === ImageDisplay.INLINE ? 0 : curRow.width
+            if (curRowWidth + elementWidth > availableWidth) {
+              // 计算剩余大小
+              const surplusWidth = availableWidth - curRowWidth
+              const adaptiveWidth =
+                surplusWidth > 0
+                  ? surplusWidth
+                  : Math.min(elementWidth, availableWidth)
+              const adaptiveHeight =
+                (elementHeight * adaptiveWidth) / elementWidth
+              element.width = adaptiveWidth / scale
+              element.height = adaptiveHeight / scale
+              metrics.width = adaptiveWidth
+              metrics.height = adaptiveHeight
+              metrics.boundingBoxDescent = adaptiveHeight
+            } else {
+              metrics.width = elementWidth
+              metrics.height = elementHeight
+              metrics.boundingBoxDescent = elementHeight
+            }
           }
         }
-        // } else {
-        //   if (element.type === ) {
-        //     //const fontMetrics = this.textParticle.measureText(ctx, element)
-        //     //element.width = fontMetrics.
-        //   } else {
-        //     const elementWidth = element.width! * scale
-        //     const elementHeight = element.height! * scale
-        //     // 图片超出尺寸后自适应
-        //     const curRowWidth =
-        //       element.imgDisplay === ImageDisplay.INLINE ? 0 : curRow.width
-        //     if (curRowWidth + elementWidth > availableWidth) {
-        //       // 计算剩余大小
-        //       const surplusWidth = availableWidth - curRowWidth
-        //       const adaptiveWidth =
-        //         surplusWidth > 0
-        //           ? surplusWidth
-        //           : Math.min(elementWidth, availableWidth)
-        //       const adaptiveHeight =
-        //         (elementHeight * adaptiveWidth) / elementWidth
-        //       element.width = adaptiveWidth / scale
-        //       element.height = adaptiveHeight / scale
-        //       metrics.width = adaptiveWidth
-        //       metrics.height = adaptiveHeight
-        //       metrics.boundingBoxDescent = adaptiveHeight
-        //     } else {
-        //       metrics.width = elementWidth
-        //       metrics.height = elementHeight
-        //       metrics.boundingBoxDescent = elementHeight
-        //     }
-        //   }
-        // }
         metrics.boundingBoxAscent = 0
       } else if (element.type === ElementType.TABLE) {
         const tdPaddingWidth = tdPadding[1] + tdPadding[3]

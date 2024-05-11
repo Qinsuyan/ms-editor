@@ -336,7 +336,10 @@ export class Position {
         ...payload,
         imgDisplay: ImageDisplay.FLOAT_TOP
       })
-      if (floatTopPosition) return floatTopPosition
+
+      if (floatTopPosition) {
+        return floatTopPosition
+      }
     }
     // 普通元素
     for (let j = 0; j < positionList.length; j++) {
@@ -347,6 +350,7 @@ export class Position {
         isFirstLetter,
         coordinate: { leftTop, rightTop, leftBottom }
       } = positionList[j]
+    
       if (positionNo !== pageNo) continue
       // 命中元素
       if (
@@ -357,6 +361,7 @@ export class Position {
       ) {
         let curPositionIndex = j
         const element = elementList[j]
+       
         // 表格被命中
         if (element.type === ElementType.TABLE) {
           for (let t = 0; t < element.trList!.length; t++) {
@@ -415,6 +420,7 @@ export class Position {
           isVariableImage(element) ||
           element.type === ElementType.GRAPH
         ) {
+          
           return {
             index: curPositionIndex,
             isDirectHit: true,
@@ -606,7 +612,6 @@ export class Position {
               tableId: element.tableId
             }
           }
-
           if (element.type === ElementType.TEXTBOX) {
             return {
               index: position.index!,
