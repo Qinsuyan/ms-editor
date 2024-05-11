@@ -389,6 +389,7 @@ export class Position {
                   isControl: !!tdValueElement.controlId,
                   isImage: tablePosition.isImage,
                   isDirectHit: tablePosition.isDirectHit,
+                  isVariable:tablePosition.isVariable,
                   isTable: true,
                   tdIndex: d,
                   trIndex: t,
