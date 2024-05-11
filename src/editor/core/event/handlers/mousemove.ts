@@ -70,6 +70,7 @@ export function mousemove(evt: MouseEvent, host: CanvasEvent) {
     isVariable,
     isTextBox
   } = positionResult
+
   if (isVariable && !isReadonly) {
     //对于变量
     //变量tooltip
@@ -78,7 +79,19 @@ export function mousemove(evt: MouseEvent, host: CanvasEvent) {
     const positionList = position.getPositionList()
     const endIndex = isTable ? tdValueIndex! : index
     const curElement = elementList[endIndex]
-    variableParticle.drawVariablePopup(curElement, positionList[endIndex])
+    if (isTable) {
+      // console.log(trIndex, tdIndex)
+      // console.log(curElement)
+      const p =
+        draw.getOriginalElementList()[index]!.trList?.[trIndex!].tdList[
+          tdIndex!
+        ].positionList
+      if (p) {
+        variableParticle.drawVariablePopup(curElement, p[tdValueIndex!])
+      }
+    } else {
+      variableParticle.drawVariablePopup(curElement, positionList[endIndex])
+    }
   }
   if (isTextBox) {
     const elementList = draw.getElementList()
