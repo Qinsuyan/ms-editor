@@ -25,7 +25,7 @@ import { Dialog } from './components/dialog/Dialog'
 import { formatPrismToken } from './utils/prism'
 import { Signature } from './components/signature/Signature'
 import { debounce, nextTick, scrollIntoView } from './utils'
-import { img } from './image'
+import { barImage, img } from './image'
 import { GraphType } from './editor/dataset/enum/Editor'
 
 window.onload = function () {
@@ -1013,10 +1013,16 @@ window.onload = function () {
   imageTestDom.onclick = function () {
     console.log('image__test')
     //instance.command.executePrint()
-    instance.command.setVariableDict({ image: img })
+    instance.command.setVariableDict({ image: img,image2:barImage })
     instance.command.executeInsertVariable({
       label: '测试图片',
       key: 'image',
+      width: 700,
+      height: 200
+    })
+    instance.command.executeInsertVariable({
+      label: '测试图片2',
+      key: 'image2',
       width: 700,
       height: 200
     })

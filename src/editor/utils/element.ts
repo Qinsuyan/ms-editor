@@ -430,6 +430,8 @@ export function formatElementList(
         loopId = getUUID()
       }
     } else if (el.type === ElementType.VARIABLE) {
+      const vId = getUUID()
+      el.id = vId
       if (el.width || el.height) {
         el.imgDisplay = ImageDisplay.BLOCK
       }
