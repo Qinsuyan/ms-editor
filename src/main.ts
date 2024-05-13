@@ -1013,7 +1013,7 @@ window.onload = function () {
   imageTestDom.onclick = function () {
     console.log('image__test')
     //instance.command.executePrint()
-    instance.command.setVariableDict({ image: img,image2:barImage })
+    instance.command.setVariableDict({ image: img, image2: barImage })
     instance.command.executeInsertVariable({
       label: '测试图片',
       key: 'image',
@@ -1083,15 +1083,17 @@ window.onload = function () {
   textBoxDom.onclick = function () {
     instance.command.executeStartTextBox()
   }
-  instance.command.setTextBoxEditStartListener((text, setter) => {
+  instance.command.setTextBoxEditStartListener((text, options, setter) => {
     console.log(text)
+    console.log(options)
     setter(
       '你好，\n这是一段测试文本!\n啦啦啦啦\n这是一段测试文本!\n啦啦啦啦\n这是一段测试文本!\n啦啦啦啦\n这是一段测试文本!\n啦啦啦啦',
+
       {
         borderOption: {
           borderColor: '#f00',
           borderWidth: 2,
-          show:true
+          show: true
         },
         font: {
           italic: true,

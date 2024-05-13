@@ -34,8 +34,8 @@ export enum PageMode {
 }
 
 export enum VariableImageMode {
-  REAL = "real",
-  SIZE = "size"
+  REAL = 'real',
+  SIZE = 'size'
 }
 
 export enum PaperDirection {

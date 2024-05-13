@@ -55,7 +55,21 @@ export type IPageModeChange = (payload: PageMode) => void
 export type IZoneChange = (payload: EditorZone) => void
 
 export type ITextBoxEditStart = (
-  payload: string,
+  text: string,
+  options: {
+    borderOption: {
+      borderColor: string
+      borderWidth: number
+      show: boolean
+    }
+    font: {
+      italic: boolean
+      bold: boolean
+      fontColor: string
+      fontSize: number
+      fontFamily: string
+    }
+  },
   setter: (
     val: string,
     styles?: {

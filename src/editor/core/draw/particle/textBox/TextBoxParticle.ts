@@ -55,6 +55,7 @@ export class TextBoxParticle {
   }
   private _mousedown(evt: MouseEvent) {
     evt.stopPropagation()
+    evt.preventDefault()
     //if (this.curElement && this.options.mode === EditorMode.EDIT) {
     if (this.curElement) {
       this.resizerDom.classList.add('active')
@@ -63,9 +64,9 @@ export class TextBoxParticle {
       this.mousemoveHandler = this._mousemove.bind(this)
       this.mouseupHandler = this._mouseleave.bind(this)
       this.clearActiveHandler = this._clearActive.bind(this)
-      document.body.addEventListener('mousemove', this.mousemoveHandler)
-      document.body.addEventListener('mouseup', this.mouseupHandler)
-      document.body.addEventListener('click', this.clearActiveHandler)
+      document.body.addEventListener('mousemove', this.mousemoveHandler!)
+      document.body.addEventListener('mouseup', this.mouseupHandler!)
+      document.body.addEventListener('click', this.clearActiveHandler!)
     }
   }
   private _clearActive(evt: MouseEvent) {
@@ -235,60 +236,82 @@ export class TextBoxParticle {
     })
     ctx.restore()
   }
-  private _dbclick() {
+  private _dbclick(evt: MouseEvent) {
+    evt.stopPropagation()
+    evt.preventDefault()
     if (!this.curElement) {
       return
     }
     const listener = this.draw.getTextBoxEditStartListener()
     if (listener) {
-      listener(this.curElement.value, (val, styles) => {
-        if (this.curElement) {
-          this.curElement.value = val
-          if (styles?.borderOption) {
-            if (styles.borderOption.show) {
-              if (styles.borderOption.borderWidth) {
-                this.curElement.borderWidth =
-                  styles.borderOption.borderWidth > 1
-                    ? styles.borderOption.borderWidth
-                    : 1
-              }
-              if (styles.borderOption.borderColor) {
-                if (
-                  /^#(?:[0-9a-fA-F]{3}){1,2}$/gi.test(
-                    styles.borderOption.borderColor
-                  )
-                ) {
-                  this.curElement.borderColor = styles.borderOption.borderColor
+      listener(
+        this.curElement.value,
+        {
+          borderOption: {
+            borderColor: this.curElement.borderColor!,
+            borderWidth: this.curElement.borderWidth || 1,
+            show: this.curElement.borderColor !== 'transparent'
+          },
+          font: {
+            italic: this.curElement.italic!,
+            bold: this.curElement.bold!,
+            fontColor: this.curElement.color!,
+            fontSize: this.curElement.size!,
+            fontFamily: this.curElement.font!
+          }
+        },
+        (val, styles) => {
+          if (this.curElement) {
+            this.curElement.value = val
+            if (styles?.borderOption) {
+              if (styles.borderOption.show) {
+                if (styles.borderOption.borderWidth) {
+                  this.curElement.borderWidth =
+                    styles.borderOption.borderWidth > 1
+                      ? styles.borderOption.borderWidth
+                      : 1
                 }
+                if (styles.borderOption.borderColor) {
+                  if (
+                    /^#(?:[0-9a-fA-F]{3}){1,2}$/gi.test(
+                      styles.borderOption.borderColor
+                    )
+                  ) {
+                    this.curElement.borderColor =
+                      styles.borderOption.borderColor
+                  }
+                }
+              } else {
+                this.curElement.borderWidth = 1
+                this.curElement.borderColor = 'transparent'
               }
-            } else {
-              this.curElement.borderWidth = 1
-              this.curElement.borderColor = 'transparent'
             }
+            if (styles?.font) {
+              if (styles.font.italic !== undefined) {
+                this.curElement.italic = styles.font.italic
+              }
+              if (styles.font.bold !== undefined) {
+                this.curElement.bold = styles.font.bold
+              }
+              if (styles.font.fontColor !== undefined) {
+                this.curElement.color = styles.font.fontColor
+              }
+              if (styles.font.fontSize !== undefined) {
+                this.curElement.size = styles.font.fontSize
+              }
+              if (styles.font.fontFamily !== undefined) {
+                this.curElement.font = styles.font.fontFamily
+              }
+            }
+            this.draw.render({
+              isSetCursor: false,
+              curIndex: this.curElementIndex
+            })
           }
-          if (styles?.font) {
-            if (styles.font.italic !== undefined) {
-              this.curElement.italic = styles.font.italic
-            }
-            if (styles.font.bold !== undefined) {
-              this.curElement.bold = styles.font.bold
-            }
-            if (styles.font.fontColor !== undefined) {
-              this.curElement.color = styles.font.fontColor
-            }
-            if (styles.font.fontSize !== undefined) {
-              this.curElement.size = styles.font.fontSize
-            }
-            if (styles.font.fontFamily !== undefined) {
-              this.curElement.font = styles.font.fontFamily
-            }
-          }
-          this.draw.render({
-            isSetCursor: false,
-            curIndex: this.curElementIndex
-          })
+          // this.resizerDom.classList.remove('active')
+          // this._mouseleave()
         }
-      })
+      )
     }
   }
   public render(
