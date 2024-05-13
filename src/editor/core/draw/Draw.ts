@@ -744,11 +744,17 @@ export class Draw {
   }
 
   public insertElementList(payload: IElement[]) {
-    if (!payload.length) return
+    if (!payload.length) {
+      return
+    }
     const isRangeCanInput = this.control.isRangeCanInput()
-    if (!isRangeCanInput) return
+    if (!isRangeCanInput) {
+      return
+    }
     const { startIndex, endIndex } = this.range.getRange()
-    if (!~startIndex && !~endIndex) return
+    if (!~startIndex && !~endIndex) {
+      return
+    }
     formatElementList(
       payload,
       {
@@ -2151,7 +2157,6 @@ export class Draw {
             imgFloatPosition.y
           )
         } else {
-          console.log(element)
           this.textBoxParticle.render(ctx, element, element.x!, element.y!)
         }
       }

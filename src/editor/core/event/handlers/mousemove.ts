@@ -80,8 +80,6 @@ export function mousemove(evt: MouseEvent, host: CanvasEvent) {
     const endIndex = isTable ? tdValueIndex! : index
     const curElement = elementList[endIndex]
     if (isTable) {
-      // console.log(trIndex, tdIndex)
-      // console.log(curElement)
       const p =
         draw.getOriginalElementList()[index]!.trList?.[trIndex!].tdList[
           tdIndex!

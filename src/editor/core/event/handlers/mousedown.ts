@@ -21,17 +21,12 @@ export function mousedown(evt: MouseEvent, host: CanvasEvent) {
   if (evt.button === MouseEventButton.RIGHT) {
     return
   }
+  const target = evt.target as HTMLDivElement
+  const pageIndex = target.dataset.index
   const draw = host.getDraw()
-  if (draw.getDrawingGraph()) {
-    draw.addDrawingPoint(evt.offsetX, evt.offsetY)
-    const id = getUUID()
-    draw.modifyDrawingGraph({ x: evt.offsetX, y: evt.offsetY }, id)
-    return
-  }
-  if (draw.getAddingTextBox()) {
-    draw.addTextBox(evt.offsetX, evt.offsetY)
-    draw.endAddingTextBox()
-    return
+  // 设置pageNo
+  if (pageIndex) {
+    draw.setPageNo(Number(pageIndex))
   }
   const isReadonly = draw.isReadonly()
   const rangeManager = draw.getRange()
@@ -50,12 +45,7 @@ export function mousedown(evt: MouseEvent, host: CanvasEvent) {
       }
     }
   }
-  const target = evt.target as HTMLDivElement
-  const pageIndex = target.dataset.index
-  // 设置pageNo
-  if (pageIndex) {
-    draw.setPageNo(Number(pageIndex))
-  }
+
   host.isAllowSelection = true
   const positionResult = position.adjustPositionContext({
     x: evt.offsetX,
@@ -128,6 +118,18 @@ export function mousedown(evt: MouseEvent, host: CanvasEvent) {
       })
     }
   }
+  if (draw.getDrawingGraph()) {
+    draw.addDrawingPoint(evt.offsetX, evt.offsetY)
+    const id = getUUID()
+    draw.modifyDrawingGraph({ x: evt.offsetX, y: evt.offsetY }, id)
+    return
+  }
+  if (draw.getAddingTextBox()) {
+    draw.addTextBox(evt.offsetX, evt.offsetY)
+    draw.endAddingTextBox()
+    return
+  }
+
   // 预览工具组件
   const previewer = draw.getPreviewer()
   previewer.clearResizer()
