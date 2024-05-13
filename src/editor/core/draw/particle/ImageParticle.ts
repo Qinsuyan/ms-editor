@@ -1,6 +1,6 @@
 import { EDITOR_PREFIX } from '../../../dataset/constant/Editor'
 import { ImageDisplay } from '../../../dataset/enum/Common'
-import { GraphType } from '../../../dataset/enum/Editor'
+import { GraphType, VariableImageMode } from '../../../dataset/enum/Editor'
 import { ElementType } from '../../../dataset/enum/Element'
 import { IEditorOption } from '../../../interface/Editor'
 import { IElement } from '../../../interface/Element'
@@ -84,7 +84,9 @@ export class ImageParticle {
     const textAddon = text
       ? `<text x="${width / 2}" y="${
           height / 2
-        }" text-anchor="middle" fill="#000000" font-size="24">${text}</text>`
+        }" text-anchor="middle" fill="#000000" font-size="24">${
+          text || '未知变量'
+        }</text>`
       : ''
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
                   <rect width="${width}" height="${height}" fill="url(#mosaic)" />
@@ -215,14 +217,24 @@ export class ImageParticle {
       if (this.imageCache.has(id)) {
         const img = this.imageCache.get(id)!
         ctx.drawImage(img, x, y, width, height)
+        if (
+          element.type === ElementType.VARIABLE &&
+          this.draw.getOptions().mode === 'edit' &&
+          this.draw.getOptions().variableImageMode === VariableImageMode.REAL
+        ) {
+          ctx.save()
+          ctx.fillStyle = '#CCC'
+          ctx.font = '12px Arial'
+          ctx.textBaseline = 'top'
+          ctx.fillText(element.label || '未知变量', x, y)
+          ctx.restore()
+        }
       } else {
         const imageLoadPromise = new Promise((resolve, reject) => {
           const img = new Image()
           img.setAttribute('crossOrigin', 'Anonymous')
           img.src = element.value
           img.onload = () => {
-            this.imageCache.set(id, img)
-            resolve(element)
             // 衬于文字下方图片需要重新首先绘制
             if (element.imgDisplay === ImageDisplay.FLOAT_BOTTOM) {
               this.draw.render({
@@ -233,6 +245,21 @@ export class ImageParticle {
             } else {
               ctx.drawImage(img, x, y, width, height)
             }
+            if (
+              element.type === ElementType.VARIABLE &&
+              this.draw.getOptions().mode === 'edit' &&
+              this.draw.getOptions().variableImageMode ===
+                VariableImageMode.REAL
+            ) {
+              ctx.save()
+              ctx.fillStyle = '#CCC'
+              ctx.font = '12px Arial'
+              ctx.textBaseline = 'top'
+              ctx.fillText(element.label || '未知变量', x, y)
+              ctx.restore()
+            }
+            this.imageCache.set(id, img)
+            resolve(element)
           }
           img.onerror = error => {
             const fallbackImage = this.getFallbackImage(

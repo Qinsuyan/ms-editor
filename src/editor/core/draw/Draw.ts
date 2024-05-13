@@ -1343,7 +1343,16 @@ export class Draw {
             // 图片超出尺寸后自适应
             const curRowWidth =
               element.imgDisplay === ImageDisplay.INLINE ? 0 : curRow.width
-            if (curRowWidth + elementWidth > availableWidth) {
+            if (element.type === ElementType.VARIABLE) {
+              const adaptiveWidth = Math.min(elementWidth, availableWidth)
+              const adaptiveHeight =
+                (elementHeight * adaptiveWidth) / elementWidth
+              element.width = adaptiveWidth / scale
+              element.height = adaptiveHeight / scale
+              metrics.width = adaptiveWidth
+              metrics.height = adaptiveHeight
+              metrics.boundingBoxDescent = adaptiveHeight
+            } else if (curRowWidth + elementWidth > availableWidth) {
               // 计算剩余大小
               const surplusWidth = availableWidth - curRowWidth
               const adaptiveWidth =

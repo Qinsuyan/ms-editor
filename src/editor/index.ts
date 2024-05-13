@@ -21,7 +21,8 @@ import {
   EditorMode,
   PageMode,
   PaperDirection,
-  WordBreak
+  WordBreak,
+  VariableImageMode
 } from './dataset/enum/Editor'
 import { EDITOR_COMPONENT } from './dataset/constant/Editor'
 import { IHeader } from './interface/Header'
@@ -200,7 +201,8 @@ export default class Editor {
       group: groupOptions,
       pageBreak: pageBreakOptions,
       zone: zoneOptions,
-      background: backgroundOptions
+      background: backgroundOptions,
+      variableImageMode: options.variableImageMode || VariableImageMode.SIZE
     }
     // 数据处理
     data = deepClone(data)

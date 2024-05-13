@@ -36,6 +36,7 @@ import {
   titleSizeMapping
 } from '../dataset/constant/Title'
 import { ControlComponent, ControlType } from '../dataset/enum/Control'
+import { VariableImageMode } from '../dataset/enum/Editor'
 import { DeepRequired } from '../interface/Common'
 import { ITd } from '../interface/table/Td'
 import { ITr } from '../interface/table/Tr'
@@ -435,8 +436,16 @@ export function formatElementList(
       if (el.width || el.height) {
         el.imgDisplay = ImageDisplay.BLOCK
       }
-      if (options.editorOptions.mode === EditorMode.EDIT) {
+      if (
+        options.editorOptions.mode === EditorMode.EDIT &&
+        ((!el.width && !el.height) ||
+          options.editorOptions.variableImageMode === VariableImageMode.SIZE)
+      ) {
+        // if((el.width || el.height) && options.editorOptions.variableImageMode === VariableImageMode.REAL){
+
+        // }else{
         el.value = '{X}'
+        //}
       } else {
         if (dict) {
           const val = el.key ? dict[el.key] : '变量值'

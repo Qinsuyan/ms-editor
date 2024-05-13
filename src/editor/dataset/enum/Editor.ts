@@ -33,6 +33,11 @@ export enum PageMode {
   CONTINUITY = 'continuity'
 }
 
+export enum VariableImageMode {
+  REAL = "real",
+  SIZE = "size"
+}
+
 export enum PaperDirection {
   VERTICAL = 'vertical',
   HORIZONTAL = 'horizontal'

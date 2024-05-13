@@ -3,6 +3,7 @@ import {
   EditorMode,
   PageMode,
   PaperDirection,
+  VariableImageMode,
   WordBreak
 } from '../dataset/enum/Editor'
 import { IBackgroundOption } from './Background'
@@ -83,6 +84,7 @@ export interface IEditorOption {
   pageBreak?: IPageBreak
   zone?: IZoneOption
   background?: IBackgroundOption
+  variableImageMode?:VariableImageMode
 }
 
 export interface IEditorResult {
