@@ -27,7 +27,14 @@ export function keydown(evt: KeyboardEvent, host: CanvasEvent) {
   const control = draw.getControl()
   const activeControl = control.getActiveControl()
   if (evt.key === KeyMap.Backspace) {
-    if (isReadonly || control.isPartRangeInControlOutside()) return
+    //console.log(elementList[index])
+    if (
+      (isReadonly || control.isPartRangeInControlOutside()) &&
+      elementList[index].type !== ElementType.GRAPH &&
+      elementList[index].type !== ElementType.TEXTBOX
+    ) {
+      return
+    }
     let curIndex: number | null
     if (activeControl) {
       curIndex = control.keydown(evt)

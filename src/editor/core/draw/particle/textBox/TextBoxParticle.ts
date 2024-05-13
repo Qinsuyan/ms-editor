@@ -1,8 +1,6 @@
-import { EditorMode } from '../../../../dataset/enum/Editor'
 import { KeyMap } from '../../../../dataset/enum/KeyMap'
 import { IEditorOption } from '../../../../interface/Editor'
 import { IElement } from '../../../../interface/Element'
-import { IRowElement } from '../../../../interface/Row'
 import { Draw } from '../../Draw'
 
 export class TextBoxParticle {
@@ -57,7 +55,8 @@ export class TextBoxParticle {
   }
   private _mousedown(evt: MouseEvent) {
     evt.stopPropagation()
-    if (this.curElement && this.options.mode === EditorMode.EDIT) {
+    //if (this.curElement && this.options.mode === EditorMode.EDIT) {
+    if (this.curElement) {
       this.resizerDom.classList.add('active')
       this.fakePosition = { x: this.curElement.x!, y: this.curElement.y! }
       this.mouseStart = { x: evt.clientX, y: evt.clientY }
@@ -128,7 +127,7 @@ export class TextBoxParticle {
   }
   private _drawBorder(
     ctx: CanvasRenderingContext2D,
-    element: IRowElement,
+    element: IElement,
     x: number,
     y: number,
     color: string | undefined,
@@ -142,13 +141,17 @@ export class TextBoxParticle {
     }
     ctx.save()
     ctx.textBaseline = 'middle'
-    if (!element.value) {
-      ctx.font = element.style
-      ctx.fillStyle = '#CCC'
-    } else {
-      ctx.font = element.style
-      ctx.fillStyle = element.color || this.options.defaultColor
-    }
+    // if (!element.value) {
+    //   ctx.font = element.style
+    //   ctx.fillStyle = '#CCC'
+    // } else {
+    //   ctx.font = element.style
+    //   ctx.fillStyle = element.color || this.options.defaultColor
+    // }
+    ctx.font = `${element.italic ? 'italic' : ''} ${
+      element.bold ? 'bold' : ''
+    } ${(element.size || 12) * scale}px ${element.font || 'sans-serif'}`
+    ctx.fillStyle = element.color || '#000'
     if (!color || !lineWidth) {
       ctx.restore()
       return
@@ -175,7 +178,7 @@ export class TextBoxParticle {
         metrics.height += m.fontBoundingBoxAscent + m.fontBoundingBoxDescent
       })
       metrics.width += lineWidth!
-      metrics.height = metrics.height * 1.2+ lineWidth!
+      metrics.height = metrics.height * 1.2 + lineWidth!
     }
     element.width = metrics.width
     element.height = metrics.height
@@ -192,7 +195,7 @@ export class TextBoxParticle {
     )
     ctx.restore()
   }
-  private _drawContent(ctx: CanvasRenderingContext2D, element: IRowElement) {
+  private _drawContent(ctx: CanvasRenderingContext2D, element: IElement) {
     const { scale } = this.options
     const metrics = {
       width: 0,
@@ -200,13 +203,16 @@ export class TextBoxParticle {
     }
     ctx.save()
     ctx.textBaseline = 'middle'
-    if (!element.value) {
-      ctx.font = element.style
-      ctx.fillStyle = '#CCC'
-    } else {
-      ctx.font = element.style
-      ctx.fillStyle = element.color || this.options.defaultColor
-    }
+    //if (!element.value) {
+    ctx.font = `${element.italic ? 'italic' : ''} ${
+      element.bold ? 'bold' : ''
+    } ${(element.size || 12) * scale}px ${element.font || 'sans-serif'}`
+
+    ctx.fillStyle = element.color || '#000'
+    // } else {
+    //   ctx.font = element.style
+    //   ctx.fillStyle = element.color || this.options.defaultColor
+    // }
     if (!element.value?.length) {
       const m = ctx.measureText('请输入文本框内容')
       metrics.width = m.actualBoundingBoxLeft + m.actualBoundingBoxRight
@@ -285,20 +291,25 @@ export class TextBoxParticle {
       })
     }
   }
-  public render(ctx: CanvasRenderingContext2D, element: IRowElement) {
+  public render(
+    ctx: CanvasRenderingContext2D,
+    element: IElement,
+    elementX: number,
+    elementY: number
+  ) {
     this._drawContent(ctx, element)
     this._drawBorder(
       ctx,
       element,
-      element.x!,
-      element.y!,
+      elementX!,
+      elementY!,
       element.borderColor,
       element.borderWidth
     )
-    const x = (element.x! - element.borderWidth! / 2) * this.options.scale
+    const x = (elementX! - element.borderWidth! / 2) * this.options.scale
     const len = element.value.split(/[\n|\t]+/gi).length
     const y =
-      (element.y! - element.borderWidth! / 2) * this.options.scale -
+      (elementY! - element.borderWidth! / 2) * this.options.scale -
       (element.height! - element.borderWidth!) / len / 2
     this.resizerDom.style.left = `${x}px`
     this.resizerDom.style.top = `${y}px`
@@ -306,9 +317,9 @@ export class TextBoxParticle {
     this.resizerDom.style.height = `${element.height}px`
   }
   public showControl(element: IElement) {
-    if (this.options.mode !== EditorMode.EDIT) {
-      return
-    }
+    // if (this.options.mode !== EditorMode.EDIT) {
+    //   return
+    // }
     const x = (element.x! - element.borderWidth! / 2) * this.options.scale
     const len = element.value.split(/[\n|\t]+/gi).length
     const y =

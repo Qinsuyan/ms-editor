@@ -22,7 +22,8 @@ import {
   PageMode,
   PaperDirection,
   WordBreak,
-  VariableImageMode
+  VariableImageMode,
+  GraphType
 } from './dataset/enum/Editor'
 import { EDITOR_COMPONENT } from './dataset/constant/Editor'
 import { IHeader } from './interface/Header'
@@ -325,5 +326,7 @@ export type {
   ICatalog,
   ICatalogItem,
   IRange,
-  IRangeStyle
+  IRangeStyle,
+  GraphType,
+  VariableImageMode
 }

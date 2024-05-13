@@ -1,4 +1,5 @@
 import { EDITOR_PREFIX } from '../../../../dataset/constant/Editor'
+import { EditorMode } from '../../../../dataset/enum/Editor'
 import { ElementType } from '../../../../dataset/enum/Element'
 import { IEditorOption } from '../../../../interface/Editor'
 import { IElement, IElementPosition } from '../../../../interface/Element'
@@ -585,7 +586,15 @@ export class Previewer {
     position: IElementPosition | null = null,
     options: IPreviewerDrawOption = {}
   ) {
+    if (
+      this.draw.getOptions().mode === EditorMode.PRINT &&
+      element.type !== ElementType.GRAPH &&
+      element.type !== ElementType.TEXTBOX
+    ) {
+      return
+    }
     this.previewerDrawOption = options
+
     const { scale } = this.options
     const elementWidth = element.width! * scale
     const elementHeight = element.height! * scale

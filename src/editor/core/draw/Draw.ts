@@ -1906,7 +1906,7 @@ export class Draw {
           // }
           this.tableParticle.render(ctx, element, x, y)
         } else if (element.type === ElementType.TEXTBOX) {
-          this.textBoxParticle.render(ctx, element)
+          this._drawRichText(ctx)
         } else if (element.type === ElementType.HYPERLINK) {
           this._drawRichText(ctx)
           this.hyperlinkParticle.render(ctx, element, x, y + offsetY)
@@ -2131,6 +2131,33 @@ export class Draw {
     }
   }
 
+  private _drawGraphAndTextBox(ctx: CanvasRenderingContext2D, pageNo: number) {
+    const floatPositionList = this.position.getFloatPositionList()
+    //const { imgDisplay, pageNo } = payload
+    for (let e = 0; e < floatPositionList.length; e++) {
+      const floatPosition = floatPositionList[e]
+      const element = floatPosition.element
+      if (
+        pageNo === floatPosition.pageNo &&
+        (element.type === ElementType.GRAPH ||
+          element.type === ElementType.TEXTBOX)
+      ) {
+        const imgFloatPosition = element.imgFloatPosition!
+        if (element.type === ElementType.GRAPH) {
+          this.imageParticle.render(
+            ctx,
+            element,
+            imgFloatPosition.x,
+            imgFloatPosition.y
+          )
+        } else {
+          console.log(element)
+          this.textBoxParticle.render(ctx, element, element.x!, element.y!)
+        }
+      }
+    }
+  }
+
   private _clearPage(pageNo: number) {
     const ctx = this.ctxList[pageNo]
     const pageDom = this.pageList[pageNo]
@@ -2189,6 +2216,8 @@ export class Draw {
       pageNo,
       imgDisplay: ImageDisplay.FLOAT_TOP
     })
+    // 渲染graph和textBox
+    this._drawGraphAndTextBox(ctx, pageNo)
     // 搜索匹配绘制
     if (this.search.getSearchKeyword()) {
       this.search.render(ctx, pageNo)
