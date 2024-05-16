@@ -55,7 +55,13 @@ import { ITd } from '../../interface/table/Td'
 import { ITr } from '../../interface/table/Tr'
 import { ITextDecoration } from '../../interface/Text'
 import { IWatermark } from '../../interface/Watermark'
-import { deepClone, downloadFile, getUUID, isObjectEqual } from '../../utils'
+import {
+  deepClone,
+  downloadFile,
+  getUUID,
+  isArray,
+  isObjectEqual
+} from '../../utils'
 import {
   createDomFromElementList,
   formatElementContext,
@@ -746,7 +752,10 @@ export class CommandAdapt {
   public insertTable(
     row: number,
     col: number,
-    borderWidth?: { inner?: number; outer?: number }
+    options?: {
+      borderWidth?: { inner?: number; outer?: number }
+      data?: any[][]
+    }
   ) {
     const isReadonly = this.draw.isReadonly()
     if (isReadonly) return
@@ -772,6 +781,7 @@ export class CommandAdapt {
         width: colWidth
       })
     }
+    const needToAddData = isArray(options?.data)
     // trlist
     const trList: ITr[] = []
     for (let r = 0; r < row; r++) {
@@ -780,15 +790,23 @@ export class CommandAdapt {
         height: this.options.defaultTrMinHeight,
         tdList
       }
+      const rowData = needToAddData ? options?.data?.[r] : undefined
+
       for (let c = 0; c < col; c++) {
+        const data: string = isArray(rowData)
+          ? typeof rowData[c] === 'string'
+            ? (rowData[c] as string)
+            : ''
+          : ''
         tdList.push({
           colspan: 1,
           rowspan: 1,
-          value: [{ value: ZERO, size: 16 }]
+          value: [{ value: data || ZERO, size: 16 }]
         })
       }
       trList.push(tr)
     }
+    const borderWidth = options?.borderWidth
     const element: IElement = {
       type: ElementType.TABLE,
       value: '',

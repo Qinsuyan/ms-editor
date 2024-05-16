@@ -381,10 +381,21 @@ window.onload = function () {
     recoveryTable()
   }
   tablePanel.onclick = function () {
+    const data = []
+    for (let i = 0; i < rowIndex; i++) {
+      const row = []
+      for (let j = 0; j < colIndex; j++) {
+        row.push(`${i + 1}-${j + 1}`)
+      }
+      data.push(row)
+    }
     // 应用选择
     instance.command.executeInsertTable(rowIndex, colIndex, {
-      outer: 5,
-      inner: 1
+      borderWidth: {
+        outer: 5,
+        inner: 1
+      },
+      data
     })
     console.log(instance.command.getValue())
     recoveryTable()
@@ -1088,7 +1099,6 @@ window.onload = function () {
     console.log(options)
     setter(
       '你好，\n这是一段测试文本!\n啦啦啦啦\n这是一段测试文本!\n啦啦啦啦\n这是一段测试文本!\n啦啦啦啦\n这是一段测试文本!\n啦啦啦啦',
-
       {
         borderOption: {
           borderColor: '#f00',
