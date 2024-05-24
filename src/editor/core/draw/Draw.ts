@@ -160,7 +160,7 @@ export class Draw {
   private lazyRenderIntersectionObserver: IntersectionObserver | null
   private printModeData: Required<IEditorData> | null
 
-  private variableDict: Record<string, string | string[]>
+  private variableDict: Record<string, string | string[] | string[][]>
   private variableParticle: VariableParticle
 
   //图形
@@ -1380,7 +1380,10 @@ export class Draw {
           }
         }
         metrics.boundingBoxAscent = 0
-      } else if (element.type === ElementType.TABLE) {
+      } else if (
+        element.type === ElementType.TABLE ||
+        element.type === ElementType.VARIABLETABLE
+      ) {
         const tdPaddingWidth = tdPadding[1] + tdPadding[3]
         const tdPaddingHeight = tdPadding[0] + tdPadding[2]
         // 计算表格行列
@@ -1671,6 +1674,8 @@ export class Draw {
       if (
         element.type === ElementType.SEPARATOR ||
         element.type === ElementType.TABLE ||
+        element.type === ElementType.VARIABLETABLE ||
+        preElement?.type === ElementType.VARIABLETABLE ||
         preElement?.type === ElementType.TABLE ||
         preElement?.type === ElementType.BLOCK ||
         element.type === ElementType.BLOCK ||
@@ -1833,6 +1838,7 @@ export class Draw {
             leftTop: [x, y]
           }
         } = positionList[curRow.startIndex + j]
+        
         const preElement = curRow.elementList[j - 1]
         // 元素高亮记录
         if (
@@ -1900,16 +1906,19 @@ export class Draw {
         } else if (element.type === ElementType.LATEX) {
           this._drawRichText(ctx)
           this.laTexParticle.render(ctx, element, x, y + offsetY)
+        } else if (element.type === ElementType.VARIABLETABLE) {
+          if (isCrossRowCol) {
+            rangeRecord.x = x
+            rangeRecord.y = y
+            tableRangeElement = element
+          }
+          this.tableParticle.render(ctx, element, x, y)
         } else if (element.type === ElementType.TABLE) {
           if (isCrossRowCol) {
             rangeRecord.x = x
             rangeRecord.y = y
             tableRangeElement = element
           }
-          // if(element.loopId){
-          //   //所有的变量改变值
-
-          // }
           this.tableParticle.render(ctx, element, x, y)
         } else if (element.type === ElementType.TEXTBOX) {
           this._drawRichText(ctx)
@@ -2059,7 +2068,10 @@ export class Draw {
         }
         index++
         // 绘制表格内元素
-        if (element.type === ElementType.TABLE) {
+        if (
+          element.type === ElementType.TABLE ||
+          element.type === ElementType.VARIABLETABLE
+        ) {
           const tdPaddingWidth = tdPadding[1] + tdPadding[3]
           for (let t = 0; t < element.trList!.length; t++) {
             const tr = element.trList![t]
@@ -2276,11 +2288,11 @@ export class Draw {
     }
   }
 
-  public setVariableDict(dict: Record<string, string | string[]>) {
+  public setVariableDict(dict: Record<string, string | string[] | string[][]>) {
     this.variableDict = { ...this.variableDict, ...dict }
   }
 
-  public getVariableDict(): Record<string, string | string[]> {
+  public getVariableDict(): Record<string, string | string[] | string[][]> {
     return this.variableDict
   }
 

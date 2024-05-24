@@ -35,6 +35,7 @@ export class Command {
   public executeRowFlex: CommandAdapt['rowFlex']
   public executeRowMargin: CommandAdapt['rowMargin']
   public executeInsertTable: CommandAdapt['insertTable']
+  public executeInsertVariableTable: CommandAdapt['insertVariableTable']
   public executeInsertTableTopRow: CommandAdapt['insertTableTopRow']
   public executeInsertTableBottomRow: CommandAdapt['insertTableBottomRow']
   public executeInsertTableLeftCol: CommandAdapt['insertTableLeftCol']
@@ -192,6 +193,7 @@ export class Command {
     //自定义功能
     this.executeInsertVariable = adapt.insertVariable.bind(adapt)
     this.setVariableDict = adapt.setVariableDict.bind(adapt)
+    this.executeInsertVariableTable = adapt.insertVariableTable.bind(adapt)
     // 页面模式、页面缩放、纸张大小、纸张方向、页边距
     this.executePageMode = adapt.pageMode.bind(adapt)
     this.executePageScaleRecovery = adapt.pageScaleRecovery.bind(adapt)

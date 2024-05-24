@@ -187,7 +187,7 @@ export class Position {
         index++
         x += metrics.width
         // 计算表格内元素位置
-        if (element.type === ElementType.TABLE) {
+        if (element.type === ElementType.TABLE || element.type === ElementType.VARIABLETABLE) {
           const tdPaddingWidth = tdPadding[1] + tdPadding[3]
           const tdPaddingHeight = tdPadding[0] + tdPadding[2]
           for (let t = 0; t < element.trList!.length; t++) {
@@ -363,7 +363,7 @@ export class Position {
         const element = elementList[j]
        
         // 表格被命中
-        if (element.type === ElementType.TABLE) {
+        if (element.type === ElementType.TABLE || element.type === ElementType.VARIABLETABLE) {
           for (let t = 0; t < element.trList!.length; t++) {
             const tr = element.trList![t]
             for (let d = 0; d < tr.tdList.length; d++) {

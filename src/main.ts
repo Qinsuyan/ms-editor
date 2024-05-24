@@ -381,23 +381,13 @@ window.onload = function () {
     recoveryTable()
   }
   tablePanel.onclick = function () {
-    const data = []
-    for (let i = 0; i < rowIndex; i++) {
-      const row = []
-      for (let j = 0; j < colIndex; j++) {
-        row.push(`${i + 1}-${j + 1}`)
-      }
-      data.push(row)
-    }
     // 应用选择
     instance.command.executeInsertTable(rowIndex, colIndex, {
       borderWidth: {
         outer: 5,
         inner: 1
-      },
-      data
+      }
     })
-    console.log(instance.command.getValue())
     recoveryTable()
   }
 
@@ -1008,9 +998,8 @@ window.onload = function () {
   }
 
   const testDom = document.querySelector<HTMLDivElement>('.menu-item__test')!
-  testDom.title = `测试1`
+  testDom.title = `长文本变量`
   testDom.onclick = function () {
-    //instance.command.executePrint()
     instance.command.setVariableDict({
       test: '测试一段非常长的文字，希望在表格里面可以自动换行'
     })
@@ -1115,6 +1104,21 @@ window.onload = function () {
       }
     )
   })
+  const variableTableDom = document.querySelector<HTMLDivElement>(
+    '.menu-item__variable__table__test'
+  )!
+  variableTableDom.title = `变量表格测试`
+  variableTableDom.onclick = function () {
+    instance.command.setVariableDict({
+      testTable: [['一', '二', '三']]
+    })
+    instance.command.executeInsertVariableTable('testTable', 3, {
+      borderWidth: {
+        outer: 5,
+        inner: 1
+      }
+    })
+  }
 
   // 6. 目录显隐 | 页面模式 | 纸张缩放 | 纸张大小 | 纸张方向 | 页边距 | 全屏
   async function updateCatalog() {

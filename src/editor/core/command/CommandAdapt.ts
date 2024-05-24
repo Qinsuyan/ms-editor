@@ -193,7 +193,7 @@ export class CommandAdapt {
     })
   }
 
-  public setVariableDict(dict: Record<string, string | string[]>) {
+  public setVariableDict(dict: Record<string, string | string[] | string[][]>) {
     this.draw.setVariableDict(dict)
   }
 
@@ -791,7 +791,6 @@ export class CommandAdapt {
         tdList
       }
       const rowData = needToAddData ? options?.data?.[r] : undefined
-
       for (let c = 0; c < col; c++) {
         const data: string = isArray(rowData)
           ? typeof rowData[c] === 'string'
@@ -809,6 +808,90 @@ export class CommandAdapt {
     const borderWidth = options?.borderWidth
     const element: IElement = {
       type: ElementType.TABLE,
+      value: '',
+      colgroup,
+      trList,
+      borderWidth: borderWidth?.outer || 1,
+      innerBorderWidth: borderWidth?.inner || 1
+    }
+    formatElementList(
+      [element],
+      {
+        editorOptions: this.options
+      },
+      this.draw.getVariableDict()
+    )
+    formatElementContext(elementList, [element], startIndex)
+    const curIndex = startIndex + 1
+    element.borderWidth = borderWidth?.outer
+    element.innerBorderWidth = borderWidth?.inner
+    this.draw.spliceElementList(
+      elementList,
+      curIndex,
+      startIndex === endIndex ? 0 : endIndex - startIndex,
+      element
+    )
+    this.range.setRange(curIndex, curIndex)
+    this.draw.render({ curIndex, isSetCursor: false })
+  }
+
+  public insertVariableTable(
+    key: string,
+    col: number,
+    options?: {
+      borderWidth?: { inner?: number; outer?: number }
+    }
+  ) {
+    const isReadonly = this.draw.isReadonly()
+    if (isReadonly) return
+    const activeControl = this.control.getActiveControl()
+    if (activeControl) return
+    const { startIndex, endIndex } = this.range.getRange()
+    if (!~startIndex && !~endIndex) return
+    const elementList = this.draw.getElementList()
+    let offsetX = 0
+    if (elementList[startIndex]?.listId) {
+      const positionList = this.position.getPositionList()
+      const { rowIndex } = positionList[startIndex]
+      const rowList = this.draw.getRowList()
+      const row = rowList[rowIndex]
+      offsetX = row?.offsetX || 0
+    }
+    const innerWidth = this.draw.getOriginalInnerWidth() - offsetX
+    // colgroup
+    const colgroup: IColgroup[] = []
+    const colWidth = innerWidth / col
+    for (let c = 0; c < col; c++) {
+      colgroup.push({
+        width: colWidth
+      })
+    }
+    const fakeData: any[] = []
+    for (let i = 1; i <= col; i++) {
+      fakeData.push(`Col ${i}`)
+    }
+    // trlist
+    const trList: ITr[] = []
+    for (let r = 0; r < 2; r++) {
+      const tdList: ITd[] = []
+      const tr: ITr = {
+        height: this.options.defaultTrMinHeight,
+        tdList
+      }
+      for (let c = 0; c < col; c++) {
+        const data = r === 0 ? fakeData[c] : '...'
+        tdList.push({
+          colspan: 1,
+          rowspan: 1,
+          value: [{ value: data || ZERO, size: 16 }]
+        })
+      }
+      trList.push(tr)
+    }
+    const borderWidth = options?.borderWidth
+    const element: IElement = {
+      type: ElementType.VARIABLETABLE,
+      key: key,
       value: '',
       colgroup,
       trList,

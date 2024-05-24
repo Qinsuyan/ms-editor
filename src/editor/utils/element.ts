@@ -61,7 +61,7 @@ interface IFormatElementListOption {
 export function formatElementList(
   elementList: IElement[],
   options: IFormatElementListOption,
-  dict: Record<string, string | string[]>
+  dict: Record<string, string | string[] | string[][]>
 ) {
   const { isHandleFirstElement, editorOptions } = <IFormatElementListOption>{
     isHandleFirstElement: true,
@@ -174,6 +174,90 @@ export function formatElementList(
         }
       }
       i--
+    } else if (el.type === ElementType.VARIABLETABLE) {
+      const tableId = getUUID()
+      el.id = tableId
+      if (el.trList) {
+        if (options.editorOptions.mode !== EditorMode.EDIT) {
+          const data = dict[el.key!]
+          if (isArray(data)) {
+            const trList: ITr[] = []
+            data.forEach((row, rowIndex) => {
+              const tdList: ITd[] = []
+              const tr: ITr = {
+                height: editorOptions.defaultTrMinHeight,
+                tdList
+              }
+              if (isArray(row)) {
+                row.forEach((d, tdIndex) => {
+                  const originalTdValue =
+                    el.trList?.[rowIndex]?.tdList?.[tdIndex].value?.[1] || {}
+                  tdList.push({
+                    colspan: 1,
+                    rowspan: 1,
+                    value: [{ ...originalTdValue, value: d || ZERO, size: 16 }]
+                  })
+                })
+              }
+              trList.push(tr)
+            })
+            el.trList = trList
+          }
+        } else {
+          const col = el.trList[0].tdList.length
+          const fakeData: any[] = []
+          for (let i = 1; i <= col; i++) {
+            fakeData.push(`Col ${i}`)
+          }
+          const trList: ITr[] = []
+          for (let r = 0; r < 2; r++) {
+            const tdList: ITd[] = []
+            const tr: ITr = {
+              height: editorOptions.defaultTrMinHeight,
+              tdList
+            }
+            for (let c = 0; c < col; c++) {
+              const data = r === 0 ? fakeData[c] : '...'
+              const originalTdValue =
+                el.trList?.[r]?.tdList?.[c].value?.[1] || {}
+              tdList.push({
+                colspan: 1,
+                rowspan: 1,
+                value: [{ ...originalTdValue, value: data || ZERO, size: 16 }]
+              })
+            }
+            trList.push(tr)
+          }
+          el.trList = trList
+        }
+        for (let t = 0; t < el.trList.length; t++) {
+          const tr = el.trList[t]
+          const trId = getUUID()
+          tr.id = trId
+          if (
+            !tr.minHeight ||
+            tr.minHeight < editorOptions.defaultTrMinHeight
+          ) {
+            tr.minHeight = editorOptions.defaultTrMinHeight
+          }
+          if (tr.height < tr.minHeight) {
+            tr.height = tr.minHeight
+          }
+          for (let d = 0; d < tr.tdList.length; d++) {
+            const td = tr.tdList[d]
+            const tdId = getUUID()
+            td.id = tdId
+            formatElementList(
+              td.value,
+              {
+                ...options,
+                isHandleFirstElement: true
+              },
+              dict
+            )
+          }
+        }
+      }
     } else if (el.type === ElementType.TABLE) {
       const tableId = getUUID()
       el.id = tableId
@@ -222,9 +306,17 @@ export function formatElementList(
                           el.loopIndex < val.length
                             ? val[el.loopIndex]
                             : val[val.length - 1]
-                        value.value = thisVal || '变量值'
+                        if (isArray(thisVal)) {
+                          value.value = '变量值'
+                        } else {
+                          value.value = thisVal || '变量值'
+                        }
                       } else {
-                        value.value = val[0] || '变量值'
+                        if (isArray(val[0])) {
+                          value.value = '变量值'
+                        } else {
+                          value.value = val[0] || '变量值'
+                        }
                       }
                     }
                   } else {
@@ -457,9 +549,17 @@ export function formatElementList(
                 el.loopIndex < val.length
                   ? val[el.loopIndex]
                   : val[val.length - 1]
-              el.value = thisVal || '变量值'
+              if (isArray(thisVal)) {
+                el.value = '变量值'
+              } else {
+                el.value = thisVal || '变量值'
+              }
             } else {
-              el.value = val[0] || '变量值'
+              if (isArray(val[0])) {
+                el.value = '变量值'
+              } else {
+                el.value = val[0] || '变量值'
+              }
             }
           }
         } else {
@@ -767,7 +867,10 @@ export function zipElementList(payload: IElement[]): IElement[] {
       }
       listElement.valueList = zipElementList(valueList)
       element = listElement
-    } else if (element.type === ElementType.TABLE) {
+    } else if (
+      element.type === ElementType.TABLE ||
+      element.type === ElementType.VARIABLETABLE
+    ) {
       if (element.trList) {
         for (let t = 0; t < element.trList.length; t++) {
           const tr = element.trList[t]
@@ -1058,7 +1161,10 @@ export function createDomFromElementList(
     for (let e = 0; e < payload.length; e++) {
       const element = payload[e]
       // 构造表格
-      if (element.type === ElementType.TABLE) {
+      if (
+        element.type === ElementType.TABLE ||
+        element.type === ElementType.VARIABLETABLE
+      ) {
         const tableDom: HTMLTableElement = document.createElement('table')
         const trList = element.trList!
         for (let t = 0; t < trList.length; t++) {
@@ -1408,7 +1514,10 @@ export function getTextFromElementList(elementList: IElement[]) {
     for (let e = 0; e < payload.length; e++) {
       const element = payload[e]
       // 构造表格
-      if (element.type === ElementType.TABLE) {
+      if (
+        element.type === ElementType.TABLE ||
+        element.type === ElementType.VARIABLETABLE
+      ) {
         text += `\n`
         const trList = element.trList!
         for (let t = 0; t < trList.length; t++) {

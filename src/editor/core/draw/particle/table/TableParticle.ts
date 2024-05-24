@@ -158,10 +158,11 @@ export class TableParticle {
     startX: number,
     startY: number,
     borderWidth: number,
-    innerBorderWidth:number,
+    innerBorderWidth: number
   ) {
     const { colgroup, trList, borderType } = element
     if (!colgroup || !trList) return
+
     const { scale } = this.options
     const tableWidth = element.width! * scale
     const tableHeight = element.height! * scale
@@ -400,7 +401,12 @@ export class TableParticle {
   ) {
     const { scale, rangeAlpha, rangeColor } = this.options
     const { type, trList } = element
-    if (!trList || type !== ElementType.TABLE) return
+    if (
+      !trList ||
+      (type !== ElementType.TABLE && type !== ElementType.VARIABLETABLE)
+    ) {
+      return
+    }
     const {
       isCrossRowCol,
       startTdIndex,
@@ -409,7 +415,9 @@ export class TableParticle {
       endTrIndex
     } = this.range.getRange()
     // 存在跨行/列
-    if (!isCrossRowCol) return
+    if (!isCrossRowCol) {
+      return
+    }
     let startTd = trList[startTrIndex!].tdList[startTdIndex!]
     let endTd = trList[endTrIndex!].tdList[endTdIndex!]
     // 交换起始位置
@@ -451,9 +459,16 @@ export class TableParticle {
     ctx: CanvasRenderingContext2D,
     element: IElement,
     startX: number,
-    startY: number,
+    startY: number
   ) {
     this._drawBackgroundColor(ctx, element, startX, startY)
-    this._drawBorder(ctx, element, startX, startY,element.borderWidth || 1,element.innerBorderWidth || 1)
+    this._drawBorder(
+      ctx,
+      element,
+      startX,
+      startY,
+      element.borderWidth || 1,
+      element.innerBorderWidth || 1
+    )
   }
 }
