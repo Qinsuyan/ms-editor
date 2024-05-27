@@ -182,16 +182,16 @@ export function formatElementList(
           const data = dict[el.key!]
           if (isArray(data)) {
             const trList: ITr[] = []
-            data.forEach((row, rowIndex) => {
+            data.forEach((row) => {
               const tdList: ITd[] = []
               const tr: ITr = {
                 height: editorOptions.defaultTrMinHeight,
                 tdList
               }
               if (isArray(row)) {
-                row.forEach((d, tdIndex) => {
+                row.forEach((d) => {
                   const originalTdValue =
-                    el.trList?.[rowIndex]?.tdList?.[tdIndex].value?.[1] || {}
+                    el.trList?.[0]?.tdList?.[0].value?.[1] || {}
                   tdList.push({
                     colspan: 1,
                     rowspan: 1,
@@ -219,7 +219,7 @@ export function formatElementList(
             for (let c = 0; c < col; c++) {
               const data = r === 0 ? fakeData[c] : '...'
               const originalTdValue =
-                el.trList?.[r]?.tdList?.[c].value?.[1] || {}
+                el.trList?.[0]?.tdList?.[0].value?.[1] || {}
               tdList.push({
                 colspan: 1,
                 rowspan: 1,
