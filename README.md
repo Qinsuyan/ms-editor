@@ -2,6 +2,12 @@
 
 forked from [canvas-editor](https://github.com/Hufe921/canvas-editor)
 
+## install from npm
+
+```bash
+npm i @qinsuyan/ms-editor
+```
+
 ## 更改内容
 
 * 表格可指定边框宽度
