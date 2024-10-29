@@ -121,6 +121,7 @@ export class Command {
   public getTitleValue: CommandAdapt['getTitleValue']
   public getPositionContextByEvent: CommandAdapt['getPositionContextByEvent']
   public getElementById: CommandAdapt['getElementById']
+  public executeStartMark: CommandAdapt['startMark']
 
   constructor(adapt: CommandAdapt) {
     // 全局命令
@@ -252,5 +253,8 @@ export class Command {
     this.getControlList = adapt.getControlList.bind(adapt)
     this.executeLocationControl = adapt.locationControl.bind(adapt)
     this.executeInsertControl = adapt.insertControl.bind(adapt)
+    //自定义功能
+    //直线标记
+    this.executeStartMark = adapt.startMark.bind(adapt)
   }
 }

@@ -11,6 +11,7 @@ import { TableTool } from '../draw/particle/table/TableTool'
 import { RangeManager } from '../range/RangeManager'
 import { CanvasEvent } from './CanvasEvent'
 import { ImageParticle } from '../draw/particle/ImageParticle'
+import { MarkParticle } from '../draw/particle/MarkParticle'
 
 export class GlobalEvent {
   private draw: Draw
@@ -24,6 +25,7 @@ export class GlobalEvent {
   private control: Control
   private dateParticle: DateParticle
   private imageParticle: ImageParticle
+  private markPaticle: MarkParticle
   private dprMediaQueryList: MediaQueryList
 
   constructor(draw: Draw, canvasEvent: CanvasEvent) {
@@ -37,6 +39,7 @@ export class GlobalEvent {
     this.hyperlinkParticle = draw.getHyperlinkParticle()
     this.dateParticle = draw.getDateParticle()
     this.imageParticle = draw.getImageParticle()
+    this.markPaticle = draw.getMarkParticle()
     this.control = draw.getControl()
     this.dprMediaQueryList = window.matchMedia(
       `(resolution: ${window.devicePixelRatio}dppx)`
@@ -105,6 +108,7 @@ export class GlobalEvent {
     this.control.destroyControl()
     this.dateParticle.clearDatePicker()
     this.imageParticle.destroyFloatImage()
+    this.markPaticle.destroyFloatImage()
   }
 
   public setCanvasEventAbility = () => {

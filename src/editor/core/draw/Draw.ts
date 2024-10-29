@@ -16,6 +16,7 @@ import {
   IEditorData,
   IEditorOption,
   IEditorResult,
+  IMarkType,
   ISetValueOption
 } from '../../interface/Editor'
 import {
@@ -108,6 +109,7 @@ import { PageBorder } from './frame/PageBorder'
 import { ITd } from '../../interface/table/Td'
 import { Actuator } from '../actuator/Actuator'
 import { TableOperate } from './particle/table/TableOperate'
+import { MarkParticle } from './particle/MarkParticle'
 
 export class Draw {
   private container: HTMLDivElement
@@ -140,6 +142,7 @@ export class Draw {
   private historyManager: HistoryManager
   private previewer: Previewer
   private imageParticle: ImageParticle
+  private markParticle: MarkParticle
   private laTexParticle: LaTexParticle
   private textParticle: TextParticle
   private tableParticle: TableParticle
@@ -218,6 +221,7 @@ export class Draw {
     this.highlight = new Highlight(this)
     this.previewer = new Previewer(this)
     this.imageParticle = new ImageParticle(this)
+    this.markParticle = new MarkParticle(this)
     this.laTexParticle = new LaTexParticle(this)
     this.textParticle = new TextParticle(this)
     this.tableParticle = new TableParticle(this)
@@ -646,9 +650,13 @@ export class Draw {
   }
 
   public insertElementList(payload: IElement[]) {
-    if (!payload.length || !this.range.getIsCanInput()) return
+    if (!payload.length || !this.range.getIsCanInput()) {
+      return
+    }
     const { startIndex, endIndex } = this.range.getRange()
-    if (!~startIndex && !~endIndex) return
+    if (!~startIndex && !~endIndex) {
+      return
+    }
     formatElementList(payload, {
       isHandleFirstElement: false,
       editorOptions: this.options
@@ -704,6 +712,7 @@ export class Draw {
       isHandleFirstElement: false,
       editorOptions: this.options
     })
+
     let curIndex: number
     const { isPrepend } = options
     if (isPrepend) {
@@ -806,6 +815,10 @@ export class Draw {
 
   public getImageParticle(): ImageParticle {
     return this.imageParticle
+  }
+
+  public getMarkParticle(): MarkParticle {
+    return this.markParticle
   }
 
   public getTableTool(): TableTool {
@@ -2328,6 +2341,14 @@ export class Draw {
           imgFloatPosition.y * scale
         )
       }
+      //渲染标记
+      if (
+        element.type === ElementType.MARK &&
+        element.pageIndex === floatPosition.pageNo
+      ) {
+        //TODO
+        this.markParticle.render(ctx, element)
+      }
     }
   }
 
@@ -2683,5 +2704,119 @@ export class Draw {
     this.getHyperlinkParticle().clearHyperlinkPopup()
     // 日期控件
     this.getDateParticle().clearDatePicker()
+  }
+
+  //标记
+
+  private _makeMarkEl(
+    start: { x: number; y: number },
+    end: { x: number; y: number },
+    parentEl: HTMLElement
+  ) {
+    // 创建 canvas，与父元素同样大小
+    const canvas = document.createElement('canvas')
+    canvas.width = parentEl.clientWidth
+    canvas.height = parentEl.clientHeight
+    canvas.style.position = 'absolute'
+    canvas.style.top = '0'
+    canvas.style.left = '0'
+    parentEl.appendChild(canvas)
+
+    // 获取 canvas 上下文
+    const ctx = canvas.getContext('2d')
+    if (!ctx) {
+      throw new Error('无法获取 canvas 的 2D 上下文')
+    }
+
+    // 绘制直线的函数
+    const drawLine = (
+      start: { x: number; y: number },
+      end: { x: number; y: number }
+    ) => {
+      // 清空画布
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+      // 绘制红色直线
+      ctx.beginPath()
+      ctx.moveTo(start.x, start.y)
+      ctx.lineTo(end.x, end.y)
+      ctx.strokeStyle = 'red'
+      ctx.lineWidth = 2
+      ctx.stroke()
+    }
+
+    // 初始绘制
+    drawLine(start, end)
+
+    // 更新端点位置的方法
+    const updatePosition = (
+      newStart: { x: number; y: number },
+      newEnd: { x: number; y: number }
+    ) => {
+      drawLine(newStart, newEnd)
+    }
+
+    return { element: canvas, updatePosition }
+  }
+
+  public startToMark(type: IMarkType) {
+    const previousMode = this.getMode()
+    const marks = {
+      type,
+      startPosition: { x: 0, y: 0 },
+      endPosition: { x: 0, y: 0 },
+      pageIndex: 0,
+      dom: <ReturnType<Draw['_makeMarkEl']> | null>null
+    }
+    const handleMarkMouseDown = (e: MouseEvent, index: number) => {
+      e.stopPropagation()
+      e.preventDefault()
+      marks.startPosition = { x: e.offsetX, y: e.offsetY }
+      marks.pageIndex = index
+    }
+    const handleMarkMouseMove = (e: MouseEvent) => {
+      e.preventDefault()
+      if (marks.startPosition.x === 0 && marks.startPosition.y === 0) {
+        return
+      }
+      marks.endPosition = { x: e.offsetX, y: e.offsetY }
+      //使用DIV创建直线
+      marks.dom?.updatePosition(marks.startPosition, marks.endPosition)
+    }
+    const handleMarkMouseUp = (e: MouseEvent) => {
+      e.preventDefault()
+      marks.endPosition = { x: e.offsetX, y: e.offsetY }
+      document.body.removeEventListener('mousemove', handleMarkMouseMove)
+      document.body.removeEventListener('mouseup', handleMarkMouseUp)
+      //恢复模式
+      this.setMode(previousMode)
+      //添加标记元素到元素列表
+      this.range.setRange(this.elementList.length - 1, this.elementList.length - 1)
+      this.insertElementList([
+        {
+          type: ElementType.MARK,
+          value: '',
+          markType: marks.type,
+          pageIndex: marks.pageIndex,
+          start: marks.startPosition,
+          end: marks.endPosition
+        }
+      ])
+      //删除添加的dom
+      this.pageList.forEach(canvas => {
+        canvas.parentElement?.lastElementChild?.remove()
+      })
+    }
+    document.body.addEventListener('mousemove', handleMarkMouseMove)
+    document.body.addEventListener('mouseup', handleMarkMouseUp)
+    this.setMode(EditorMode.PRINT)
+    this.pageList.forEach((canvas, index) => {
+      const parent = canvas.parentElement!
+      const markWrap = document.createElement('div')
+      markWrap.onmousedown = e => handleMarkMouseDown(e, index)
+      markWrap.className = 'ce-mark-wrap'
+      parent.appendChild(markWrap)
+      marks.dom = this._makeMarkEl({ x: 0, y: 0 }, { x: 0, y: 0 }, markWrap)
+    })
   }
 }

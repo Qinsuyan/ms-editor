@@ -1,8 +1,10 @@
 export class EventBus<EventMap> {
   private eventHub: Map<string, Set<Function>>
+  private isPause: boolean
 
   constructor() {
     this.eventHub = new Map()
+    this.isPause = false
   }
 
   public on<K extends string & keyof EventMap>(
@@ -19,6 +21,9 @@ export class EventBus<EventMap> {
     eventName: K,
     payload?: EventMap[K] extends (payload: infer P) => void ? P : never
   ) {
+    if(!this.isPause){
+      return
+    }
     if (!eventName) return
     const callBackSet = this.eventHub.get(eventName)
     if (!callBackSet) return
@@ -42,5 +47,12 @@ export class EventBus<EventMap> {
   public isSubscribe<K extends string & keyof EventMap>(eventName: K): boolean {
     const eventSet = this.eventHub.get(eventName)
     return !!eventSet && eventSet.size > 0
+  }
+
+  public pause() {
+    this.isPause = true
+  }
+  public resume(){
+    this.isPause = false
   }
 }

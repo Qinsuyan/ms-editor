@@ -13,6 +13,7 @@ import { ITextDecoration } from './Text'
 import { ITitle } from './Title'
 import { IColgroup } from './table/Colgroup'
 import { ITr } from './table/Tr'
+import { IMarkType } from './Editor'
 
 export interface IElementBasic {
   id?: string
@@ -62,6 +63,7 @@ export interface ITableAttr {
   colgroup?: IColgroup[]
   trList?: ITr[]
   borderType?: TableBorder
+  outBorderWidth?: number
 }
 
 export interface ITableElement {
@@ -121,6 +123,13 @@ export interface IImageElement {
   }
 }
 
+export interface IMarkElement {
+  markType?: IMarkType
+  pageIndex?: number
+  start?: { x: number; y: number }
+  end?: { x: number; y: number }
+}
+
 export interface IBlockElement {
   block?: IBlock
 }
@@ -140,7 +149,8 @@ export type IElement = IElementBasic &
   IImageElement &
   IBlockElement &
   ITitleElement &
-  IListElement
+  IListElement &
+  IMarkElement
 
 export interface IElementMetrics {
   width: number

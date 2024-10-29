@@ -14,6 +14,7 @@ interface IDrawTableBorderOption {
   startY: number
   width: number
   height: number
+  outerWidth: number
   isDrawFullBorder?: boolean
 }
 
@@ -101,7 +102,10 @@ export class TableParticle {
   }
 
   private _drawOuterBorder(payload: IDrawTableBorderOption) {
-    const { ctx, startX, startY, width, height, isDrawFullBorder } = payload
+    const { ctx, startX, startY, width, height, isDrawFullBorder, outerWidth } =
+      payload
+    ctx.save()
+    ctx.lineWidth = outerWidth
     ctx.beginPath()
     const x = Math.round(startX)
     const y = Math.round(startY)
@@ -115,6 +119,7 @@ export class TableParticle {
     }
     ctx.stroke()
     ctx.translate(-0.5, -0.5)
+    ctx.restore()
   }
 
   private _drawSlash(
@@ -152,6 +157,7 @@ export class TableParticle {
     const { colgroup, trList, borderType } = element
     if (!colgroup || !trList) return
     const { scale } = this.options
+    const outerBorderWidth = element.outBorderWidth ? element.outBorderWidth : 1
     const tableWidth = element.width! * scale
     const tableHeight = element.height! * scale
     // 无边框
@@ -163,6 +169,7 @@ export class TableParticle {
     if (borderType === TableBorder.DASH) {
       ctx.setLineDash([3, 3])
     }
+
     ctx.lineWidth = scale
     // 渲染边框
     if (!isEmptyBorderType) {
@@ -172,7 +179,11 @@ export class TableParticle {
         startY,
         width: tableWidth,
         height: tableHeight,
-        isDrawFullBorder: isExternalBorderType
+        outerWidth: outerBorderWidth * scale,
+        isDrawFullBorder:
+          isExternalBorderType ||
+          borderType === TableBorder.ALL ||
+          borderType === undefined
       })
     }
     // 渲染单元格

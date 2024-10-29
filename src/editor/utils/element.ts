@@ -463,7 +463,7 @@ export function formatElementList(
     if (el.value === '\n' || el.value == '\r\n') {
       el.value = ZERO
     }
-    if (el.type === ElementType.IMAGE || el.type === ElementType.BLOCK) {
+    if (el.type === ElementType.IMAGE || el.type === ElementType.BLOCK || el.type === ElementType.MARK) {
       el.id = getUUID()
     }
     if (el.type === ElementType.LATEX) {

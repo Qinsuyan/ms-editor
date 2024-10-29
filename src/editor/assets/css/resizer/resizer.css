@@ -15,7 +15,9 @@
   box-sizing: border-box;
   pointer-events: initial;
 }
-
+.ce-resizer-selection .resizer-handle.hide {
+  display: none;
+}
 .ce-resizer-selection .handle-0 {
   cursor: nw-resize;
 }
@@ -47,6 +49,14 @@
 .ce-resizer-selection .handle-7 {
   cursor: w-resize;
 }
+.ce-resizer-selection .handle-8 {
+  cursor: pointer;
+  background-color: rgb(65, 130, 217);
+}
+.ce-resizer-selection .handle-9 {
+  cursor: pointer;
+  background-color: rgb(65, 130, 217);
+}
 
 .ce-resizer-size-view {
   display: flex;
@@ -57,7 +67,7 @@
   z-index: 9;
   top: -30px;
   left: 0;
-  opacity: .9;
+  opacity: 0.9;
   background-color: #000000;
   padding: 0 5px;
   border-radius: 4px;

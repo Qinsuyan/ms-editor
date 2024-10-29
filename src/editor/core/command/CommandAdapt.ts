@@ -54,6 +54,7 @@ import {
   IEditorResult,
   IEditorText,
   IFocusOption,
+  IMarkType,
   ISetValueOption,
   IUpdateOption
 } from '../../interface/Editor'
@@ -2142,5 +2143,10 @@ export class CommandAdapt {
       cursorPosition: positionList[curIndex],
       direction: MoveDirection.DOWN
     })
+  }
+  //直线标记
+  public startMark(type: IMarkType){
+    console.log('start to mark '+type)
+    this.draw.startToMark(type)
   }
 }

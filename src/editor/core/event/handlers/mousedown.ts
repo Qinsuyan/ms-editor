@@ -101,6 +101,7 @@ export function mousedown(evt: MouseEvent, host: CanvasEvent) {
     isCheckbox,
     isRadio,
     isImage,
+    isMark,
     isTable,
     tdValueIndex,
     hitLineStartIndex
@@ -118,6 +119,7 @@ export function mousedown(evt: MouseEvent, host: CanvasEvent) {
   const curElement = elementList[curIndex]
   // 绘制
   const isDirectHitImage = !!(isDirectHit && isImage)
+  const isDirectHitMark = !!(isDirectHit && isMark)
   const isDirectHitCheckbox = !!(isDirectHit && isCheckbox)
   const isDirectHitRadio = !!(isDirectHit && isRadio)
   if (~index) {
@@ -181,7 +183,7 @@ export function mousedown(evt: MouseEvent, host: CanvasEvent) {
   // 预览工具组件
   const previewer = draw.getPreviewer()
   previewer.clearResizer()
-  if (isDirectHitImage) {
+  if (isDirectHitImage || isDirectHitMark) {
     const previewerDrawOption: IPreviewerDrawOption = {
       // 只读或控件外表单模式禁用拖拽
       dragDisable:
@@ -192,6 +194,7 @@ export function mousedown(evt: MouseEvent, host: CanvasEvent) {
       previewerDrawOption.mime = 'svg'
       previewerDrawOption.srcKey = 'laTexSVG'
     }
+
     previewer.drawResizer(
       curElement,
       positionList[curIndex],
@@ -210,6 +213,9 @@ export function mousedown(evt: MouseEvent, host: CanvasEvent) {
       curElement.imgDisplay === ImageDisplay.FLOAT_BOTTOM
     ) {
       draw.getImageParticle().createFloatImage(curElement)
+    }
+    if(curElement.type === ElementType.MARK){
+      draw.getMarkParticle().createFloatImage(curElement)
     }
   }
   // 表格工具组件

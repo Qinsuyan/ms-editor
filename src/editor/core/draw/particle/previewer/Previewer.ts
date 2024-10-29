@@ -1,4 +1,6 @@
+import { nextTick } from 'process'
 import { EDITOR_PREFIX } from '../../../../dataset/constant/Editor'
+import { ElementType } from '../../../../dataset/enum/Element'
 import { IEditorOption } from '../../../../interface/Editor'
 import { IElement, IElementPosition } from '../../../../interface/Element'
 import {
@@ -31,6 +33,14 @@ export class Previewer {
   // 预览选区
   private previewerContainer: HTMLDivElement | null
   private previewerImage: HTMLImageElement | null
+  //marker的canvas
+  private markerCanvas: HTMLCanvasElement
+  private markerCtx: CanvasRenderingContext2D | null
+  private markerCache: {
+    start: { x: number; y: number }
+    end: { x: number; y: number }
+    movingEnd: string
+  }
 
   constructor(draw: Draw) {
     this.container = draw.getContainer()
@@ -61,6 +71,13 @@ export class Previewer {
     this.curHandleIndex = 0 // 默认右下角
     this.previewerContainer = null
     this.previewerImage = null
+    this.markerCanvas = document.createElement('canvas')
+    this.markerCtx = null
+    this.markerCache = {
+      start: { x: 0, y: 0 },
+      end: { x: 0, y: 0 },
+      movingEnd: ''
+    }
   }
 
   private _getElementPosition(
@@ -77,7 +94,155 @@ export class Previewer {
     if (element.imgFloatPosition) {
       x = element.imgFloatPosition.x!
       y = element.imgFloatPosition.y + preY
+      const handles = document.getElementsByClassName('resizer-handle-default')
+      for (let i = 0; i < handles.length; i++) {
+        const el = handles.item(i)
+        el?.classList.remove('hide')
+      }
+      const otherHandles = document.getElementsByClassName(
+        'resizer-handle-mark'
+      )
+      for (let i = 0; i < otherHandles.length; i++) {
+        const el = otherHandles.item(i)
+        el?.classList.add('hide')
+      }
+      this.markerCanvas.remove()
+    } else if (element.start && element.end) {
+      x = Math.min(element.start.x, element.end.x)
+      y = Math.min(element.start.y, element.end.y)
+      let direction = ''
+      if (element.start.x < element.end.x) {
+        if (element.start.y < element.end.y) {
+          direction = 'rightdown'
+        } else {
+          direction = 'rightup'
+        }
+      } else {
+        if (element.start.y < element.end.y) {
+          direction = 'leftdown'
+        } else {
+          direction = 'leftup'
+        }
+      }
+      //Mark元素只保留两个位置
+      const handles = document.getElementsByClassName('resizer-handle-mark')
+      for (let i = 0; i < handles.length; i++) {
+        const el = handles.item(i)
+        el?.classList.remove('hide')
+        if (i === 0) {
+          el?.setAttribute('data-end', 'start')
+          //start handle
+          if (direction === 'rightup') {
+            el?.setAttribute(
+              'style',
+              'left:0;bottom:0;transform:translateX(-50%) translateY(50%);'
+            )
+          } else if (direction === 'rightdown') {
+            el?.setAttribute(
+              'style',
+              'left:0;top:0;transform:translateX(-50%) translateY(-50%);'
+            )
+          } else if (direction === 'leftup') {
+            el?.setAttribute(
+              'style',
+              'right:0;bottom:0;transform:translateX(50%) translateY(50%);'
+            )
+          } else {
+            el?.setAttribute(
+              'style',
+              'right:0;top:0;transform:translateX(50%) translateY(-50%);'
+            )
+          }
+        } else {
+          //end handle
+          el?.setAttribute('data-end', 'end')
+          if (direction === 'rightup') {
+            el?.setAttribute(
+              'style',
+              'right:0;top:0;transform:translateX(50%) translateY(-50%);'
+            )
+          } else if (direction === 'rightdown') {
+            el?.setAttribute(
+              'style',
+              'right:0;bottom:0;transform:translateX(50%) translateY(50%);'
+            )
+          } else if (direction === 'leftup') {
+            el?.setAttribute(
+              'style',
+              'left:0;top:0;transform:translateX(-50%) translateY(-50%);'
+            )
+          } else {
+            el?.setAttribute(
+              'style',
+              'left:0;bottom:0;transform:translateX(-50%) translateY(50%);'
+            )
+          }
+        }
+      }
+      const otherHandles = document.getElementsByClassName(
+        'resizer-handle-default'
+      )
+      for (let i = 0; i < otherHandles.length; i++) {
+        const el = otherHandles.item(i)
+        el?.classList.add('hide')
+      }
+      this.markerCache.start.x = element.start.x
+      this.markerCache.start.y = element.start.y
+      this.markerCache.end.x = element.end.x
+      this.markerCache.end.y = element.end.y
+      const parent = this.draw.getPage().parentElement!
+      const width = this.draw.getCanvasWidth()
+      const height = this.draw.getCanvasHeight()
+      this.markerCanvas!.width = width
+      this.markerCanvas!.height = height
+      this.markerCanvas.style.pointerEvents = 'none'
+      this.markerCanvas!.style.width = this.draw.getWidth() + 'px'
+      this.markerCanvas!.style.height = this.draw.getHeight() + 'px'
+      this.markerCanvas!.style.position = 'absolute'
+      this.markerCanvas!.style.top = '0'
+      this.markerCanvas!.style.left = '0'
+      this.markerCanvas!.style.top = '0'
+      this.markerCanvas!.style.bottom = '0'
+
+      parent.appendChild(this.markerCanvas!)
+
+      const ctx = this.markerCanvas!.getContext('2d')!
+      const dpr = this.draw.getPagePixelRatio()
+      ctx.scale(dpr, dpr)
+      // 重置以下属性是因部分浏览器(chrome)会应用css样式
+      ctx.letterSpacing = '0px'
+      ctx.wordSpacing = '0px'
+      ctx.direction = 'ltr'
+      ctx.clearRect(0, 0, width, height)
+      ctx.fillStyle = 'rgba(255,255,255,0.7)'
+      ctx.fillRect(0, 0, width, height)
+      ctx.lineWidth = 2
+      ctx.strokeStyle = 'red'
+      ctx.beginPath()
+      ctx.moveTo(
+        element.start!.x * this.draw.getOptions().scale,
+        element.start!.y * this.draw.getOptions().scale
+      )
+      ctx.lineTo(
+        element.end!.x * this.draw.getOptions().scale,
+        element.end!.y * this.draw.getOptions().scale
+      )
+      ctx.stroke()
+      this.markerCtx = ctx
     } else if (position) {
+      this.markerCanvas.remove()
+      const handles = document.getElementsByClassName('resizer-handle-default')
+      for (let i = 0; i < handles.length; i++) {
+        const el = handles.item(i)
+        el?.classList.remove('hide')
+      }
+      const otherHandles = document.getElementsByClassName(
+        'resizer-handle-mark'
+      )
+      for (let i = 0; i < otherHandles.length; i++) {
+        const el = otherHandles.item(i)
+        el?.classList.add('hide')
+      }
       const {
         coordinate: {
           leftTop: [left, top]
@@ -100,13 +265,22 @@ export class Previewer {
     resizerSelection.style.borderWidth = `${scale}px`
     // 拖拽点
     const resizerHandleList: HTMLDivElement[] = []
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < 10; i++) {
       const handleDom = document.createElement('div')
       handleDom.style.background = this.options.resizerColor
       handleDom.classList.add(`resizer-handle`)
       handleDom.classList.add(`handle-${i}`)
-      handleDom.setAttribute('data-index', String(i))
-      handleDom.onmousedown = this._mousedown.bind(this)
+
+      if (i > 7) {
+        handleDom.classList.add('resizer-handle-mark', 'hide')
+        handleDom.style.display = 'none'
+        handleDom.onmousedown = this._markerMouseDown.bind(this)
+      } else {
+        handleDom.classList.add('resizer-handle-default')
+        handleDom.onmousedown = this._mousedown.bind(this)
+        handleDom.setAttribute('data-index', String(i))
+      }
+
       resizerSelection.append(handleDom)
       resizerHandleList.push(handleDom)
     }
@@ -124,6 +298,8 @@ export class Previewer {
     const resizerImage = document.createElement('img')
     resizerImageContainer.append(resizerImage)
     this.container.append(resizerImageContainer)
+    //marker canvas
+
     return {
       resizerSelection,
       resizerHandleList,
@@ -193,6 +369,67 @@ export class Previewer {
     evt.preventDefault()
   }
 
+  private _updateMarkerCanvas() {
+    const ctx = this.markerCtx!
+    ctx.beginPath()
+    ctx.clearRect(0, 0, this.markerCanvas.width, this.markerCanvas.height)
+    ctx.fillRect(0, 0, this.markerCanvas.width, this.markerCanvas.height)
+    ctx.moveTo(
+      this.markerCache.start.x * this.draw.getOptions().scale,
+      this.markerCache.start!.y * this.draw.getOptions().scale
+    )
+    ctx.lineTo(
+      this.markerCache.end!.x * this.draw.getOptions().scale,
+      this.markerCache.end!.y * this.draw.getOptions().scale
+    )
+    ctx.stroke()
+  }
+
+  private _markerMouseUp = (evt: MouseEvent) => {
+    evt.preventDefault()
+    this.curElement!.start!.x = this.markerCache.start.x
+    this.curElement!.start!.y = this.markerCache.start!.y
+    this.curElement!.end!.x = this.markerCache.end!.x
+    this.curElement!.end!.y = this.markerCache.end!.y
+    this.draw.render({
+      isSetCursor: false,
+      curIndex: this.curPosition?.index
+    })
+    document.removeEventListener('mousemove', this._markerMouseMove)
+    document.removeEventListener('mouseup', this._markerMouseUp)
+  }
+  private _markerMouseMove = (evt: MouseEvent) => {
+    evt.preventDefault()
+    if (!this.markerCache.movingEnd) {
+      return
+    }
+    const dx = (this.mousedownX - evt.x) / this.options.scale
+    const dy = (this.mousedownY - evt.y) / this.options.scale
+    if (this.markerCache.movingEnd === 'end') {
+      this.markerCache.end.x = this.curElement!.end!.x - dx
+      this.markerCache.end.y = this.curElement!.end!.y - dy
+    }
+    if (this.markerCache.movingEnd === 'start') {
+      this.markerCache.start.x = this.curElement!.start!.x - dx
+      this.markerCache.start.y = this.curElement!.start!.y - dy
+    }
+    this._updateMarkerCanvas()
+    // 更新预览包围框尺寸
+    this._updateResizerRectForMark()
+
+
+    
+  }
+
+  private _markerMouseDown(evt: MouseEvent) {
+    evt.preventDefault()
+    this.markerCache.movingEnd = (evt.target as HTMLDivElement).dataset.end!
+    this.mousedownX = evt.x
+    this.mousedownY = evt.y
+    document.addEventListener('mousemove', this._markerMouseMove)
+    document.addEventListener('mouseup', this._markerMouseUp)
+  }
+
   private _mousemove(evt: MouseEvent) {
     if (!this.curElement || this.previewerDrawOption.dragDisable) return
     const { scale } = this.options
@@ -259,11 +496,12 @@ export class Previewer {
     // 更新预览包围框尺寸
     this._updateResizerRect(elementWidth, elementHeight)
     // 尺寸预览
-    this._updateResizerSizeView(elementWidth, elementHeight)
+    // this._updateResizerSizeView(elementWidth, elementHeight)
     evt.preventDefault()
   }
 
   private _drawPreviewer() {
+    console.log('???????')
     const previewerContainer = document.createElement('div')
     previewerContainer.classList.add(`${EDITOR_PREFIX}-image-previewer`)
     // 关闭按钮
@@ -375,6 +613,7 @@ export class Previewer {
     y: number
   ) {
     if (!this.previewerImage) return
+    console.log('set!')
     this.previewerImage.style.left = `${x}px`
     this.previewerImage.style.top = `${y}px`
     this.previewerImage.style.transform = `scale(${scale}) rotate(${
@@ -412,6 +651,92 @@ export class Previewer {
     }
   }
 
+  public _updateResizerRectForMark() {
+    let direction = ''
+    if (this.markerCache.start.x < this.markerCache.end.x) {
+      if (this.markerCache.start.y < this.markerCache.end.y) {
+        direction = 'rightdown'
+      } else {
+        direction = 'rightup'
+      }
+    } else {
+      if (this.markerCache.start.y < this.markerCache.end.y) {
+        direction = 'leftdown'
+      } else {
+        direction = 'leftup'
+      }
+    }
+    //Mark元素只保留两个位置
+    const handles = document.getElementsByClassName('resizer-handle-mark')
+    for (let i = 0; i < handles.length; i++) {
+      const el = handles.item(i)
+      el?.classList.remove('hide')
+      if (i === 0) {
+        el?.setAttribute('data-end', 'start')
+        //start handle
+        if (direction === 'rightup') {
+          el?.setAttribute(
+            'style',
+            'left:0;bottom:0;transform:translateX(-50%) translateY(50%);'
+          )
+        } else if (direction === 'rightdown') {
+          el?.setAttribute(
+            'style',
+            'left:0;top:0;transform:translateX(-50%) translateY(-50%);'
+          )
+        } else if (direction === 'leftup') {
+          el?.setAttribute(
+            'style',
+            'right:0;bottom:0;transform:translateX(50%) translateY(50%);'
+          )
+        } else {
+          el?.setAttribute(
+            'style',
+            'right:0;top:0;transform:translateX(50%) translateY(-50%);'
+          )
+        }
+      } else {
+        //end handle
+        el?.setAttribute('data-end', 'end')
+        if (direction === 'rightup') {
+          el?.setAttribute(
+            'style',
+            'right:0;top:0;transform:translateX(50%) translateY(-50%);'
+          )
+        } else if (direction === 'rightdown') {
+          el?.setAttribute(
+            'style',
+            'right:0;bottom:0;transform:translateX(50%) translateY(50%);'
+          )
+        } else if (direction === 'leftup') {
+          el?.setAttribute(
+            'style',
+            'left:0;top:0;transform:translateX(-50%) translateY(-50%);'
+          )
+        } else {
+          el?.setAttribute(
+            'style',
+            'left:0;bottom:0;transform:translateX(-50%) translateY(50%);'
+          )
+        }
+      }
+    }
+    //TODO:更行
+    const { scale } = this.options
+    const elementWidth =
+      Math.abs(this.markerCache.start!.x - this.markerCache.end!.x) * scale
+    const elementHeight =
+      Math.abs(this.markerCache.start!.y - this.markerCache.end!.y) * scale
+    const x = Math.min(this.markerCache.start.x, this.markerCache.end.x)
+    const y = Math.min(this.markerCache.start.y, this.markerCache.end.y)
+    this.resizerSelection.style.left = `${x}px`
+    this.resizerSelection.style.top = `${y}px`
+    this.resizerSelection.style.borderWidth = `${scale}px`
+    // 更新预览包围框尺寸
+    this._updateResizerRect(elementWidth, elementHeight)
+    this._updateResizerSizeView(elementWidth, elementHeight)
+  }
+
   public _updateResizerSizeView(width: number, height: number) {
     this.resizerSize.innerText = `${Math.round(width)} × ${Math.round(height)}`
   }
@@ -440,8 +765,12 @@ export class Previewer {
     position: IElementPosition | null = null
   ) {
     const { scale } = this.options
-    const elementWidth = element.width! * scale
-    const elementHeight = element.height! * scale
+    let elementWidth = element.width! * scale
+    let elementHeight = element.height! * scale
+    if (element.type === ElementType.MARK) {
+      elementWidth = Math.abs(element.start!.x - element.end!.x)
+      elementHeight = Math.abs(element.start!.y - element.end!.y)
+    }
     // 尺寸预览
     this._updateResizerSizeView(elementWidth, elementHeight)
     // 优先使用浮动位置信息
@@ -465,5 +794,6 @@ export class Previewer {
   public clearResizer() {
     this.resizerSelection.style.display = 'none'
     document.removeEventListener('keydown', this._keydown)
+    this.markerCanvas.remove()
   }
 }

@@ -1,4 +1,4 @@
-import { commentList, data, options } from './mock'
+import {  data, options } from './mock'
 import './style.css'
 import prism from 'prismjs'
 import Editor, {
@@ -6,7 +6,6 @@ import Editor, {
   Command,
   ControlType,
   EditorMode,
-  EditorZone,
   ElementType,
   IBlock,
   ICatalogItem,
@@ -24,7 +23,8 @@ import Editor, {
 import { Dialog } from './components/dialog/Dialog'
 import { formatPrismToken } from './utils/prism'
 import { Signature } from './components/signature/Signature'
-import { debounce, nextTick, scrollIntoView } from './utils'
+import { debounce, nextTick } from './utils'
+import { IMarkType } from './editor/interface/Editor'
 
 window.onload = function () {
   const isApple =
@@ -36,27 +36,27 @@ window.onload = function () {
     container,
     {
       header: [
-        {
-          value: '第一人民医院',
-          size: 32,
-          rowFlex: RowFlex.CENTER
-        },
-        {
-          value: '\n门诊病历',
-          size: 18,
-          rowFlex: RowFlex.CENTER
-        },
-        {
-          value: '\n',
-          type: ElementType.SEPARATOR
-        }
+        // {
+        //   value: '第一人民医院',
+        //   size: 32,
+        //   rowFlex: RowFlex.CENTER
+        // },
+        // {
+        //   value: '\n门诊病历',
+        //   size: 18,
+        //   rowFlex: RowFlex.CENTER
+        // },
+        // {
+        //   value: '\n',
+        //   type: ElementType.SEPARATOR
+        // }
       ],
       main: <IElement[]>data,
       footer: [
-        {
-          value: 'canvas-editor',
-          size: 12
-        }
+        // {
+        //   value: 'canvas-editor',
+        //   size: 12
+        // }
       ]
     },
     options
@@ -1485,61 +1485,61 @@ window.onload = function () {
     })
   }
 
-  // 模拟批注
-  const commentDom = document.querySelector<HTMLDivElement>('.comment')!
-  async function updateComment() {
-    const groupIds = await instance.command.getGroupIds()
-    for (const comment of commentList) {
-      const activeCommentDom = commentDom.querySelector<HTMLDivElement>(
-        `.comment-item[data-id='${comment.id}']`
-      )
-      // 编辑器是否存在对应成组id
-      if (groupIds.includes(comment.id)) {
-        // 当前dom是否存在-不存在则追加
-        if (!activeCommentDom) {
-          const commentItem = document.createElement('div')
-          commentItem.classList.add('comment-item')
-          commentItem.setAttribute('data-id', comment.id)
-          commentItem.onclick = () => {
-            instance.command.executeLocationGroup(comment.id)
-          }
-          commentDom.append(commentItem)
-          // 选区信息
-          const commentItemTitle = document.createElement('div')
-          commentItemTitle.classList.add('comment-item__title')
-          commentItemTitle.append(document.createElement('span'))
-          const commentItemTitleContent = document.createElement('span')
-          commentItemTitleContent.innerText = comment.rangeText
-          commentItemTitle.append(commentItemTitleContent)
-          const closeDom = document.createElement('i')
-          closeDom.onclick = () => {
-            instance.command.executeDeleteGroup(comment.id)
-          }
-          commentItemTitle.append(closeDom)
-          commentItem.append(commentItemTitle)
-          // 基础信息
-          const commentItemInfo = document.createElement('div')
-          commentItemInfo.classList.add('comment-item__info')
-          const commentItemInfoName = document.createElement('span')
-          commentItemInfoName.innerText = comment.userName
-          const commentItemInfoDate = document.createElement('span')
-          commentItemInfoDate.innerText = comment.createdDate
-          commentItemInfo.append(commentItemInfoName)
-          commentItemInfo.append(commentItemInfoDate)
-          commentItem.append(commentItemInfo)
-          // 详细评论
-          const commentItemContent = document.createElement('div')
-          commentItemContent.classList.add('comment-item__content')
-          commentItemContent.innerText = comment.content
-          commentItem.append(commentItemContent)
-          commentDom.append(commentItem)
-        }
-      } else {
-        // 编辑器内不存在对应成组id则dom则移除
-        activeCommentDom?.remove()
-      }
-    }
-  }
+  // // 模拟批注
+  // const commentDom = document.querySelector<HTMLDivElement>('.comment')!
+  // async function updateComment() {
+  //   const groupIds = await instance.command.getGroupIds()
+  //   for (const comment of commentList) {
+  //     const activeCommentDom = commentDom.querySelector<HTMLDivElement>(
+  //       `.comment-item[data-id='${comment.id}']`
+  //     )
+  //     // 编辑器是否存在对应成组id
+  //     if (groupIds.includes(comment.id)) {
+  //       // 当前dom是否存在-不存在则追加
+  //       if (!activeCommentDom) {
+  //         const commentItem = document.createElement('div')
+  //         commentItem.classList.add('comment-item')
+  //         commentItem.setAttribute('data-id', comment.id)
+  //         commentItem.onclick = () => {
+  //           instance.command.executeLocationGroup(comment.id)
+  //         }
+  //         commentDom.append(commentItem)
+  //         // 选区信息
+  //         const commentItemTitle = document.createElement('div')
+  //         commentItemTitle.classList.add('comment-item__title')
+  //         commentItemTitle.append(document.createElement('span'))
+  //         const commentItemTitleContent = document.createElement('span')
+  //         commentItemTitleContent.innerText = comment.rangeText
+  //         commentItemTitle.append(commentItemTitleContent)
+  //         const closeDom = document.createElement('i')
+  //         closeDom.onclick = () => {
+  //           instance.command.executeDeleteGroup(comment.id)
+  //         }
+  //         commentItemTitle.append(closeDom)
+  //         commentItem.append(commentItemTitle)
+  //         // 基础信息
+  //         const commentItemInfo = document.createElement('div')
+  //         commentItemInfo.classList.add('comment-item__info')
+  //         const commentItemInfoName = document.createElement('span')
+  //         commentItemInfoName.innerText = comment.userName
+  //         const commentItemInfoDate = document.createElement('span')
+  //         commentItemInfoDate.innerText = comment.createdDate
+  //         commentItemInfo.append(commentItemInfoName)
+  //         commentItemInfo.append(commentItemInfoDate)
+  //         commentItem.append(commentItemInfo)
+  //         // 详细评论
+  //         const commentItemContent = document.createElement('div')
+  //         commentItemContent.classList.add('comment-item__content')
+  //         commentItemContent.innerText = comment.content
+  //         commentItem.append(commentItemContent)
+  //         commentDom.append(commentItem)
+  //       }
+  //     } else {
+  //       // 编辑器内不存在对应成组id则dom则移除
+  //       activeCommentDom?.remove()
+  //     }
+  //   }
+  // }
   // 8. 内部事件监听
   instance.listener.rangeStyleChange = function (payload) {
     // 控件类型
@@ -1692,22 +1692,22 @@ window.onload = function () {
       listDom.classList.remove('active')
     }
 
-    // 批注
-    commentDom
-      .querySelectorAll<HTMLDivElement>('.comment-item')
-      .forEach(commentItemDom => {
-        commentItemDom.classList.remove('active')
-      })
-    if (payload.groupIds) {
-      const [id] = payload.groupIds
-      const activeCommentDom = commentDom.querySelector<HTMLDivElement>(
-        `.comment-item[data-id='${id}']`
-      )
-      if (activeCommentDom) {
-        activeCommentDom.classList.add('active')
-        scrollIntoView(commentDom, activeCommentDom)
-      }
-    }
+    // // 批注
+    // commentDom
+    //   .querySelectorAll<HTMLDivElement>('.comment-item')
+    //   .forEach(commentItemDom => {
+    //     commentItemDom.classList.remove('active')
+    //   })
+    // if (payload.groupIds) {
+    //   const [id] = payload.groupIds
+    //   const activeCommentDom = commentDom.querySelector<HTMLDivElement>(
+    //     `.comment-item[data-id='${id}']`
+    //   )
+    //   if (activeCommentDom) {
+    //     activeCommentDom.classList.add('active')
+    //     scrollIntoView(commentDom, activeCommentDom)
+    //   }
+    // }
   }
 
   instance.listener.visiblePageNoListChange = function (payload) {
@@ -1775,9 +1775,9 @@ window.onload = function () {
       })
     }
     // 批注
-    nextTick(() => {
-      updateComment()
-    })
+    // nextTick(() => {
+    //   updateComment()
+    // })
   }
   instance.listener.contentChange = debounce(handleContentChange, 200)
   handleContentChange()
@@ -1788,44 +1788,44 @@ window.onload = function () {
 
   // 9. 右键菜单注册
   instance.register.contextMenuList([
-    {
-      name: '批注',
-      when: payload => {
-        return (
-          !payload.isReadonly &&
-          payload.editorHasSelection &&
-          payload.zone === EditorZone.MAIN
-        )
-      },
-      callback: (command: Command) => {
-        new Dialog({
-          title: '批注',
-          data: [
-            {
-              type: 'textarea',
-              label: '批注',
-              height: 100,
-              name: 'value',
-              required: true,
-              placeholder: '请输入批注'
-            }
-          ],
-          onConfirm: payload => {
-            const value = payload.find(p => p.name === 'value')?.value
-            if (!value) return
-            const groupId = command.executeSetGroup()
-            if (!groupId) return
-            commentList.push({
-              id: groupId,
-              content: value,
-              userName: 'Hufe',
-              rangeText: command.getRangeText(),
-              createdDate: new Date().toLocaleString()
-            })
-          }
-        })
-      }
-    },
+    // {
+    //   name: '批注',
+    //   when: payload => {
+    //     return (
+    //       !payload.isReadonly &&
+    //       payload.editorHasSelection &&
+    //       payload.zone === EditorZone.MAIN
+    //     )
+    //   },
+    //   callback: (command: Command) => {
+    //     new Dialog({
+    //       title: '批注',
+    //       data: [
+    //         {
+    //           type: 'textarea',
+    //           label: '批注',
+    //           height: 100,
+    //           name: 'value',
+    //           required: true,
+    //           placeholder: '请输入批注'
+    //         }
+    //       ],
+    //       onConfirm: payload => {
+    //         const value = payload.find(p => p.name === 'value')?.value
+    //         if (!value) return
+    //         const groupId = command.executeSetGroup()
+    //         if (!groupId) return
+    //         commentList.push({
+    //           id: groupId,
+    //           content: value,
+    //           userName: 'Hufe',
+    //           rangeText: command.getRangeText(),
+    //           createdDate: new Date().toLocaleString()
+    //         })
+    //       }
+    //     })
+    //   }
+    // },
     {
       name: '签名',
       icon: 'signature',
@@ -1911,4 +1911,13 @@ window.onload = function () {
       }
     }
   ])
+  // 11. 自定义标记功能: 直线、箭头、文本框
+  const makeLine = document.querySelector<HTMLDivElement>('.menu-item__line')!
+  makeLine.title = `直线标记`
+  makeLine.onclick = function () {
+    // console.log('print')
+    // instance.command.executePrint()
+    // console.log('markline')
+    instance.command.executeStartMark(IMarkType.LINE)
+  }
 }

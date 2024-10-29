@@ -147,6 +147,7 @@ export class Position {
       const tablePreY = y
       for (let j = 0; j < curRow.elementList.length; j++) {
         const element = curRow.elementList[j]
+
         const metrics = element.metrics
         const offsetY =
           (element.imgDisplay !== ImageDisplay.INLINE &&
@@ -199,6 +200,25 @@ export class Position {
           }
           this.floatPositionList.push({
             pageNo,
+            element,
+            position: positionItem,
+            isTable: payload.isTable,
+            index: payload.index,
+            tdIndex: payload.tdIndex,
+            trIndex: payload.trIndex,
+            tdValueIndex: index,
+            zone
+          })
+        }
+        if (element.type == ElementType.MARK) {
+          // 浮动元素使用上一位置信息
+          const prePosition = positionList[positionList.length - 1]
+          if (prePosition) {
+            positionItem.metrics = prePosition.metrics
+            positionItem.coordinate = prePosition.coordinate
+          }
+          this.floatPositionList.push({
+            pageNo: pageNo,
             element,
             position: positionItem,
             isTable: payload.isTable,
@@ -366,7 +386,10 @@ export class Position {
         ...payload,
         imgDisplays: [ImageDisplay.FLOAT_TOP, ImageDisplay.SURROUND]
       })
-      if (floatTopPosition) return floatTopPosition
+      if (floatTopPosition) {
+        // ('float top index', floatTopPosition.index, payload)
+        return floatTopPosition
+      }
     }
     // 普通元素
     for (let j = 0; j < positionList.length; j++) {
@@ -707,6 +730,43 @@ export class Position {
           }
         }
       }
+
+      if (
+        currentPageNo === pageNo &&
+        element.type === ElementType.MARK &&
+        payload.imgDisplays.includes(ImageDisplay.FLOAT_TOP)
+      ) {
+        const leftX = Math.min(element.start!.x, element.end!.x)
+        const width = Math.abs(element.start!.x - element.end!.x)
+        const topY = Math.min(element.start!.y, element.end!.y)
+        const height = Math.abs(element.start!.y - element.end!.y)
+        if (
+          x >= leftX &&
+          x <= leftX + width &&
+          y >= topY &&
+          y <= topY + height!
+        ) {
+          if (isTable) {
+            return {
+              index: index!,
+              isDirectHit: true,
+              isMark: true,
+              isTable,
+              trIndex,
+              tdIndex,
+              tdValueIndex,
+              tdId: element.tdId,
+              trId: element.trId,
+              tableId: element.tableId
+            }
+          }
+          return {
+            index: position.index,
+            isDirectHit: true,
+            isMark: true
+          }
+        }
+      }
     }
   }
 
@@ -721,6 +781,7 @@ export class Position {
       this.draw.getMode() !== EditorMode.READONLY
     ) {
       const { index, isTable, trIndex, tdIndex, tdValueIndex } = positionResult
+
       const control = this.draw.getControl()
       const { newIndex } = control.moveCursor({
         index,
@@ -735,6 +796,7 @@ export class Position {
         positionResult.index = newIndex
       }
     }
+
     const {
       index,
       isCheckbox,
@@ -747,7 +809,8 @@ export class Position {
       tdIndex,
       tdId,
       trId,
-      tableId
+      tableId,
+      isMark
     } = positionResult
     // 设置位置上下文
     this.setPositionContext({
@@ -757,6 +820,7 @@ export class Position {
       isControl: isControl || false,
       isImage: isImage || false,
       isDirectHit: isDirectHit || false,
+      isMark: isMark || false,
       index,
       trIndex,
       tdIndex,
