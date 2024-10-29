@@ -1,4 +1,4 @@
-import { nextTick } from 'process'
+
 import { EDITOR_PREFIX } from '../../../../dataset/constant/Editor'
 import { ElementType } from '../../../../dataset/enum/Element'
 import { IEditorOption } from '../../../../interface/Editor'

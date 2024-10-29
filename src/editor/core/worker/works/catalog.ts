@@ -27,7 +27,8 @@ enum ElementType {
   DATE = 'date',
   BLOCK = 'block',
   TITLE = 'title',
-  LIST = 'list'
+  LIST = 'list',
+  MARK = 'mark'
 }
 
 enum TitleLevel {

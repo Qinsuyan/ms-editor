@@ -1,5 +1,4 @@
 import { EDITOR_PREFIX } from '../../../dataset/constant/Editor'
-import { ImageDisplay } from '../../../dataset/enum/Common'
 import { IEditorOption } from '../../../interface/Editor'
 import { IElement } from '../../../interface/Element'
 import { convertStringToBase64 } from '../../../utils'
