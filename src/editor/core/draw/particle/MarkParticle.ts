@@ -1,5 +1,5 @@
 import { EDITOR_PREFIX } from '../../../dataset/constant/Editor'
-import { IEditorOption } from '../../../interface/Editor'
+import { IEditorOption, IMarkType } from '../../../interface/Editor'
 import { IElement } from '../../../interface/Element'
 import { Draw } from '../Draw'
 
@@ -49,11 +49,16 @@ export class MarkParticle {
     const preY = this.draw.getPageNo() * (height + pageGap)
     floatImageContainer.style.left = `${leftX}px`
     floatImageContainer.style.top = `${preY + topY}px`
-    floatImage.src = this._getLineBase64(element.start!, element.end!)
+    floatImage.src = this._getLineBase64(
+      element.start!,
+      element.end!,
+      element.markType!
+    )
   }
   private _getLineBase64(
     start: { x: number; y: number },
-    end: { x: number; y: number }
+    end: { x: number; y: number },
+    type: IMarkType
   ) {
     // 计算矩形区域的坐标和宽高，并加1确保包含整条直线
     const minX = Math.min(start.x, end.x)
@@ -75,6 +80,28 @@ export class MarkParticle {
       ctx.lineTo(end.x - minX, end.y - minY)
       ctx.strokeStyle = 'red'
       ctx.lineWidth = 2
+      if (type === IMarkType.ARROW) {
+        // 箭头长度
+        const arrowLength = 15
+        // 箭头角度（30度转为弧度）
+        const angle = Math.PI / 6
+        // 计算直线的角度
+        const lineAngle = Math.atan2(end.y - start.y, end.x - start.x)
+        // 计算箭头两侧的点
+        const arrowPoint1 = {
+          x: end.x - minX - arrowLength * Math.cos(lineAngle - angle),
+          y: end.y - minY - arrowLength * Math.sin(lineAngle - angle)
+        }
+        const arrowPoint2 = {
+          x: end.x - minX - arrowLength * Math.cos(lineAngle + angle),
+          y: end.y - minY - arrowLength * Math.sin(lineAngle + angle)
+        }
+        // 绘制箭头的两条短线
+        ctx.moveTo(end.x - minX, end.y - minY)
+        ctx.lineTo(arrowPoint1.x, arrowPoint1.y)
+        ctx.moveTo(end.x - minX, end.y - minY)
+        ctx.lineTo(arrowPoint2.x, arrowPoint2.y)
+      }
       ctx.stroke()
     }
 
@@ -111,6 +138,31 @@ export class MarkParticle {
     ctx.beginPath()
     ctx.moveTo(element.start!.x * scale, element.start!.y * scale)
     ctx.lineTo(element.end!.x * scale, element.end!.y * scale)
+    if (element.markType === IMarkType.ARROW) {
+      // 箭头长度
+      const arrowLength = 15
+      // 箭头角度（30度转为弧度）
+      const angle = Math.PI / 6
+      // 计算直线的角度
+      const lineAngle = Math.atan2(
+        element.end!.y - element.start!.y,
+        element.end!.x - element.start!.x
+      )
+      // 计算箭头两侧的点
+      const arrowPoint1 = {
+        x: element.end!.x - arrowLength * Math.cos(lineAngle - angle),
+        y: element.end!.y - arrowLength * Math.sin(lineAngle - angle)
+      }
+      const arrowPoint2 = {
+        x: element.end!.x - arrowLength * Math.cos(lineAngle + angle),
+        y: element.end!.y - arrowLength * Math.sin(lineAngle + angle)
+      }
+      // 绘制箭头的两条短线
+      ctx.moveTo(element.end!.x, element.end!.y)
+      ctx.lineTo(arrowPoint1.x, arrowPoint1.y)
+      ctx.moveTo(element.end!.x, element.end!.y)
+      ctx.lineTo(arrowPoint2.x, arrowPoint2.y)
+    }
     ctx.stroke()
     ctx.restore()
   }

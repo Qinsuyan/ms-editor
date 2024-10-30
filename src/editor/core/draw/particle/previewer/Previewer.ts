@@ -1,6 +1,6 @@
 import { EDITOR_PREFIX } from '../../../../dataset/constant/Editor'
 import { ElementType } from '../../../../dataset/enum/Element'
-import { IEditorOption } from '../../../../interface/Editor'
+import { IEditorOption, IMarkType } from '../../../../interface/Editor'
 import { IElement, IElementPosition } from '../../../../interface/Element'
 import {
   IPreviewerCreateResult,
@@ -206,9 +206,7 @@ export class Previewer {
       this.markerCanvas!.style.height = this.draw.getHeight() + 'px'
       this.markerCanvas!.style.left = '0'
       this.markerCanvas!.style.right = '0'
-
       parent.appendChild(this.markerCanvas!)
-
       const ctx = this.markerCanvas!.getContext('2d')!
       const dpr = this.draw.getPagePixelRatio()
       ctx.scale(dpr, dpr)
@@ -230,6 +228,29 @@ export class Previewer {
         element.end!.x * this.draw.getOptions().scale,
         element.end!.y * this.draw.getOptions().scale
       )
+      if(element.markType === IMarkType.ARROW){
+          // 箭头长度
+          const arrowLength = 15
+          // 箭头角度（30度转为弧度）
+          const angle = Math.PI / 6
+          // 计算直线的角度
+          const lineAngle = Math.atan2(element.end.y - element.start.y, element.end.x - element.start.x)
+          // 计算箭头两侧的点
+          const arrowPoint1 = {
+            x: element.end.x - arrowLength * Math.cos(lineAngle - angle),
+            y: element.end.y - arrowLength * Math.sin(lineAngle - angle)
+          }
+          const arrowPoint2 = {
+            x:element. end.x - arrowLength * Math.cos(lineAngle + angle),
+            y: element.end.y - arrowLength * Math.sin(lineAngle + angle)
+          }
+          // 绘制箭头的两条短线
+          ctx.moveTo(element.end.x, element.end.y)
+          ctx.lineTo(arrowPoint1.x, arrowPoint1.y)
+          ctx.moveTo(element.end.x, element.end.y)
+          ctx.lineTo(arrowPoint2.x, arrowPoint2.y)
+        
+      }
       ctx.stroke()
       this.markerCtx = ctx
     } else if (position) {
@@ -385,6 +406,29 @@ export class Previewer {
       this.markerCache.end!.x * this.draw.getOptions().scale,
       this.markerCache.end!.y * this.draw.getOptions().scale
     )
+    if(this.curElement?.markType === IMarkType.ARROW){
+      // 箭头长度
+      const arrowLength = 15
+      // 箭头角度（30度转为弧度）
+      const angle = Math.PI / 6
+      // 计算直线的角度
+      const lineAngle = Math.atan2( this.markerCache.end.y -  this.markerCache.start.y,  this.markerCache.end.x -  this.markerCache.start.x)
+      // 计算箭头两侧的点
+      const arrowPoint1 = {
+        x:  this.markerCache.end.x - arrowLength * Math.cos(lineAngle - angle),
+        y:  this.markerCache.end.y - arrowLength * Math.sin(lineAngle - angle)
+      }
+      const arrowPoint2 = {
+        x: this.markerCache. end.x - arrowLength * Math.cos(lineAngle + angle),
+        y:  this.markerCache.end.y - arrowLength * Math.sin(lineAngle + angle)
+      }
+      // 绘制箭头的两条短线
+      ctx.moveTo( this.markerCache.end.x,  this.markerCache.end.y)
+      ctx.lineTo(arrowPoint1.x, arrowPoint1.y)
+      ctx.moveTo( this.markerCache.end.x,  this.markerCache.end.y)
+      ctx.lineTo(arrowPoint2.x, arrowPoint2.y)
+    
+  }
     ctx.stroke()
   }
 

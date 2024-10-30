@@ -1915,9 +1915,11 @@ window.onload = function () {
   const makeLine = document.querySelector<HTMLDivElement>('.menu-item__line')!
   makeLine.title = `直线标记`
   makeLine.onclick = function () {
-    // console.log('print')
-    // instance.command.executePrint()
-    // console.log('markline')
     instance.command.executeStartMark(IMarkType.LINE)
+  }
+  const makeArrow = document.querySelector<HTMLDivElement>('.menu-item__arrow')!
+  makeArrow.title = `箭头标记`
+  makeArrow.onclick = function () {
+    instance.command.executeStartMark(IMarkType.ARROW)
   }
 }

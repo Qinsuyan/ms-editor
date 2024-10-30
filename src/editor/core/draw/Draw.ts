@@ -2711,6 +2711,7 @@ export class Draw {
   private _makeMarkEl(
     start: { x: number; y: number },
     end: { x: number; y: number },
+    type: IMarkType,
     parentEl: HTMLElement
   ) {
     // 创建 canvas，与父元素同样大小
@@ -2731,7 +2732,8 @@ export class Draw {
     // 绘制直线的函数
     const drawLine = (
       start: { x: number; y: number },
-      end: { x: number; y: number }
+      end: { x: number; y: number },
+      type: IMarkType
     ) => {
       // 清空画布
       ctx.clearRect(0, 0, canvas.width, canvas.height)
@@ -2742,18 +2744,40 @@ export class Draw {
       ctx.lineTo(end.x, end.y)
       ctx.strokeStyle = 'red'
       ctx.lineWidth = 2
+      if (type === IMarkType.ARROW) {
+        // 箭头长度
+        const arrowLength = 15
+        // 箭头角度（30度转为弧度）
+        const angle = Math.PI / 6
+        // 计算直线的角度
+        const lineAngle = Math.atan2(end.y - start.y, end.x - start.x)
+        // 计算箭头两侧的点
+        const arrowPoint1 = {
+          x: end.x - arrowLength * Math.cos(lineAngle - angle),
+          y: end.y - arrowLength * Math.sin(lineAngle - angle)
+        }
+        const arrowPoint2 = {
+          x: end.x - arrowLength * Math.cos(lineAngle + angle),
+          y: end.y - arrowLength * Math.sin(lineAngle + angle)
+        }
+        // 绘制箭头的两条短线
+        ctx.moveTo(end.x, end.y)
+        ctx.lineTo(arrowPoint1.x, arrowPoint1.y)
+        ctx.moveTo(end.x, end.y)
+        ctx.lineTo(arrowPoint2.x, arrowPoint2.y)
+      }
       ctx.stroke()
     }
 
     // 初始绘制
-    drawLine(start, end)
+    drawLine(start, end, type)
 
     // 更新端点位置的方法
     const updatePosition = (
       newStart: { x: number; y: number },
       newEnd: { x: number; y: number }
     ) => {
-      drawLine(newStart, newEnd)
+      drawLine(newStart, newEnd, type)
     }
 
     return { element: canvas, updatePosition }
@@ -2780,7 +2804,6 @@ export class Draw {
         return
       }
       marks.endPosition = { x: e.offsetX, y: e.offsetY }
-      //使用DIV创建直线
       marks.doms[marks.pageIndex].updatePosition(
         marks.startPosition,
         marks.endPosition
@@ -2828,7 +2851,7 @@ export class Draw {
       markWrap.className = 'ce-mark-wrap'
       parent.appendChild(markWrap)
       marks.doms.push(
-        this._makeMarkEl({ x: 0, y: 0 }, { x: 0, y: 0 }, markWrap)
+        this._makeMarkEl({ x: 0, y: 0 }, { x: 0, y: 0 }, type, markWrap)
       )
     })
   }

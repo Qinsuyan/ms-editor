@@ -102,7 +102,7 @@ const elementList: IElement[] = [
     value: '',
     start: { x: 511, y: 60 },
     end: { x: 314, y: 180 },
-    markType: IMarkType.LINE
+    markType: IMarkType.ARROW
   },
 ]
 
