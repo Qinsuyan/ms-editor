@@ -791,7 +791,7 @@ ul {
   right: 0;
   top: 0;
   bottom: 0;
-  cursor:crosshair;
+  cursor: crosshair;
 }
 .ce-page-container canvas {
   box-shadow: rgb(158 161 165 / 40%) 0px 2px 12px 0px;
@@ -801,9 +801,7 @@ ul {
   width: 250px;
   height: 650px;
   position: fixed;
-  transform: translateX(420px);
-  top: 200px;
-  left: 50%;
+  right: 20px;
   overflow-y: auto;
 }
 

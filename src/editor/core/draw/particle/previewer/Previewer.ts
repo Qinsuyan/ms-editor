@@ -1,4 +1,3 @@
-
 import { EDITOR_PREFIX } from '../../../../dataset/constant/Editor'
 import { ElementType } from '../../../../dataset/enum/Element'
 import { IEditorOption } from '../../../../interface/Editor'
@@ -109,7 +108,9 @@ export class Previewer {
       this.markerCanvas.remove()
     } else if (element.start && element.end) {
       x = Math.min(element.start.x, element.end.x)
-      y = Math.min(element.start.y, element.end.y)
+      y =
+        Math.min(element.start.y, element.end.y) +
+        (this.draw.getHeight() + this.draw.getPageGap()) * element.pageIndex!
       let direction = ''
       if (element.start.x < element.end.x) {
         if (element.start.y < element.end.y) {
@@ -199,10 +200,12 @@ export class Previewer {
       this.markerCanvas!.style.width = this.draw.getWidth() + 'px'
       this.markerCanvas!.style.height = this.draw.getHeight() + 'px'
       this.markerCanvas!.style.position = 'absolute'
-      this.markerCanvas!.style.top = '0'
+      this.markerCanvas!.style.top =
+        (this.draw.getHeight() + this.draw.getPageGap()) * element.pageIndex! +
+        'px'
+      this.markerCanvas!.style.height = this.draw.getHeight() + 'px'
       this.markerCanvas!.style.left = '0'
-      this.markerCanvas!.style.top = '0'
-      this.markerCanvas!.style.bottom = '0'
+      this.markerCanvas!.style.right = '0'
 
       parent.appendChild(this.markerCanvas!)
 
@@ -416,9 +419,6 @@ export class Previewer {
     this._updateMarkerCanvas()
     // 更新预览包围框尺寸
     this._updateResizerRectForMark()
-
-
-    
   }
 
   private _markerMouseDown(evt: MouseEvent) {
@@ -501,7 +501,6 @@ export class Previewer {
   }
 
   private _drawPreviewer() {
-    console.log('???????')
     const previewerContainer = document.createElement('div')
     previewerContainer.classList.add(`${EDITOR_PREFIX}-image-previewer`)
     // 关闭按钮
@@ -613,7 +612,6 @@ export class Previewer {
     y: number
   ) {
     if (!this.previewerImage) return
-    console.log('set!')
     this.previewerImage.style.left = `${x}px`
     this.previewerImage.style.top = `${y}px`
     this.previewerImage.style.transform = `scale(${scale}) rotate(${
@@ -728,7 +726,10 @@ export class Previewer {
     const elementHeight =
       Math.abs(this.markerCache.start!.y - this.markerCache.end!.y) * scale
     const x = Math.min(this.markerCache.start.x, this.markerCache.end.x)
-    const y = Math.min(this.markerCache.start.y, this.markerCache.end.y)
+    const y =
+      Math.min(this.markerCache.start.y, this.markerCache.end.y) +
+      (this.draw.getHeight() + this.draw.getPageGap()) *
+        this.curElement!.pageIndex!
     this.resizerSelection.style.left = `${x}px`
     this.resizerSelection.style.top = `${y}px`
     this.resizerSelection.style.borderWidth = `${scale}px`

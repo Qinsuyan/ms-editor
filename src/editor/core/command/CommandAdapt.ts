@@ -2146,7 +2146,6 @@ export class CommandAdapt {
   }
   //直线标记
   public startMark(type: IMarkType){
-    console.log('start to mark '+type)
     this.draw.startToMark(type)
   }
 }

@@ -2344,9 +2344,9 @@ export class Draw {
       //渲染标记
       if (
         element.type === ElementType.MARK &&
-        element.pageIndex === floatPosition.pageNo
+        element.pageIndex === pageNo &&
+        imgDisplays.includes(ImageDisplay.FLOAT_TOP)
       ) {
-        //TODO
         this.markParticle.render(ctx, element)
       }
     }
@@ -2766,7 +2766,7 @@ export class Draw {
       startPosition: { x: 0, y: 0 },
       endPosition: { x: 0, y: 0 },
       pageIndex: 0,
-      dom: <ReturnType<Draw['_makeMarkEl']> | null>null
+      doms: <ReturnType<Draw['_makeMarkEl']>[]>[]
     }
     const handleMarkMouseDown = (e: MouseEvent, index: number) => {
       e.stopPropagation()
@@ -2781,7 +2781,10 @@ export class Draw {
       }
       marks.endPosition = { x: e.offsetX, y: e.offsetY }
       //使用DIV创建直线
-      marks.dom?.updatePosition(marks.startPosition, marks.endPosition)
+      marks.doms[marks.pageIndex].updatePosition(
+        marks.startPosition,
+        marks.endPosition
+      )
     }
     const handleMarkMouseUp = (e: MouseEvent) => {
       e.preventDefault()
@@ -2791,17 +2794,23 @@ export class Draw {
       //恢复模式
       this.setMode(previousMode)
       //添加标记元素到元素列表
-      this.range.setRange(this.elementList.length - 1, this.elementList.length - 1)
-      this.insertElementList([
-        {
-          type: ElementType.MARK,
-          value: '',
-          markType: marks.type,
-          pageIndex: marks.pageIndex,
-          start: marks.startPosition,
-          end: marks.endPosition
-        }
-      ])
+      this.range.setRange(
+        this.elementList.length - 1,
+        this.elementList.length - 1
+      )
+      this.appendElementList(
+        [
+          {
+            type: ElementType.MARK,
+            value: '',
+            markType: marks.type,
+            pageIndex: marks.pageIndex,
+            start: marks.startPosition,
+            end: marks.endPosition
+          }
+        ],
+        {}
+      )
       //删除添加的dom
       this.pageList.forEach(canvas => {
         canvas.parentElement?.lastElementChild?.remove()
@@ -2813,10 +2822,14 @@ export class Draw {
     this.pageList.forEach((canvas, index) => {
       const parent = canvas.parentElement!
       const markWrap = document.createElement('div')
+      markWrap.style.top = (this.getHeight() + this.getPageGap()) * index + 'px'
+      markWrap.style.height = this.getHeight() + 'px'
       markWrap.onmousedown = e => handleMarkMouseDown(e, index)
       markWrap.className = 'ce-mark-wrap'
       parent.appendChild(markWrap)
-      marks.dom = this._makeMarkEl({ x: 0, y: 0 }, { x: 0, y: 0 }, markWrap)
+      marks.doms.push(
+        this._makeMarkEl({ x: 0, y: 0 }, { x: 0, y: 0 }, markWrap)
+      )
     })
   }
 }

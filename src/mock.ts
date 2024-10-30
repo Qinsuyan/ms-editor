@@ -6,6 +6,7 @@ import {
   PaperDirection,
   RowFlex
 } from './editor'
+import { WRAP } from './editor/dataset/constant/Common'
 import { IMarkType } from './editor/interface/Editor'
 import { imgTop, imgSide } from './test'
 
@@ -86,7 +87,23 @@ const elementList: IElement[] = [
       y: 500,
       pageNo: 0
     }
-  }
+  },
+  {
+    type: ElementType.PAGE_BREAK,
+    value: WRAP
+  },
+  {
+    type: ElementType.TEXT,
+    value: '这是文本'
+  },
+  {
+    type: ElementType.MARK,
+    pageIndex: 1,
+    value: '',
+    start: { x: 511, y: 60 },
+    end: { x: 314, y: 180 },
+    markType: IMarkType.LINE
+  },
 ]
 
 export const data: IElement[] = elementList

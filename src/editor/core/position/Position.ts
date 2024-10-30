@@ -198,6 +198,7 @@ export class Position {
               pageNo
             }
           }
+          
           this.floatPositionList.push({
             pageNo,
             element,
@@ -218,7 +219,7 @@ export class Position {
             positionItem.coordinate = prePosition.coordinate
           }
           this.floatPositionList.push({
-            pageNo: pageNo,
+            pageNo: element.pageIndex!,
             element,
             position: positionItem,
             isTable: payload.isTable,
@@ -387,7 +388,6 @@ export class Position {
         imgDisplays: [ImageDisplay.FLOAT_TOP, ImageDisplay.SURROUND]
       })
       if (floatTopPosition) {
-        // ('float top index', floatTopPosition.index, payload)
         return floatTopPosition
       }
     }
@@ -730,7 +730,6 @@ export class Position {
           }
         }
       }
-
       if (
         currentPageNo === pageNo &&
         element.type === ElementType.MARK &&
