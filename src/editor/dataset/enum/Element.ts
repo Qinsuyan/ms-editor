@@ -16,5 +16,6 @@ export enum ElementType {
   BLOCK = 'block',
   TITLE = 'title',
   LIST = 'list',
-  MARK = 'mark'
+  MARK = 'mark',
+  TEXT_VARIABLE = 'textVariable'
 }

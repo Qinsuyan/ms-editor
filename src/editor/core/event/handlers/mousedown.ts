@@ -12,6 +12,7 @@ import { RadioControl } from '../../draw/control/radio/RadioControl'
 import { CanvasEvent } from '../CanvasEvent'
 import { IElement } from '../../../interface/Element'
 import { Draw } from '../../draw/Draw'
+import { text } from 'node:stream/consumers'
 
 export function setRangeCache(host: CanvasEvent) {
   const draw = host.getDraw()
@@ -234,6 +235,12 @@ export function mousedown(evt: MouseEvent, host: CanvasEvent) {
       hyperlinkParticle.drawHyperlinkPopup(curElement, positionList[curIndex])
     }
   }
+  const textVariableParticle = draw.getTextVariableParticle()
+  textVariableParticle.clearHyperlinkPopup()
+  if(curElement.type === ElementType.TEXT_VARIABLE){
+    textVariableParticle.drawHyperlinkPopup(curElement, positionList[curIndex])
+  }
+
   // 日期控件
   const dateParticle = draw.getDateParticle()
   dateParticle.clearDatePicker()

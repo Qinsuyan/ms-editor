@@ -94,10 +94,15 @@ export default class Editor {
       footerElementList
     ]
     pageComponentData.forEach(elementList => {
-      formatElementList(elementList, {
-        editorOptions,
-        isForceCompensation: true
-      })
+      formatElementList(
+        elementList,
+        {
+          editorOptions,
+          isForceCompensation: true
+        },
+        {},
+        {}
+      )
     })
     // 监听
     this.listener = new Listener()

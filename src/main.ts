@@ -1,4 +1,4 @@
-import {  data, options } from './mock'
+import { data, options } from './mock'
 import './style.css'
 import prism from 'prismjs'
 import Editor, {
@@ -25,6 +25,7 @@ import { formatPrismToken } from './utils/prism'
 import { Signature } from './components/signature/Signature'
 import { debounce, nextTick } from './utils'
 import { IMarkType } from './editor/interface/Editor'
+import { imgV } from './test'
 
 window.onload = function () {
   const isApple =
@@ -1911,7 +1912,7 @@ window.onload = function () {
       }
     }
   ])
-  // 11. 自定义标记功能: 直线、箭头、文本框
+  // 11. 自定义标记功能: 直线、箭头
   const makeLine = document.querySelector<HTMLDivElement>('.menu-item__line')!
   makeLine.title = `直线标记`
   makeLine.onclick = function () {
@@ -1922,4 +1923,50 @@ window.onload = function () {
   makeArrow.onclick = function () {
     instance.command.executeStartMark(IMarkType.ARROW)
   }
+  // 12. 设置变量
+  instance.command.executeSetTextVariable({
+    projectName: '我的测试项目'
+  })
+  const variableSetText = document.querySelector<HTMLDivElement>(
+    '.menu-item__variable_set_text'
+  )!
+  variableSetText.title = `设置文字变量`
+  variableSetText.onclick = function () {
+    instance.command.executeSetTextVariable({
+      projectName: '我的测试项目22222'
+    })
+  }
+  const variableSetImg = document.querySelector<HTMLDivElement>(
+    '.menu-item__variable_set_img'
+  )!
+  variableSetImg.title = `设置图片变量`
+  variableSetImg.onclick = function () {
+    instance.command.executeSetImgVariable({
+      imgPattern: imgV
+    })
+  }
+  // 13. 变量文字
+  const variableText = document.querySelector<HTMLDivElement>(
+    '.menu-item__variable_text'
+  )!
+  variableText.title = `变量文字`
+  variableText.onclick = function () {
+    instance.command.executeInsertTextVariable({
+      label: '项目名称',
+      key: 'projectName'
+    })
+  }
+  // 14. 变量图片
+  // const variableImg = document.querySelector<HTMLDivElement>(
+  //   '.menu-item__variable_img'
+  // )!
+  // variableImg.title = `变量图片`
+  // variableImg.onclick = function () {
+  //   instance.command.executeInsertImgVariable({
+  //     label: '项目名称',
+  //     key: 'projectName',
+  //     width: 500,
+  //     height: 500
+  //   })
+  // }
 }

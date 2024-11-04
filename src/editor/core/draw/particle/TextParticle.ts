@@ -16,7 +16,6 @@ export interface IMeasureWordResult {
 export class TextParticle {
   private draw: Draw
   private options: DeepRequired<IEditorOption>
-
   private ctx: CanvasRenderingContext2D
   private curX: number
   private curY: number

@@ -110,6 +110,7 @@ import { ITd } from '../../interface/table/Td'
 import { Actuator } from '../actuator/Actuator'
 import { TableOperate } from './particle/table/TableOperate'
 import { MarkParticle } from './particle/MarkParticle'
+import { TextVariableParticle } from './particle/TextVariableParticle'
 
 export class Draw {
   private container: HTMLDivElement
@@ -155,6 +156,7 @@ export class Draw {
   private header: Header
   private footer: Footer
   private hyperlinkParticle: HyperlinkParticle
+  private textVariableParticle: TextVariableParticle
   private dateParticle: DateParticle
   private separatorParticle: SeparatorParticle
   private pageBreakParticle: PageBreakParticle
@@ -182,6 +184,8 @@ export class Draw {
   private intersectionPageNo: number
   private lazyRenderIntersectionObserver: IntersectionObserver | null
   private printModeData: Required<IEditorData> | null
+  public textVariables: Record<string, string | string[]>
+  public imgVariables: Record<string, string | string[]>
 
   constructor(
     rootContainer: HTMLElement,
@@ -202,6 +206,8 @@ export class Draw {
     this.listener = listener
     this.eventBus = eventBus
     this.override = override
+    this.textVariables = {}
+    this.imgVariables = {}
 
     this._formatContainer()
     this.pageContainer = this._createPageContainer()
@@ -234,6 +240,7 @@ export class Draw {
     this.header = new Header(this, data.header)
     this.footer = new Footer(this, data.footer)
     this.hyperlinkParticle = new HyperlinkParticle(this)
+    this.textVariableParticle = new TextVariableParticle(this)
     this.dateParticle = new DateParticle(this)
     this.separatorParticle = new SeparatorParticle(this)
     this.pageBreakParticle = new PageBreakParticle(this)
@@ -292,6 +299,7 @@ export class Draw {
 
   public setMode(payload: EditorMode) {
     if (this.mode === payload) return
+
     // 设置打印模式
     if (payload === EditorMode.PRINT) {
       this.printModeData = {
@@ -318,6 +326,37 @@ export class Draw {
     this.range.clearRange()
     this.mode = payload
     this.options.mode = payload
+    this.elementList.forEach(el => {
+      if (el.type === ElementType.TEXT_VARIABLE) {
+        formatElementList(
+          [el],
+          { isHandleFirstElement: false, editorOptions: this.options },
+          this.textVariables,
+          this.imgVariables
+        )
+      }
+      if (el.type === ElementType.TABLE) {
+        el.trList?.forEach(tr => {
+          tr.tdList.forEach(td => {
+            td.rowList?.forEach(row => {
+              row.elementList.forEach(el => {
+                if (el.type === ElementType.TEXT_VARIABLE) {
+                  formatElementList(
+                    [el],
+                    {
+                      isHandleFirstElement: false,
+                      editorOptions: this.options
+                    },
+                    this.textVariables,
+                    this.imgVariables
+                  )
+                }
+              })
+            })
+          })
+        })
+      }
+    })
     this.render({
       isSetCursor: false,
       isSubmitHistory: false
@@ -657,10 +696,15 @@ export class Draw {
     if (!~startIndex && !~endIndex) {
       return
     }
-    formatElementList(payload, {
-      isHandleFirstElement: false,
-      editorOptions: this.options
-    })
+    formatElementList(
+      payload,
+      {
+        isHandleFirstElement: false,
+        editorOptions: this.options
+      },
+      this.textVariables,
+      this.imgVariables
+    )
     let curIndex = -1
     // 判断是否在控件内
     let activeControl = this.control.getActiveControl()
@@ -708,10 +752,15 @@ export class Draw {
     options: IAppendElementListOption = {}
   ) {
     if (!elementList.length) return
-    formatElementList(elementList, {
-      isHandleFirstElement: false,
-      editorOptions: this.options
-    })
+    formatElementList(
+      elementList,
+      {
+        isHandleFirstElement: false,
+        editorOptions: this.options
+      },
+      this.textVariables,
+      this.imgVariables
+    )
 
     let curIndex: number
     const { isPrepend } = options
@@ -843,6 +892,10 @@ export class Draw {
 
   public getHyperlinkParticle(): HyperlinkParticle {
     return this.hyperlinkParticle
+  }
+
+  public getTextVariableParticle(): TextVariableParticle {
+    return this.textVariableParticle
   }
 
   public getDateParticle(): DateParticle {
@@ -1130,10 +1183,15 @@ export class Draw {
     const pageComponentData = [header, main, footer]
     pageComponentData.forEach(data => {
       if (!data) return
-      formatElementList(data, {
-        editorOptions: this.options,
-        isForceCompensation: true
-      })
+      formatElementList(
+        data,
+        {
+          editorOptions: this.options,
+          isForceCompensation: true
+        },
+        this.textVariables,
+        this.imgVariables
+      )
     })
     this.setEditorData({
       header,
@@ -2033,6 +2091,9 @@ export class Draw {
         } else if (element.type === ElementType.HYPERLINK) {
           this.textParticle.complete()
           this.hyperlinkParticle.render(ctx, element, x, y + offsetY)
+        } else if (element.type === ElementType.TEXT_VARIABLE) {
+          this.textParticle.complete()
+          this.textVariableParticle.render(ctx, element, x, y + offsetY)
         } else if (element.type === ElementType.DATE) {
           const nextElement = curRow.elementList[j + 1]
           // 释放之前的
@@ -2708,7 +2769,6 @@ export class Draw {
   }
 
   //标记
-
   private _makeMarkEl(
     start: { x: number; y: number },
     end: { x: number; y: number },
@@ -2854,6 +2914,56 @@ export class Draw {
       marks.doms.push(
         this._makeMarkEl({ x: 0, y: 0 }, { x: 0, y: 0 }, type, markWrap)
       )
+    })
+  }
+  public insertTextVariable(def: { label: string; key: string }) {
+    this.insertElementList([
+      {
+        variableId: getUUID(),
+        type: ElementType.TEXT_VARIABLE,
+        value: '',
+        key: def.key,
+        label: def.label
+      }
+    ])
+  }
+  public setTextVariables(dict: Record<string, string | string[]>) {
+    this.textVariables = dict
+    this.elementList.forEach((el, index) => {
+      if (el.type === ElementType.TEXT_VARIABLE) {
+        formatElementList(
+          [el],
+          { isHandleFirstElement: false, editorOptions: this.options },
+          this.textVariables,
+          this.imgVariables
+        )
+        
+      }
+      if (el.type === ElementType.TABLE) {
+        el.trList?.forEach(tr => {
+          tr.tdList.forEach(td => {
+            td.rowList?.forEach(row => {
+              row.elementList.forEach(el => {
+                if (el.type === ElementType.TEXT_VARIABLE) {
+                  formatElementList(
+                    [el],
+                    {
+                      isHandleFirstElement: false,
+                      editorOptions: this.options
+                    },
+                    this.textVariables,
+                    this.imgVariables
+                  )
+                }
+              })
+            })
+          })
+        })
+      }
+      this.render({
+        curIndex: index,
+        isSetCursor: false
+      })
     })
   }
 }

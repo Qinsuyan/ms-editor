@@ -187,10 +187,15 @@ export function mouseup(evt: MouseEvent, host: CanvasEvent) {
         if (isOmitControlAttr) {
           newElement = omitObject(newElement, CONTROL_CONTEXT_ATTR)
         }
-        formatElementList([newElement], {
-          isHandleFirstElement: false,
-          editorOptions
-        })
+        formatElementList(
+          [newElement],
+          {
+            isHandleFirstElement: false,
+            editorOptions
+          },
+          draw.textVariables,
+          draw.imgVariables
+        )
         return newElement
       }
     })

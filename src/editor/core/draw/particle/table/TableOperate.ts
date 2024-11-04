@@ -80,9 +80,14 @@ export class TableOperate {
       trList
     }
     // 格式化element
-    formatElementList([element], {
-      editorOptions: this.options
-    })
+    formatElementList(
+      [element],
+      {
+        editorOptions: this.options
+      },
+      this.draw.textVariables,
+      this.draw.imgVariables
+    )
     formatElementContext(elementList, [element], startIndex, {
       editorOptions: this.options
     })

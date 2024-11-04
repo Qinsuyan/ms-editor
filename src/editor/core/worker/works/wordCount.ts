@@ -4,7 +4,8 @@ enum ElementType {
   TEXT = 'text',
   TABLE = 'table',
   HYPERLINK = 'hyperlink',
-  CONTROL = 'control'
+  CONTROL = 'control',
+  TEXT_VARIABLE = 'textVariable'
 }
 
 enum ControlComponent {

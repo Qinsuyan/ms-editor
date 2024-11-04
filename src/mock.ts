@@ -59,6 +59,12 @@ const elementList: IElement[] = [
                 width: 556,
                 imgDisplay: ImageDisplay.INLINE,
                 rowFlex: RowFlex.CENTER
+              },
+              {
+                type: ElementType.TEXT_VARIABLE,
+                value: '',
+                label: '项目名称',
+                key: 'projectName'
               }
             ]
           }
@@ -68,42 +74,13 @@ const elementList: IElement[] = [
     outBorderWidth: 5
   },
   {
-    type: ElementType.MARK,
-    pageIndex: 0,
-    value: '',
-    start: { x: 200, y: 60 },
-    end: { x: 400, y: 180 },
-    markType: IMarkType.LINE
-  },
-  {
-    type: ElementType.IMAGE,
-    imgDisplay: ImageDisplay.FLOAT_TOP,
-    value: imgTop,
-    width: 400,
-    height: 200,
-
-    imgFloatPosition: {
-      x: 500,
-      y: 500,
-      pageNo: 0
-    }
-  },
-  {
     type: ElementType.PAGE_BREAK,
     value: WRAP
   },
   {
     type: ElementType.TEXT,
     value: '这是文本'
-  },
-  {
-    type: ElementType.MARK,
-    pageIndex: 1,
-    value: '',
-    start: { x: 511, y: 60 },
-    end: { x: 314, y: 180 },
-    markType: IMarkType.ARROW
-  },
+  }
 ]
 
 export const data: IElement[] = elementList

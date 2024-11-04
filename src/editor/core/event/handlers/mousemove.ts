@@ -4,6 +4,7 @@ import { ElementType } from '../../../dataset/enum/Element'
 import { CanvasEvent } from '../CanvasEvent'
 
 export function mousemove(evt: MouseEvent, host: CanvasEvent) {
+  
   const draw = host.getDraw()
   // 是否是拖拽文字
   if (host.isAllowDrag) {
@@ -38,7 +39,7 @@ export function mousemove(evt: MouseEvent, host: CanvasEvent) {
         draw.getPreviewer().clearResizer()
         draw.getImageParticle().dragFloatImage(evt.movementX, evt.movementY)
       }
-      if(dragElement?.type === ElementType.MARK){
+      if (dragElement?.type === ElementType.MARK) {
         draw.getPreviewer().clearResizer()
         draw.getMarkParticle().dragFloatImage(evt.movementX, evt.movementY)
       }
@@ -47,6 +48,7 @@ export function mousemove(evt: MouseEvent, host: CanvasEvent) {
     host.isAllowDrop = true
     return
   }
+  
   if (!host.isAllowSelection || !host.mouseDownStartPosition) return
   const target = evt.target as HTMLDivElement
   const pageIndex = target.dataset.index
@@ -68,7 +70,7 @@ export function mousemove(evt: MouseEvent, host: CanvasEvent) {
     isTable: startIsTable,
     tdIndex: startTdIndex,
     trIndex: startTrIndex,
-    tableId: startTableId
+    tableId: startTableId,
   } = host.mouseDownStartPosition
   const endIndex = isTable ? tdValueIndex! : index
   // 判断是否是表格跨行/列
@@ -97,6 +99,8 @@ export function mousemove(evt: MouseEvent, host: CanvasEvent) {
       // prettier-ignore
       [start, end] = [end, start]
     }
+ 
+
     if (start === end) return
     // 背景文本禁止选区
     const elementList = draw.getElementList()
@@ -111,6 +115,7 @@ export function mousemove(evt: MouseEvent, host: CanvasEvent) {
     }
     rangeManager.setRange(start, end)
   }
+ 
   // 绘制
   draw.render({
     isSubmitHistory: false,

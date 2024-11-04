@@ -1643,10 +1643,15 @@ export class CommandAdapt {
           ...elementList[elementIndex],
           ...payload.properties
         }
-        formatElementList(zipElementList([elementList[elementIndex]]), {
-          isHandleFirstElement: false,
-          editorOptions: this.options
-        })
+        formatElementList(
+          zipElementList([elementList[elementIndex]]),
+          {
+            isHandleFirstElement: false,
+            editorOptions: this.options
+          },
+          this.draw.textVariables,
+          this.draw.imgVariables
+        )
         this.draw.render({
           isSetCursor: false
         })
@@ -2145,7 +2150,19 @@ export class CommandAdapt {
     })
   }
   //直线标记
-  public startMark(type: IMarkType){
+  public startMark(type: IMarkType) {
     this.draw.startToMark(type)
+  }
+  //设置文字变量
+  public setTextVariable(variable: Record<string, string | string[]>) {
+    this.draw.setTextVariables(variable)
+  }
+  //设置图片变量
+  public setImgVariable(variable: Record<string, string | string[]>) {
+    this.draw.imgVariables = variable
+  }
+  //文字变量
+  public insertTextVariable(def: { label: string; key: string }) {
+    this.draw.insertTextVariable(def)
   }
 }

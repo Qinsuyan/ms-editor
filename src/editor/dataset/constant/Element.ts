@@ -128,6 +128,7 @@ export const EDITOR_ELEMENT_CONTEXT_ATTR: Array<keyof IElement> = [
 export const TEXTLIKE_ELEMENT_TYPE: ElementType[] = [
   ElementType.TEXT,
   ElementType.HYPERLINK,
+  ElementType.TEXT_VARIABLE,
   ElementType.SUBSCRIPT,
   ElementType.SUPERSCRIPT,
   ElementType.CONTROL,

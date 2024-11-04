@@ -122,6 +122,9 @@ export class Command {
   public getPositionContextByEvent: CommandAdapt['getPositionContextByEvent']
   public getElementById: CommandAdapt['getElementById']
   public executeStartMark: CommandAdapt['startMark']
+  public executeSetTextVariable: CommandAdapt['setTextVariable']
+  public executeSetImgVariable:CommandAdapt['setImgVariable']
+  public executeInsertTextVariable:CommandAdapt['insertTextVariable']
 
   constructor(adapt: CommandAdapt) {
     // 全局命令
@@ -256,5 +259,10 @@ export class Command {
     //自定义功能
     //直线标记
     this.executeStartMark = adapt.startMark.bind(adapt)
+    //设置变量
+    this.executeSetTextVariable = adapt.setTextVariable.bind(adapt)
+    this.executeSetImgVariable = adapt.setImgVariable.bind(adapt)
+    //文字变量
+    this.executeInsertTextVariable = adapt.insertTextVariable.bind(adapt)
   }
 }

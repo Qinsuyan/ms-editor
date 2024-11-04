@@ -74,7 +74,9 @@ interface IFormatElementListOption {
 
 export function formatElementList(
   elementList: IElement[],
-  options: IFormatElementListOption
+  options: IFormatElementListOption,
+  textDict: Record<string, string | string[]>,
+  imgDict: Record<string, string | string[]>
 ) {
   const {
     isHandleFirstElement = true,
@@ -103,11 +105,16 @@ export function formatElementList(
       elementList.splice(i, 1)
       // 格式化元素
       const valueList = el.valueList || []
-      formatElementList(valueList, {
-        ...options,
-        isHandleFirstElement: false,
-        isForceCompensation: false
-      })
+      formatElementList(
+        valueList,
+        {
+          ...options,
+          isHandleFirstElement: false,
+          isForceCompensation: false
+        },
+        textDict,
+        imgDict
+      )
       // 追加节点
       if (valueList.length) {
         const titleId = getUUID()
@@ -138,11 +145,16 @@ export function formatElementList(
       elementList.splice(i, 1)
       // 格式化元素
       const valueList = el.valueList || []
-      formatElementList(valueList, {
-        ...options,
-        isHandleFirstElement: true,
-        isForceCompensation: false
-      })
+      formatElementList(
+        valueList,
+        {
+          ...options,
+          isHandleFirstElement: true,
+          isForceCompensation: false
+        },
+        textDict,
+        imgDict
+      )
       // 追加节点
       if (valueList.length) {
         const listId = getUUID()
@@ -175,11 +187,16 @@ export function formatElementList(
             const td = tr.tdList[d]
             const tdId = getUUID()
             td.id = tdId
-            formatElementList(td.value, {
-              ...options,
-              isHandleFirstElement: true,
-              isForceCompensation: true
-            })
+            formatElementList(
+              td.value,
+              {
+                ...options,
+                isHandleFirstElement: true,
+                isForceCompensation: true
+              },
+              textDict,
+              imgDict
+            )
             for (let v = 0; v < td.value.length; v++) {
               const value = td.value[v]
               value.tdId = tdId
@@ -207,6 +224,16 @@ export function formatElementList(
         }
       }
       i--
+    } else if (el.type === ElementType.TEXT_VARIABLE) {
+      //TODO:判断循环
+      if (
+        options.editorOptions.mode !== EditorMode.CLEAN &&
+        options.editorOptions.mode !== EditorMode.PRINT
+      ) {
+        el.value = '{X}'
+      } else {
+        el.value = (textDict[el.key!] as string) || '未定义变量'
+      }
     } else if (el.type === ElementType.DATE) {
       // 移除父节点
       elementList.splice(i, 1)
@@ -391,11 +418,16 @@ export function formatElementList(
               }
             }
           }
-          formatElementList(valueList, {
-            ...options,
-            isHandleFirstElement: false,
-            isForceCompensation: false
-          })
+          formatElementList(
+            valueList,
+            {
+              ...options,
+              isHandleFirstElement: false,
+              isForceCompensation: false
+            },
+            textDict,
+            imgDict
+          )
           for (let v = 0; v < valueList.length; v++) {
             const element = valueList[v]
             const value = element.value
@@ -463,7 +495,11 @@ export function formatElementList(
     if (el.value === '\n' || el.value == '\r\n') {
       el.value = ZERO
     }
-    if (el.type === ElementType.IMAGE || el.type === ElementType.BLOCK || el.type === ElementType.MARK) {
+    if (
+      el.type === ElementType.IMAGE ||
+      el.type === ElementType.BLOCK ||
+      el.type === ElementType.MARK
+    ) {
       el.id = getUUID()
     }
     if (el.type === ElementType.LATEX) {

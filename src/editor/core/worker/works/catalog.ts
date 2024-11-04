@@ -28,7 +28,9 @@ enum ElementType {
   BLOCK = 'block',
   TITLE = 'title',
   LIST = 'list',
-  MARK = 'mark'
+  MARK = 'mark',
+  TEXT_VARIABLE = 'textVariable',
+
 }
 
 enum TitleLevel {
@@ -55,7 +57,8 @@ const TEXTLIKE_ELEMENT_TYPE: ElementType[] = [
   ElementType.SUBSCRIPT,
   ElementType.SUPERSCRIPT,
   ElementType.CONTROL,
-  ElementType.DATE
+  ElementType.DATE,
+  ElementType.TEXT_VARIABLE
 ]
 
 const ZERO = '\u200B'

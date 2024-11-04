@@ -747,7 +747,7 @@ export class Control {
           formatElementList(formatValue, {
             isHandleFirstElement: false,
             editorOptions: this.options
-          })
+          },{},{})
           const text = new TextControl(element, this)
           this.activeControl = text
           if (value) {
@@ -931,7 +931,7 @@ export class Control {
       formatElementList(elementList, {
         editorOptions: this.options,
         isForceCompensation: true
-      })
+      },{},{})
     }
     this.draw.setEditorData(pageComponentData)
     this.draw.render({
