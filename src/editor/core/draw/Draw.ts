@@ -299,7 +299,37 @@ export class Draw {
 
   public setMode(payload: EditorMode) {
     if (this.mode === payload) return
-
+    this.elementList.forEach(el => {
+      if (el.type === ElementType.TEXT_VARIABLE) {
+        formatElementList(
+          [el],
+          { isHandleFirstElement: false, editorOptions: {...this.options,mode:payload} },
+          this.textVariables,
+          this.imgVariables
+        )
+      }
+      if (el.type === ElementType.TABLE) {
+        el.trList?.forEach(tr => {
+          tr.tdList.forEach(td => {
+            td.rowList?.forEach(row => {
+              row.elementList.forEach(el => {
+                if (el.type === ElementType.TEXT_VARIABLE) {
+                  formatElementList(
+                    [el],
+                    {
+                      isHandleFirstElement: false,
+                      editorOptions: {...this.options,mode:payload}
+                    },
+                    this.textVariables,
+                    this.imgVariables
+                  )
+                }
+              })
+            })
+          })
+        })
+      }
+    })
     // 设置打印模式
     if (payload === EditorMode.PRINT) {
       this.printModeData = {
@@ -326,37 +356,7 @@ export class Draw {
     this.range.clearRange()
     this.mode = payload
     this.options.mode = payload
-    this.elementList.forEach(el => {
-      if (el.type === ElementType.TEXT_VARIABLE) {
-        formatElementList(
-          [el],
-          { isHandleFirstElement: false, editorOptions: this.options },
-          this.textVariables,
-          this.imgVariables
-        )
-      }
-      if (el.type === ElementType.TABLE) {
-        el.trList?.forEach(tr => {
-          tr.tdList.forEach(td => {
-            td.rowList?.forEach(row => {
-              row.elementList.forEach(el => {
-                if (el.type === ElementType.TEXT_VARIABLE) {
-                  formatElementList(
-                    [el],
-                    {
-                      isHandleFirstElement: false,
-                      editorOptions: this.options
-                    },
-                    this.textVariables,
-                    this.imgVariables
-                  )
-                }
-              })
-            })
-          })
-        })
-      }
-    })
+
     this.render({
       isSetCursor: false,
       isSubmitHistory: false
@@ -2427,6 +2427,7 @@ export class Draw {
   }
 
   private _drawPage(payload: IDrawPagePayload) {
+    console.log('draw Page')
     const { elementList, positionList, rowList, pageNo } = payload
     const {
       inactiveAlpha,

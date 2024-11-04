@@ -7,7 +7,6 @@ import {
   RowFlex
 } from './editor'
 import { WRAP } from './editor/dataset/constant/Common'
-import { IMarkType } from './editor/interface/Editor'
 import { imgTop, imgSide } from './test'
 
 const elementList: IElement[] = [
@@ -79,8 +78,17 @@ const elementList: IElement[] = [
   },
   {
     type: ElementType.TEXT,
-    value: '这是文本'
-  }
+    value: '这是文本,'
+  },
+  {
+    type: ElementType.TEXT_VARIABLE,
+    value: '',
+    label: '项目名称',
+    key: 'projectName'
+  },{
+    type: ElementType.TEXT,
+    value: '。'
+  },
 ]
 
 export const data: IElement[] = elementList

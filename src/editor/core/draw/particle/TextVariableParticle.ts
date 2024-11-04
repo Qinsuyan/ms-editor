@@ -1,20 +1,17 @@
 import { IElement } from '../../..'
 import { EDITOR_PREFIX } from '../../../dataset/constant/Editor'
-import { IEditorOption } from '../../../interface/Editor'
 import { IElementPosition } from '../../../interface/Element'
 import { IRowElement } from '../../../interface/Row'
 import { Draw } from '../Draw'
 
 export class TextVariableParticle {
   private draw: Draw
-  private options: Required<IEditorOption>
   private container: HTMLDivElement
   private hyperlinkPopupContainer: HTMLDivElement
   private hyperlinkDom: HTMLSpanElement
 
   constructor(draw: Draw) {
     this.draw = draw
-    this.options = draw.getOptions()
     this.container = draw.getContainer()
     const { hyperlinkPopupContainer, hyperlinkDom } =
       this._createHyperlinkPopupDom()
@@ -57,17 +54,11 @@ export class TextVariableParticle {
     ctx: CanvasRenderingContext2D,
     element: IRowElement,
     x: number,
-    y: number,
+    y: number
   ) {
     ctx.save()
     ctx.font = element.style
-    // if (!element.color) {
-    //   element.color = this.draw.getTextParticle().
-    // }
-    // ctx.fillStyle = element.color
-    
-      ctx.fillText(element.value, x, y)
-    
+    ctx.fillText(element.value, x, y)
     ctx.restore()
   }
 }

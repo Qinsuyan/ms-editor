@@ -12,7 +12,6 @@ import { RadioControl } from '../../draw/control/radio/RadioControl'
 import { CanvasEvent } from '../CanvasEvent'
 import { IElement } from '../../../interface/Element'
 import { Draw } from '../../draw/Draw'
-import { text } from 'node:stream/consumers'
 
 export function setRangeCache(host: CanvasEvent) {
   const draw = host.getDraw()
