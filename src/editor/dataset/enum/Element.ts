@@ -18,5 +18,6 @@ export enum ElementType {
   LIST = 'list',
   MARK = 'mark',
   TEXT_VARIABLE = 'textVariable',
-  IMG_VARIABLE = 'imgVariable'
+  IMG_VARIABLE = 'imgVariable',
+  LOOP = 'loop'
 }

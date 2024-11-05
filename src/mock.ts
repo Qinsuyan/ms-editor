@@ -1,4 +1,5 @@
 import {
+  EditorMode,
   ElementType,
   IEditorOption,
   IElement,
@@ -105,6 +106,47 @@ const elementList: IElement[] = [
     key: 'imgPattern',
     width: 500,
     height: 500
+  },
+  {
+    type: ElementType.PAGE_BREAK,
+    value: ''
+  },
+  {
+    type: ElementType.LOOP,
+    loopType: 'start',
+    value: ''
+  },
+  {
+    value: '第',
+    size: 32
+  },
+  {
+    type: ElementType.TEXT_VARIABLE,
+    value: '',
+    label: '循环计数',
+    key: 'loopIndex',
+    size: 32
+  },
+  {
+    value: '次循环',
+    size: 32
+  },
+  {
+    type: ElementType.IMAGE,
+    value: imgSide,
+    height: 180,
+    width: 556,
+    imgDisplay: ImageDisplay.INLINE,
+    rowFlex: RowFlex.CENTER
+  },
+  {
+    type: ElementType.PAGE_BREAK,
+    value: ''
+  },
+  {
+    type: ElementType.LOOP,
+    loopType: 'end',
+    value: ''
   }
 ]
 
@@ -112,6 +154,7 @@ export const data: IElement[] = elementList
 
 export const options: IEditorOption = {
   margins: [60, 60, 60, 60],
+  mode: EditorMode.PRINT,
   // watermark: {
   //   data: 'CANVAS-EDITOR',
   //   size: 120

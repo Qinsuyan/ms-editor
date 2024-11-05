@@ -111,6 +111,7 @@ import { Actuator } from '../actuator/Actuator'
 import { TableOperate } from './particle/table/TableOperate'
 import { MarkParticle } from './particle/MarkParticle'
 import { TextVariableParticle } from './particle/TextVariableParticle'
+import { LoopParticle } from './particle/LoopParticle'
 
 export class Draw {
   private container: HTMLDivElement
@@ -160,6 +161,7 @@ export class Draw {
   private dateParticle: DateParticle
   private separatorParticle: SeparatorParticle
   private pageBreakParticle: PageBreakParticle
+  private loopParticle: LoopParticle
   private superscriptParticle: SuperscriptParticle
   private subscriptParticle: SubscriptParticle
   private checkboxParticle: CheckboxParticle
@@ -244,6 +246,7 @@ export class Draw {
     this.dateParticle = new DateParticle(this)
     this.separatorParticle = new SeparatorParticle(this)
     this.pageBreakParticle = new PageBreakParticle(this)
+    this.loopParticle = new LoopParticle(this)
     this.superscriptParticle = new SuperscriptParticle()
     this.subscriptParticle = new SubscriptParticle()
     this.checkboxParticle = new CheckboxParticle(this)
@@ -297,8 +300,102 @@ export class Draw {
     return this.mode
   }
 
-  public setMode(payload: EditorMode) {
-    if (this.mode === payload) return
+  private parseLoop(payload: EditorMode) {
+    //处理循环
+    if (payload === EditorMode.PRINT || payload === EditorMode.CLEAN) {
+      //展开循环
+      let i = 0
+      for (i; i < this.elementList.length; i++) {
+        const el = this.elementList[i]
+        if (el.type === ElementType.LOOP && el.loopType === 'start') {
+          //寻找循环结束
+          let endIndex = i
+          for (endIndex; endIndex < this.elementList.length; endIndex++) {
+            if (
+              this.elementList[endIndex].type === ElementType.LOOP &&
+              this.elementList[endIndex].loopType === 'end'
+            ) {
+              break
+            }
+          }
+          if (endIndex !== i) {
+            const loopId = getUUID()
+            const loopList = this.elementList.slice(i + 1, endIndex)
+            let loopCount = 1
+            loopList.forEach(el => {
+              el.loopId = loopId
+              //找出循环次数
+              if (el.type === ElementType.TEXT_VARIABLE) {
+                const values = this.textVariables[el.key!]
+                if (typeof values !== 'string') {
+                  if (values.length > loopCount) {
+                    loopCount = values.length
+                  }
+                }
+              }
+              if (el.type === ElementType.IMG_VARIABLE) {
+                const values = this.imgVariables[el.key!]
+                if (typeof values !== 'string') {
+                  if (values.length > loopCount) {
+                    loopCount = values.length
+                  }
+                }
+              }
+            })
+            this.elementList.splice(i, endIndex + 1 - i)
+            for (let j = loopCount - 1; j >= 0; j--) {
+              const loopElements = deepClone(loopList)
+              loopElements.forEach(el => {
+                el.loopIndex = j
+              })
+              this.elementList.splice(i, 0, ...loopElements)
+            }
+            i--
+          }
+        }
+      }
+    } else {
+      //还原循环
+      let i = 0
+      let loopId = ''
+
+      for (i; i < this.elementList.length; i++) {
+        const el = this.elementList[i]
+        if (el.loopId && el.loopIndex === 0) {
+          loopId = el.loopId
+          //寻找循环结束
+          let endIndex = i
+          let loopCount = 1
+          for (endIndex = i; endIndex < this.elementList.length; endIndex++) {
+            if (this.elementList[endIndex].loopId === loopId) {
+              if (this.elementList[endIndex].loopIndex! + 1 > loopCount) {
+                loopCount = this.elementList[endIndex].loopIndex! + 1
+              }
+            }
+            if (this.elementList[endIndex].loopId !== loopId) {
+              endIndex--
+              break
+            }
+          }
+          console.log(i, endIndex, loopCount)
+          //取出循环的元素
+          let loopElements = this.elementList.slice(i, endIndex + 1)
+          loopElements = loopElements.slice(0, loopElements.length / loopCount)
+          loopElements.forEach(el => {
+            el.loopId = undefined
+            el.loopIndex = undefined
+          })
+          loopElements = [
+            { type: ElementType.LOOP, loopType: 'start', value: '' },
+            ...loopElements,
+            { type: ElementType.LOOP, loopType: 'end', value: '' }
+          ]
+          this.elementList.splice(i, endIndex - i + 1, ...loopElements)
+          console.log(this.elementList)
+          i--
+        }
+      }
+    }
     this.elementList.forEach(el => {
       if (
         el.type === ElementType.TEXT_VARIABLE ||
@@ -339,6 +436,12 @@ export class Draw {
         })
       }
     })
+  }
+
+  public setMode(payload: EditorMode) {
+    if (this.mode === payload) return
+    this.parseLoop(payload)
+
     this.imageParticle.clearCache()
     // 设置打印模式
     if (payload === EditorMode.PRINT) {
@@ -1649,6 +1752,11 @@ export class Draw {
         element.width = availableWidth / scale
         metrics.width = availableWidth
         metrics.height = defaultSize
+      } else if (element.type === ElementType.LOOP) {
+        const len = this.i18n.t(`loop.${element.loopType}`).length + 2
+        element.width = (defaultSize * len) / scale
+        metrics.width = defaultSize * len
+        metrics.height = defaultSize
       } else if (
         element.type === ElementType.RADIO ||
         element.controlComponent === ControlComponent.RADIO
@@ -2132,6 +2240,10 @@ export class Draw {
           if (this.mode !== EditorMode.CLEAN && !isPrintMode) {
             this.pageBreakParticle.render(ctx, element, x, y)
           }
+        } else if (element.type === ElementType.LOOP) {
+          if (this.mode !== EditorMode.CLEAN && !isPrintMode) {
+            this.loopParticle.render(ctx, element, x, y)
+          }
         } else if (
           element.type === ElementType.CHECKBOX ||
           element.controlComponent === ControlComponent.CHECKBOX
@@ -2442,7 +2554,6 @@ export class Draw {
   }
 
   private _drawPage(payload: IDrawPagePayload) {
-    console.log('draw Page')
     const { elementList, positionList, rowList, pageNo } = payload
     const {
       inactiveAlpha,
@@ -2945,6 +3056,7 @@ export class Draw {
   }
   public setTextVariables(dict: Record<string, string | string[]>) {
     this.textVariables = dict
+    this.parseLoop(this.getMode())
     this.elementList.forEach((el, index) => {
       if (el.type === ElementType.TEXT_VARIABLE) {
         formatElementList(
@@ -2984,6 +3096,7 @@ export class Draw {
   public setImgVariables(dict: Record<string, string | string[]>) {
     this.imgVariables = dict
     this.imageParticle.clearCache()
+    this.parseLoop(this.getMode())
     this.elementList.forEach((el, index) => {
       if (el.type === ElementType.IMG_VARIABLE) {
         formatElementList(
@@ -3035,6 +3148,15 @@ export class Draw {
         label: def.label,
         width: def.width,
         height: def.height
+      }
+    ])
+  }
+  public insertLoop(type: 'start' | 'end') {
+    this.insertElementList([
+      {
+        type: ElementType.LOOP,
+        value: '',
+        loopType: type
       }
     ])
   }

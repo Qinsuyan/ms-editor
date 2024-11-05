@@ -21,6 +21,8 @@ export interface IElementBasic {
   value: string
   extension?: unknown
   externalId?: string
+  loopId?: string
+  loopIndex?: number
 }
 
 export interface IElementStyle {
@@ -142,6 +144,10 @@ export interface IVariableImgElement {
   label?: string
 }
 
+export interface ILoopElement {
+  loopType?: 'start' | 'end'
+}
+
 export interface IBlockElement {
   block?: IBlock
 }
@@ -164,7 +170,8 @@ export type IElement = IElementBasic &
   IListElement &
   IMarkElement &
   IVariableTextElement &
-  IVariableImgElement
+  IVariableImgElement &
+  ILoopElement
 
 export interface IElementMetrics {
   width: number

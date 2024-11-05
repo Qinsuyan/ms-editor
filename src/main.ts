@@ -1443,30 +1443,40 @@ window.onload = function () {
   let modeIndex = 0
   const modeList = [
     {
-      mode: EditorMode.EDIT,
-      name: '编辑模式'
-    },
-    {
-      mode: EditorMode.CLEAN,
-      name: '清洁模式'
-    },
-    {
-      mode: EditorMode.READONLY,
-      name: '只读模式'
-    },
-    {
-      mode: EditorMode.FORM,
-      name: '表单模式'
-    },
-    {
       mode: EditorMode.PRINT,
       name: '打印模式'
     },
     {
-      mode: EditorMode.DESIGN,
-      name: '设计模式'
+      mode: EditorMode.EDIT,
+      name: '编辑模式'
     }
   ]
+  //const modeList = [
+  //   {
+  //     mode: EditorMode.EDIT,
+  //     name: '编辑模式'
+  //   },
+  //   {
+  //     mode: EditorMode.CLEAN,
+  //     name: '清洁模式'
+  //   },
+  //   {
+  //     mode: EditorMode.READONLY,
+  //     name: '只读模式'
+  //   },
+  //   {
+  //     mode: EditorMode.FORM,
+  //     name: '表单模式'
+  //   },
+  //   {
+  //     mode: EditorMode.PRINT,
+  //     name: '打印模式'
+  //   },
+  //   {
+  //     mode: EditorMode.DESIGN,
+  //     name: '设计模式'
+  //   }
+  // ]
   const modeElement = document.querySelector<HTMLDivElement>('.editor-mode')!
   modeElement.onclick = function () {
     // 模式选择循环
@@ -1925,7 +1935,8 @@ window.onload = function () {
   }
   // 12. 设置变量
   instance.command.executeSetTextVariable({
-    projectName: '我的测试项目'
+    projectName: '我的测试项目',
+    loopIndex: ['1', '2', '3', '4']
   })
 
   instance.command.executeSetImgVariable({
@@ -1972,5 +1983,20 @@ window.onload = function () {
       width: 500,
       height: 500
     })
+  }
+  //15. 循环
+  const loopStart = document.querySelector<HTMLDivElement>(
+    '.menu-item__loop_start'
+  )!
+  loopStart.title = `循环开始`
+  loopStart.onclick = function () {
+    instance.command.executeInsertLoop('start')
+  }
+  const loopEnd = document.querySelector<HTMLDivElement>(
+    '.menu-item__loop_end'
+  )!
+  loopEnd.title = `循环结束`
+  loopEnd.onclick = function () {
+    instance.command.executeInsertLoop('end')
   }
 }

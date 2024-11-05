@@ -144,7 +144,7 @@ export const IMAGE_ELEMENT_TYPE: ElementType[] = [
 
 export const BLOCK_ELEMENT_TYPE: ElementType[] = [
   ElementType.BLOCK,
-  ElementType.PAGE_BREAK,
+  ElementType.LOOP,
   ElementType.SEPARATOR,
   ElementType.TABLE
 ]

@@ -2181,4 +2181,8 @@ export class CommandAdapt {
   }) {
     this.draw.insertImgVariable(def)
   }
+  //循环
+  public insertLoop(type:'start'|'end'){
+    this.draw.insertLoop(type)
+  }
 }

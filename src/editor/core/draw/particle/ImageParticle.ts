@@ -137,10 +137,7 @@ export class ImageParticle {
         img.setAttribute('crossOrigin', 'Anonymous')
         img.src = element.value
         img.onload = () => {
-          // if (element.type !== ElementType.IMG_VARIABLE) {
           this.imageCache.set(element.id!, img)
-          // }
-
           resolve(element)
           // 衬于文字下方图片需要重新首先绘制
           if (element.imgDisplay === ImageDisplay.FLOAT_BOTTOM) {
@@ -153,29 +150,31 @@ export class ImageParticle {
             ctx.drawImage(img, x, y, width, height)
           }
         }
-        img.onerror = error => {
+        img.onerror = () => {
           const fallbackImage = this.getFallbackImage(
             width,
             height,
             element.label,
             element.type === ElementType.IMG_VARIABLE
-              ? (this.draw.imgVariables[element.key!] as string)
+              ? typeof this.draw.imgVariables[element.key!] === 'string'
+                ? (this.draw.imgVariables[element.key!] as string)
+                : this.draw.imgVariables[element.key!][element.loopIndex!] || ''
               : ''
           )
           fallbackImage.onload = () => {
             ctx.drawImage(fallbackImage, x, y, width, height)
-            // if (element.type !== ElementType.IMG_VARIABLE) {
             this.imageCache.set(element.id!, fallbackImage)
-            // }
           }
-          reject(error)
+          fallbackImage.onerror = (e) => {
+            reject(e)
+          }
         }
       })
       this.addImageObserver(imageLoadPromise)
     }
   }
 
-  public clearCache(){
+  public clearCache() {
     this.imageCache.clear()
   }
 }

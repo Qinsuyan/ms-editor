@@ -126,6 +126,7 @@ export class Command {
   public executeSetImgVariable:CommandAdapt['setImgVariable']
   public executeInsertTextVariable:CommandAdapt['insertTextVariable']
   public executeInsertImgVariable:CommandAdapt['insertImgVariable']
+  public executeInsertLoop:CommandAdapt['insertLoop']
 
   constructor(adapt: CommandAdapt) {
     // 全局命令
@@ -267,5 +268,7 @@ export class Command {
     this.executeInsertTextVariable = adapt.insertTextVariable.bind(adapt)
     //图片变量
     this.executeInsertImgVariable = adapt.insertImgVariable.bind(adapt)
+    //循环
+    this.executeInsertLoop = adapt.insertLoop.bind(adapt)
   }
 }

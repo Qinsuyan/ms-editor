@@ -70,6 +70,7 @@ interface IFormatElementListOption {
   isHandleFirstElement?: boolean // 根据上下文确定首字符处理逻辑（处理首字符补偿）
   isForceCompensation?: boolean // 强制补偿字符
   editorOptions: DeepRequired<IEditorOption>
+  onlyLoop?: boolean
 }
 
 export function formatElementList(
@@ -224,7 +225,59 @@ export function formatElementList(
         }
       }
       i--
-    } else if (el.type === ElementType.TEXT_VARIABLE) {
+    }
+    // else if (el.type === ElementType.LOOP && el.loopType === 'start') {
+    //   if (
+    //     options.editorOptions.mode === EditorMode.CLEAN ||
+    //     options.editorOptions.mode === EditorMode.PRINT
+    //   ) {
+    //     //寻找循环结束
+    //     let endIndex = i
+    //     for(endIndex;endIndex<elementList.length;endIndex++){
+    //       if(elementList[endIndex].type === ElementType.LOOP && elementList[endIndex].loopType === 'end'){
+    //         break
+    //       }
+    //     }
+    //     console.log(endIndex)
+    //     if(endIndex !== i){
+    //       const loopId = getUUID()
+    //       const loopList =  elementList.slice(i+1,endIndex)
+    //       let loopCount = 1
+    //       loopList.forEach(el => {
+    //         el.loopId = loopId
+    //         //找出循环次数
+    //         if(el.type === ElementType.TEXT_VARIABLE){
+    //           const values = textDict[el.key!]
+    //           if(typeof values !== 'string'){
+    //             if(values.length > loopCount){
+    //               loopCount = values.length
+    //             }
+    //           }
+    //         }
+    //         if(el.type === ElementType.IMG_VARIABLE){
+    //           const values = imgDict[el.key!]
+    //           if(typeof values !== 'string'){
+    //             if(values.length > loopCount){
+    //               loopCount = values.length
+    //             }
+    //           }
+    //         }
+    //       })
+    //       elementList.splice(i,endIndex+1 - i)
+    //       console.log(loopCount)
+    //       for(let j = 0; j < loopCount; j++){
+    //         const loopElements = deepClone(loopList)
+    //         elementList.splice(i,0,...loopElements)
+    //       }
+    //       i--
+    //     }else{
+    //       elementList.splice(i,1)
+    //       i--
+    //     }
+
+    //   }
+    // }
+    else if (el.type === ElementType.TEXT_VARIABLE) {
       //TODO:判断循环
       if (
         options.editorOptions.mode !== EditorMode.CLEAN &&
@@ -232,7 +285,10 @@ export function formatElementList(
       ) {
         el.value = '{X}'
       } else {
-        el.value = (textDict[el.key!] as string) || '未定义变量'
+        el.value =
+          (typeof textDict[el.key!] === 'string'|| textDict[el.key!] === undefined)
+            ? (textDict[el.key!] as string) || '未定义变量'
+            : textDict[el.key!][el.loopIndex!] || ''
       }
     } else if (el.type === ElementType.IMG_VARIABLE) {
       if (
@@ -241,7 +297,10 @@ export function formatElementList(
       ) {
         el.value = ''
       } else {
-        el.value = (imgDict[el.key!] as string) || ''
+        el.value =
+          (typeof imgDict[el.key!] === 'string'|| imgDict[el.key!] === undefined)
+            ? (imgDict[el.key!] as string) || ''
+            : imgDict[el.key!][el.loopIndex!] || ''
       }
     } else if (el.type === ElementType.DATE) {
       // 移除父节点

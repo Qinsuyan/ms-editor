@@ -84,6 +84,10 @@
   "pageBreak": {
     "displayName": "Page Break"
   },
+  "loop": {
+    "start": "Loop Start",
+    "end":"Loop End"
+  },
   "zone": {
     "headerTip": "Double click to edit header",
     "footerTip": "Double click to edit footer"
