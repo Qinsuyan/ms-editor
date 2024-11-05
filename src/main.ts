@@ -25,7 +25,7 @@ import { formatPrismToken } from './utils/prism'
 import { Signature } from './components/signature/Signature'
 import { debounce, nextTick } from './utils'
 import { IMarkType } from './editor/interface/Editor'
-import { imgV } from './test'
+import { imgSide, imgV } from './test'
 
 window.onload = function () {
   const isApple =
@@ -1927,6 +1927,10 @@ window.onload = function () {
   instance.command.executeSetTextVariable({
     projectName: '我的测试项目'
   })
+
+  instance.command.executeSetImgVariable({
+    imgPattern: imgV
+  })
   const variableSetText = document.querySelector<HTMLDivElement>(
     '.menu-item__variable_set_text'
   )!
@@ -1942,7 +1946,7 @@ window.onload = function () {
   variableSetImg.title = `设置图片变量`
   variableSetImg.onclick = function () {
     instance.command.executeSetImgVariable({
-      imgPattern: imgV
+      imgPattern: imgSide
     })
   }
   // 13. 变量文字
@@ -1956,17 +1960,17 @@ window.onload = function () {
       key: 'projectName'
     })
   }
-  // 14. 变量图片
-  // const variableImg = document.querySelector<HTMLDivElement>(
-  //   '.menu-item__variable_img'
-  // )!
-  // variableImg.title = `变量图片`
-  // variableImg.onclick = function () {
-  //   instance.command.executeInsertImgVariable({
-  //     label: '项目名称',
-  //     key: 'projectName',
-  //     width: 500,
-  //     height: 500
-  //   })
-  // }
+  //14. 变量图片
+  const variableImg = document.querySelector<HTMLDivElement>(
+    '.menu-item__variable_img'
+  )!
+  variableImg.title = `变量图片`
+  variableImg.onclick = function () {
+    instance.command.executeInsertImgVariable({
+      label: '花纹图片',
+      key: 'imgPattern',
+      width: 500,
+      height: 500
+    })
+  }
 }

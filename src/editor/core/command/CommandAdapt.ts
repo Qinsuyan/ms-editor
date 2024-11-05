@@ -1293,7 +1293,14 @@ export class CommandAdapt {
     const { startIndex } = this.range.getRange()
     const elementList = this.draw.getElementList()
     const element = elementList[startIndex]
-    if (!element || element.type !== ElementType.IMAGE) return
+    if (
+      !element ||
+      (element.type !== ElementType.IMAGE &&
+        element.type !== ElementType.IMG_VARIABLE)
+    ) {
+      return
+    }
+
     downloadFile(element.value, `${element.id!}.png`)
   }
 
@@ -2159,10 +2166,19 @@ export class CommandAdapt {
   }
   //设置图片变量
   public setImgVariable(variable: Record<string, string | string[]>) {
-    this.draw.imgVariables = variable
+    this.draw.setImgVariables(variable)
   }
   //文字变量
   public insertTextVariable(def: { label: string; key: string }) {
     this.draw.insertTextVariable(def)
+  }
+  //图片变量
+  public insertImgVariable(def: {
+    label: string
+    key: string
+    width: number
+    height: number
+  }) {
+    this.draw.insertImgVariable(def)
   }
 }

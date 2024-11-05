@@ -17,5 +17,6 @@ export enum ElementType {
   TITLE = 'title',
   LIST = 'list',
   MARK = 'mark',
-  TEXT_VARIABLE = 'textVariable'
+  TEXT_VARIABLE = 'textVariable',
+  IMG_VARIABLE = 'imgVariable'
 }

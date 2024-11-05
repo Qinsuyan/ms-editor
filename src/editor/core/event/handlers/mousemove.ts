@@ -31,7 +31,7 @@ export function mousemove(evt: MouseEvent, host: CanvasEvent) {
       // 浮动元素拖拽调整位置
       const dragElement = host.cacheElementList![cacheStartIndex]
       if (
-        dragElement?.type === ElementType.IMAGE &&
+        (dragElement?.type === ElementType.IMAGE || dragElement?.type === ElementType.IMG_VARIABLE) &&
         (dragElement.imgDisplay === ImageDisplay.SURROUND ||
           dragElement.imgDisplay === ImageDisplay.FLOAT_TOP ||
           dragElement.imgDisplay === ImageDisplay.FLOAT_BOTTOM)

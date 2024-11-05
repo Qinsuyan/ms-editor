@@ -151,7 +151,8 @@ export class Position {
         const metrics = element.metrics
         const offsetY =
           (element.imgDisplay !== ImageDisplay.INLINE &&
-            element.type === ElementType.IMAGE) ||
+            (element.type === ElementType.IMAGE ||
+              element.type === ElementType.IMG_VARIABLE)) ||
           element.type === ElementType.LATEX
             ? curRow.ascent - metrics.height
             : curRow.ascent
@@ -198,7 +199,7 @@ export class Position {
               pageNo
             }
           }
-          
+
           this.floatPositionList.push({
             pageNo,
             element,
@@ -459,6 +460,7 @@ export class Position {
         // 图片区域均为命中
         if (
           element.type === ElementType.IMAGE ||
+          element.type === ElementType.IMG_VARIABLE ||
           element.type === ElementType.LATEX
         ) {
           return {
@@ -697,7 +699,7 @@ export class Position {
       } = this.floatPositionList[f]
       if (
         currentPageNo === pageNo &&
-        element.type === ElementType.IMAGE &&
+        (element.type === ElementType.IMAGE || element.type === ElementType.IMG_VARIABLE) &&
         element.imgDisplay &&
         payload.imgDisplays.includes(element.imgDisplay) &&
         (!floatElementZone || floatElementZone === currentZone)

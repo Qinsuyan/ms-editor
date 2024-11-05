@@ -300,10 +300,16 @@ export class Draw {
   public setMode(payload: EditorMode) {
     if (this.mode === payload) return
     this.elementList.forEach(el => {
-      if (el.type === ElementType.TEXT_VARIABLE) {
+      if (
+        el.type === ElementType.TEXT_VARIABLE ||
+        el.type === ElementType.IMG_VARIABLE
+      ) {
         formatElementList(
           [el],
-          { isHandleFirstElement: false, editorOptions: {...this.options,mode:payload} },
+          {
+            isHandleFirstElement: false,
+            editorOptions: { ...this.options, mode: payload }
+          },
           this.textVariables,
           this.imgVariables
         )
@@ -313,12 +319,15 @@ export class Draw {
           tr.tdList.forEach(td => {
             td.rowList?.forEach(row => {
               row.elementList.forEach(el => {
-                if (el.type === ElementType.TEXT_VARIABLE) {
+                if (
+                  el.type === ElementType.TEXT_VARIABLE ||
+                  el.type === ElementType.IMG_VARIABLE
+                ) {
                   formatElementList(
                     [el],
                     {
                       isHandleFirstElement: false,
-                      editorOptions: {...this.options,mode:payload}
+                      editorOptions: { ...this.options, mode: payload }
                     },
                     this.textVariables,
                     this.imgVariables
@@ -330,6 +339,7 @@ export class Draw {
         })
       }
     })
+    this.imageParticle.clearCache()
     // 设置打印模式
     if (payload === EditorMode.PRINT) {
       this.printModeData = {
@@ -356,7 +366,6 @@ export class Draw {
     this.range.clearRange()
     this.mode = payload
     this.options.mode = payload
-
     this.render({
       isSetCursor: false,
       isSubmitHistory: false
@@ -1368,7 +1377,8 @@ export class Draw {
       x += curRow.elementList.length === 1 ? offsetX : 0
       if (
         element.type === ElementType.IMAGE ||
-        element.type === ElementType.LATEX
+        element.type === ElementType.LATEX ||
+        element.type === ElementType.IMG_VARIABLE
       ) {
         // 浮动图片无需计算数据
         if (
@@ -1702,7 +1712,8 @@ export class Draw {
       }
       const ascent =
         (element.imgDisplay !== ImageDisplay.INLINE &&
-          element.type === ElementType.IMAGE) ||
+          (element.type === ElementType.IMAGE ||
+            element.type === ElementType.IMG_VARIABLE)) ||
         element.type === ElementType.LATEX
           ? metrics.height + rowMargin
           : metrics.boundingBoxAscent + rowMargin
@@ -2068,7 +2079,10 @@ export class Draw {
         } = positionList[curRow.startIndex + j]
         const preElement = curRow.elementList[j - 1]
         // 元素绘制
-        if (element.type === ElementType.IMAGE) {
+        if (
+          element.type === ElementType.IMAGE ||
+          element.type === ElementType.IMG_VARIABLE
+        ) {
           this.textParticle.complete()
           // 浮动图片单独绘制
           if (
@@ -2393,7 +2407,8 @@ export class Draw {
           floatPosition.zone == EditorZone.FOOTER) &&
         element.imgDisplay &&
         imgDisplays.includes(element.imgDisplay) &&
-        element.type === ElementType.IMAGE
+        (element.type === ElementType.IMAGE ||
+          element.type === ElementType.IMG_VARIABLE)
       ) {
         const imgFloatPosition = element.imgFloatPosition!
         this.imageParticle.render(
@@ -2938,7 +2953,6 @@ export class Draw {
           this.textVariables,
           this.imgVariables
         )
-        
       }
       if (el.type === ElementType.TABLE) {
         el.trList?.forEach(tr => {
@@ -2966,5 +2980,62 @@ export class Draw {
         isSetCursor: false
       })
     })
+  }
+  public setImgVariables(dict: Record<string, string | string[]>) {
+    this.imgVariables = dict
+    this.imageParticle.clearCache()
+    this.elementList.forEach((el, index) => {
+      if (el.type === ElementType.IMG_VARIABLE) {
+        formatElementList(
+          [el],
+          { isHandleFirstElement: false, editorOptions: this.options },
+          this.textVariables,
+          this.imgVariables
+        )
+      }
+      if (el.type === ElementType.TABLE) {
+        el.trList?.forEach(tr => {
+          tr.tdList.forEach(td => {
+            td.rowList?.forEach(row => {
+              row.elementList.forEach(el => {
+                if (el.type === ElementType.IMG_VARIABLE) {
+                  formatElementList(
+                    [el],
+                    {
+                      isHandleFirstElement: false,
+                      editorOptions: this.options
+                    },
+                    this.textVariables,
+                    this.imgVariables
+                  )
+                }
+              })
+            })
+          })
+        })
+      }
+      this.render({
+        curIndex: index,
+        isSetCursor: false
+      })
+    })
+  }
+  public insertImgVariable(def: {
+    label: string
+    key: string
+    width: number
+    height: number
+  }) {
+    this.insertElementList([
+      {
+        variableId: getUUID(),
+        type: ElementType.IMG_VARIABLE,
+        value: '',
+        key: def.key,
+        label: def.label,
+        width: def.width,
+        height: def.height
+      }
+    ])
   }
 }

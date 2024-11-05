@@ -1,5 +1,6 @@
 import { EDITOR_PREFIX } from '../../../dataset/constant/Editor'
 import { ImageDisplay } from '../../../dataset/enum/Common'
+import { ElementType } from '../../../dataset/enum/Element'
 import { IEditorOption } from '../../../interface/Editor'
 import { IElement } from '../../../interface/Element'
 import { convertStringToBase64 } from '../../../utils'
@@ -71,20 +72,45 @@ export class ImageParticle {
     this.draw.getImageObserver().add(promise)
   }
 
-  protected getFallbackImage(width: number, height: number): HTMLImageElement {
+  protected getFallbackImage(
+    width: number,
+    height: number,
+    placeholder?: string,
+    value?: string
+  ): HTMLImageElement {
     const tileSize = 8
     const x = (width - Math.ceil(width / tileSize) * tileSize) / 2
     const y = (height - Math.ceil(height / tileSize) * tileSize) / 2
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
-                  <rect width="${width}" height="${height}" fill="url(#mosaic)" />
-                  <defs>
+                  ${
+                    value
+                      ? `<image href="${value}" width="${width}" height="${height}" opacity="0.6" preserveAspectRatio="none" />`
+                      : `<rect width="${width}" height="${height}" fill="url(#mosaic)" />`
+                  }
+                  ${
+                    placeholder
+                      ? `<text x="${width / 2}" y="${
+                          height / 2
+                        }" fill="black" font-size="${
+                          width / placeholder?.length
+                        }" text-anchor="middle" dominant-baseline="middle">
+                  ${placeholder}`
+                      : ''
+                  }
+                </text>
+                ${
+                  !value
+                    ? ` <defs>
                     <pattern id="mosaic" x="${x}" y="${y}" width="${
-      tileSize * 2
-    }" height="${tileSize * 2}" patternUnits="userSpaceOnUse">
+                        tileSize * 2
+                      }" height="${tileSize * 2}" patternUnits="userSpaceOnUse">
                       <rect width="${tileSize}" height="${tileSize}" fill="#cccccc" />
                       <rect width="${tileSize}" height="${tileSize}" fill="#cccccc" transform="translate(${tileSize}, ${tileSize})" />
                     </pattern>
-                  </defs>
+                  </defs>`
+                    : ''
+                }
+                 
                 </svg>`
     const fallbackImage = new Image()
     fallbackImage.src = `data:image/svg+xml;base64,${convertStringToBase64(
@@ -111,7 +137,10 @@ export class ImageParticle {
         img.setAttribute('crossOrigin', 'Anonymous')
         img.src = element.value
         img.onload = () => {
+          // if (element.type !== ElementType.IMG_VARIABLE) {
           this.imageCache.set(element.id!, img)
+          // }
+
           resolve(element)
           // 衬于文字下方图片需要重新首先绘制
           if (element.imgDisplay === ImageDisplay.FLOAT_BOTTOM) {
@@ -125,15 +154,28 @@ export class ImageParticle {
           }
         }
         img.onerror = error => {
-          const fallbackImage = this.getFallbackImage(width, height)
+          const fallbackImage = this.getFallbackImage(
+            width,
+            height,
+            element.label,
+            element.type === ElementType.IMG_VARIABLE
+              ? (this.draw.imgVariables[element.key!] as string)
+              : ''
+          )
           fallbackImage.onload = () => {
             ctx.drawImage(fallbackImage, x, y, width, height)
+            // if (element.type !== ElementType.IMG_VARIABLE) {
             this.imageCache.set(element.id!, fallbackImage)
+            // }
           }
           reject(error)
         }
       })
       this.addImageObserver(imageLoadPromise)
     }
+  }
+
+  public clearCache(){
+    this.imageCache.clear()
   }
 }

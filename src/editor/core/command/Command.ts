@@ -125,6 +125,7 @@ export class Command {
   public executeSetTextVariable: CommandAdapt['setTextVariable']
   public executeSetImgVariable:CommandAdapt['setImgVariable']
   public executeInsertTextVariable:CommandAdapt['insertTextVariable']
+  public executeInsertImgVariable:CommandAdapt['insertImgVariable']
 
   constructor(adapt: CommandAdapt) {
     // 全局命令
@@ -264,5 +265,7 @@ export class Command {
     this.executeSetImgVariable = adapt.setImgVariable.bind(adapt)
     //文字变量
     this.executeInsertTextVariable = adapt.insertTextVariable.bind(adapt)
+    //图片变量
+    this.executeInsertImgVariable = adapt.insertImgVariable.bind(adapt)
   }
 }

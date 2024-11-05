@@ -28,7 +28,8 @@ export const imageMenus: IRegisterContextMenu[] = [
       return (
         !payload.isReadonly &&
         !payload.editorHasSelection &&
-        payload.startElement?.type === ElementType.IMAGE
+        (payload.startElement?.type === ElementType.IMAGE ||
+          payload.startElement?.type === ElementType.IMG_VARIABLE)
       )
     },
     callback: (command: Command) => {
@@ -56,7 +57,7 @@ export const imageMenus: IRegisterContextMenu[] = [
     when: payload => {
       return (
         !payload.editorHasSelection &&
-        payload.startElement?.type === ElementType.IMAGE
+        (payload.startElement?.type === ElementType.IMAGE || payload.startElement?.type === ElementType.IMG_VARIABLE)
       )
     },
     callback: (command: Command) => {
@@ -70,7 +71,7 @@ export const imageMenus: IRegisterContextMenu[] = [
       return (
         !payload.isReadonly &&
         !payload.editorHasSelection &&
-        payload.startElement?.type === ElementType.IMAGE
+        (payload.startElement?.type === ElementType.IMAGE|| payload.startElement?.type === ElementType.IMG_VARIABLE)
       )
     },
     childMenus: [

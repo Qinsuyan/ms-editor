@@ -39,6 +39,14 @@ const elementList: IElement[] = [
                 width: 556,
                 imgDisplay: ImageDisplay.INLINE,
                 rowFlex: RowFlex.CENTER
+              },
+              {
+                type: ElementType.IMG_VARIABLE,
+                value: '',
+                label: '花纹图片',
+                key: 'imgPattern',
+                width: 50,
+                height: 50
               }
             ]
           }
@@ -85,10 +93,19 @@ const elementList: IElement[] = [
     value: '',
     label: '项目名称',
     key: 'projectName'
-  },{
+  },
+  {
     type: ElementType.TEXT,
     value: '。'
   },
+  {
+    type: ElementType.IMG_VARIABLE,
+    value: '',
+    label: '花纹图片',
+    key: 'imgPattern',
+    width: 500,
+    height: 500
+  }
 ]
 
 export const data: IElement[] = elementList

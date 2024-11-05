@@ -30,7 +30,7 @@ enum ElementType {
   LIST = 'list',
   MARK = 'mark',
   TEXT_VARIABLE = 'textVariable',
-
+  IMG_VARIABLE = 'imgVariable'
 }
 
 enum TitleLevel {

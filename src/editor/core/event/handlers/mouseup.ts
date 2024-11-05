@@ -95,6 +95,7 @@ export function mouseup(evt: MouseEvent, host: CanvasEvent) {
         const dragElement = cacheElementList[cacheEndIndex]
         if (
           dragElement.type === ElementType.IMAGE ||
+          dragElement.type === ElementType.IMG_VARIABLE ||
           dragElement.type === ElementType.LATEX ||
           dragElement.type === ElementType.MARK
         ) {
@@ -303,7 +304,7 @@ export function mouseup(evt: MouseEvent, host: CanvasEvent) {
       const elementList = draw.getElementList()
       const dragElement = elementList[rangeEndIndex]
       if (
-        dragElement.type === ElementType.IMAGE ||
+        dragElement.type === ElementType.IMAGE ||dragElement.type === ElementType.IMG_VARIABLE ||
         dragElement.type === ElementType.LATEX ||
         dragElement.type === ElementType.MARK
       ) {

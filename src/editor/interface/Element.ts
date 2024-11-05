@@ -136,6 +136,12 @@ export interface IVariableTextElement {
   label?: string
 }
 
+export interface IVariableImgElement {
+  variableId?: string
+  key?: string
+  label?: string
+}
+
 export interface IBlockElement {
   block?: IBlock
 }
@@ -157,7 +163,8 @@ export type IElement = IElementBasic &
   ITitleElement &
   IListElement &
   IMarkElement &
-  IVariableTextElement
+  IVariableTextElement &
+  IVariableImgElement
 
 export interface IElementMetrics {
   width: number

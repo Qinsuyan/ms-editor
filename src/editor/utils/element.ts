@@ -234,6 +234,15 @@ export function formatElementList(
       } else {
         el.value = (textDict[el.key!] as string) || '未定义变量'
       }
+    } else if (el.type === ElementType.IMG_VARIABLE) {
+      if (
+        options.editorOptions.mode !== EditorMode.CLEAN &&
+        options.editorOptions.mode !== EditorMode.PRINT
+      ) {
+        el.value = ''
+      } else {
+        el.value = (imgDict[el.key!] as string) || ''
+      }
     } else if (el.type === ElementType.DATE) {
       // 移除父节点
       elementList.splice(i, 1)

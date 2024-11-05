@@ -138,7 +138,8 @@ export const TEXTLIKE_ELEMENT_TYPE: ElementType[] = [
 export const IMAGE_ELEMENT_TYPE: ElementType[] = [
   ElementType.IMAGE,
   ElementType.LATEX,
-  ElementType.MARK
+  ElementType.MARK,
+  ElementType.IMG_VARIABLE
 ]
 
 export const BLOCK_ELEMENT_TYPE: ElementType[] = [
