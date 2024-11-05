@@ -2168,6 +2168,10 @@ export class CommandAdapt {
   public setImgVariable(variable: Record<string, string | string[]>) {
     this.draw.setImgVariables(variable)
   }
+  //设置表格变量
+  public setTableVariables(variable: Record<string, string[][]>) {
+    this.draw.setTableVariables(variable)
+  }
   //文字变量
   public insertTextVariable(def: { label: string; key: string }) {
     this.draw.insertTextVariable(def)

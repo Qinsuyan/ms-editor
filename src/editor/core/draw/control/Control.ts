@@ -114,6 +114,7 @@ export class Control {
   public filterAssistElement(elementList: IElement[]): IElement[] {
     return elementList.filter(element => {
       if (element.type === ElementType.TABLE) {
+       
         const trList = element.trList!
         for (let r = 0; r < trList.length; r++) {
           const tr = trList[r]
@@ -123,6 +124,7 @@ export class Control {
           }
         }
       }
+      
       if (!element.controlId) return true
       if (element.control?.minWidth) {
         if (

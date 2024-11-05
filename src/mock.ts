@@ -18,7 +18,64 @@ const elementList: IElement[] = [
   {
     type: ElementType.TABLE,
     value: '',
+    dataKey: 'personsData',
+    colgroup: [
+      {
+        width: 300
+      },
+      {
+        width: 300
+      },
+      {
+        width: 300
+      }
+    ],
+    trList: [
+      {
+        height: 40,
+        header: true,
+        tdList: [
+          {
+            colspan: 1,
+            rowspan: 1,
+            value: [
+              {
+                value: '姓名',
+              }
+            ]
+          },
+          {
+            colspan: 1,
+            rowspan: 1,
 
+            value: [
+              {
+                value: '年龄'
+              }
+            ]
+          },
+          {
+            colspan: 1,
+            rowspan: 1,
+
+            value: [
+              {
+                value: '性别'
+              }
+            ]
+          }
+        ]
+      },
+    ],
+    outBorderWidth: 1
+  },
+  {
+    value: '',
+    type: ElementType.PAGE_BREAK
+  },
+  {
+    type: ElementType.TABLE,
+    value: '',
     colgroup: [
       {
         width: 1003

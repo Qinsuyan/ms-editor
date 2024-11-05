@@ -1942,6 +1942,15 @@ window.onload = function () {
   instance.command.executeSetImgVariable({
     imgPattern: imgV
   })
+  instance.command.executeSetTableVariables({
+    personsData: [
+      ['张三', '18', '男'],
+      ['李四', '19', '女'],
+      ['王五', '20', '男'],
+      ['赵六', '21', '男'],
+      ['钱七', '22', '男']
+    ]
+  })
   const variableSetText = document.querySelector<HTMLDivElement>(
     '.menu-item__variable_set_text'
   )!

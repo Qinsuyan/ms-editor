@@ -66,6 +66,7 @@ export interface ITableAttr {
   trList?: ITr[]
   borderType?: TableBorder
   outBorderWidth?: number
+  dataKey?:string,
 }
 
 export interface ITableElement {
@@ -148,6 +149,7 @@ export interface ILoopElement {
   loopType?: 'start' | 'end'
 }
 
+
 export interface IBlockElement {
   block?: IBlock
 }
@@ -171,7 +173,7 @@ export type IElement = IElementBasic &
   IMarkElement &
   IVariableTextElement &
   IVariableImgElement &
-  ILoopElement
+  ILoopElement 
 
 export interface IElementMetrics {
   width: number

@@ -188,6 +188,7 @@ export class Draw {
   private printModeData: Required<IEditorData> | null
   public textVariables: Record<string, string | string[]>
   public imgVariables: Record<string, string | string[]>
+  public tableVariables: Record<string, string[][]>
 
   constructor(
     rootContainer: HTMLElement,
@@ -210,6 +211,7 @@ export class Draw {
     this.override = override
     this.textVariables = {}
     this.imgVariables = {}
+    this.tableVariables = {}
 
     this._formatContainer()
     this.pageContainer = this._createPageContainer()
@@ -377,7 +379,6 @@ export class Draw {
               break
             }
           }
-          console.log(i, endIndex, loopCount)
           //取出循环的元素
           let loopElements = this.elementList.slice(i, endIndex + 1)
           loopElements = loopElements.slice(0, loopElements.length / loopCount)
@@ -391,7 +392,6 @@ export class Draw {
             { type: ElementType.LOOP, loopType: 'end', value: '' }
           ]
           this.elementList.splice(i, endIndex - i + 1, ...loopElements)
-          console.log(this.elementList)
           i--
         }
       }
@@ -437,10 +437,75 @@ export class Draw {
       }
     })
   }
+  private parseDataTable(mode: EditorMode) {
+    if (mode === EditorMode.PRINT || mode === EditorMode.CLEAN) {
+      //添加数据行
+      this.elementList.forEach(el => {
+        if (el.type === ElementType.TABLE && el.dataKey) {
+          const values = this.tableVariables[el.dataKey]
+          const modelRow = deepClone(el.trList![el.trList!.length - 1])
+          el.trList = el.trList?.filter(tr => tr.header)
+          values.forEach(dataRow => {
+            const row = deepClone(modelRow)
+            row.header = undefined
+            row.tdList!.forEach((td, index) => {
+              const dataValue = dataRow[index]
+              const modelTd = td.value[td.value.length - 1]
+              td.value = [
+                {
+                  ...modelTd,
+                  value: dataValue
+                }
+              ]
+            })
+            row.dataKey = el.dataKey
+            el.trList?.push(row)
+          })
+          formatElementList(
+            [el],
+            { isHandleFirstElement: false, editorOptions: this.options },
+            {},
+            {}
+          )
+        }
+      })
+    } else {
+      //删除数据行
+      this.elementList.forEach(el => {
+        if (el.type === ElementType.TABLE && el.dataKey) {
+          const modelRow = el.trList![el.trList!.length - 1]
+          const row = deepClone(modelRow)
+          el.trList = el.trList?.filter(tr => tr.header)
+          row.tdList!.forEach(td => {
+            const modelTd = td.value[td.value.length - 1]
+            td.value = [
+              {
+                ...modelTd,
+                value: '...'
+              }
+            ]
+          })
+          row.dataKey = undefined
+          el.trList?.push(row)
+
+          formatElementList(
+            [el],
+            { isHandleFirstElement: false, editorOptions: this.options },
+            {},
+            {}
+          )
+        }
+      })
+    }
+  }
 
   public setMode(payload: EditorMode) {
     if (this.mode === payload) return
     this.parseLoop(payload)
+    this.parseDataTable(payload)
+    if (this.printModeData) {
+      this.printModeData.main = this.elementList
+    }
 
     this.imageParticle.clearCache()
     // 设置打印模式
@@ -3132,6 +3197,11 @@ export class Draw {
         isSetCursor: false
       })
     })
+  }
+  public setTableVariables(dict: Record<string, string[][]>) {
+    this.tableVariables = dict
+    this.parseDataTable(this.getMode())
+    this.render()
   }
   public insertImgVariable(def: {
     label: string

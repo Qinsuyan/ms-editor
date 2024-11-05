@@ -4,6 +4,8 @@ export interface ITr {
   id?: string
   extension?: unknown
   externalId?: string
+  dataKey?: string
+  header?: boolean
   height: number
   tdList: ITd[]
   minHeight?: number

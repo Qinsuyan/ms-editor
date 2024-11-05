@@ -19,5 +19,5 @@ export enum ElementType {
   MARK = 'mark',
   TEXT_VARIABLE = 'textVariable',
   IMG_VARIABLE = 'imgVariable',
-  LOOP = 'loop'
+  LOOP = 'loop',
 }
