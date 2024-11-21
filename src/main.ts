@@ -1,4 +1,4 @@
-import { data, options, report } from './mock'
+import {  options, report } from './mock'
 import './style.css'
 import prism from 'prismjs'
 import Editor, {
