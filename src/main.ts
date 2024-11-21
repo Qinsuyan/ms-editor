@@ -1,4 +1,4 @@
-import { data, options } from './mock'
+import { data, options, report } from './mock'
 import './style.css'
 import prism from 'prismjs'
 import Editor, {
@@ -52,7 +52,7 @@ window.onload = function () {
         //   type: ElementType.SEPARATOR
         // }
       ],
-      main: <IElement[]>data,
+      main: <IElement[]>[],
       footer: [
         // {
         //   value: 'canvas-editor',
@@ -2007,5 +2007,49 @@ window.onload = function () {
   loopEnd.title = `循环结束`
   loopEnd.onclick = function () {
     instance.command.executeInsertLoop('end')
+  }
+  const setV = document.querySelector<HTMLDivElement>(
+    '.menu-item__set_variable'
+  )!
+  setV.title = `设置变量`
+  setV.onclick = function () {
+    instance.command.executeSetImgVariable(report.imgVariables)
+  }
+  const img24 = document.querySelector<HTMLDivElement>(
+    '.menu-item__insert_img_24'
+  )!
+  img24.title = `24小时内微震事件分布情况`
+  img24.onclick = function () {
+    instance.command.executeInsertElementList([
+      {
+        type: ElementType.IMG_VARIABLE,
+        value: '',
+        label: '24小时内微震事件分布情况',
+        key: 'DailyGLEvents24',
+        width: 760,
+        height: 350
+      }
+    ])
+  }
+  const img7 = document.querySelector<HTMLDivElement>(
+    '.menu-item__insert_img_7'
+  )!
+  img7.title = `7日内微震事件分布情况`
+  img7.onclick = function () {
+    instance.command.executeInsertElementList([
+      {
+        type: ElementType.IMG_VARIABLE,
+        value: '',
+        label: '7日内微震事件分布情况',
+        key: 'DailyGLEvents7',
+        width: 760,
+        height: 350
+      }
+    ])
+  }
+  const getV = document.querySelector<HTMLDivElement>('.menu-item__getValue')!
+  getV.title = `GET VALUE`
+  getV.onclick = function () {
+    console.log(instance.command.getValue())
   }
 }

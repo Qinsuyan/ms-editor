@@ -175,7 +175,6 @@ export function formatElementList(
       if (el.trList) {
         const { defaultTrMinHeight } = editorOptions.table
         for (let t = 0; t < el.trList.length; t++) {
-          
           const tr = el.trList[t]
           const trId = getUUID()
           tr.id = trId
@@ -226,8 +225,8 @@ export function formatElementList(
         }
       }
       i--
-    }else if (el.type === ElementType.TEXT_VARIABLE) {
-      //TODO:判断循环
+    } else if (el.type === ElementType.TEXT_VARIABLE) {
+      el.id = getUUID()
       if (
         options.editorOptions.mode !== EditorMode.CLEAN &&
         options.editorOptions.mode !== EditorMode.PRINT
@@ -235,11 +234,13 @@ export function formatElementList(
         el.value = '{X}'
       } else {
         el.value =
-          (typeof textDict[el.key!] === 'string'|| textDict[el.key!] === undefined)
+          typeof textDict[el.key!] === 'string' ||
+          textDict[el.key!] === undefined
             ? (textDict[el.key!] as string) || '未定义变量'
             : textDict[el.key!][el.loopIndex!] || ''
       }
     } else if (el.type === ElementType.IMG_VARIABLE) {
+      el.id = getUUID()
       if (
         options.editorOptions.mode !== EditorMode.CLEAN &&
         options.editorOptions.mode !== EditorMode.PRINT
@@ -247,7 +248,7 @@ export function formatElementList(
         el.value = ''
       } else {
         el.value =
-          (typeof imgDict[el.key!] === 'string'|| imgDict[el.key!] === undefined)
+          typeof imgDict[el.key!] === 'string' || imgDict[el.key!] === undefined
             ? (imgDict[el.key!] as string) || ''
             : imgDict[el.key!][el.loopIndex!] || ''
       }
@@ -809,6 +810,12 @@ export function zipElementList(
       }
     } else {
       e++
+    }
+    if (pickElement.type === ElementType.IMG_VARIABLE) {
+      pickElement.value = ''
+    }
+    if (pickElement.type === ElementType.TEXT_VARIABLE) {
+      pickElement.value = ''
     }
     zipElementListData.push(pickElement)
   }

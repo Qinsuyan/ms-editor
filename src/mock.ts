@@ -40,7 +40,7 @@ const elementList: IElement[] = [
             rowspan: 1,
             value: [
               {
-                value: '姓名',
+                value: '姓名'
               }
             ]
           },
@@ -65,7 +65,7 @@ const elementList: IElement[] = [
             ]
           }
         ]
-      },
+      }
     ],
     outBorderWidth: 1
   },
@@ -211,14 +211,9 @@ export const data: IElement[] = elementList
 
 export const options: IEditorOption = {
   margins: [60, 60, 60, 60],
-  mode: EditorMode.PRINT,
-  // watermark: {
-  //   data: 'CANVAS-EDITOR',
-  //   size: 120
-  // },
+  mode: EditorMode.EDIT,
   pageNumber: {
     format: ''
-    // format: '第{pageNo}页/共{pageCount}页'
   },
   placeholder: {
     data: '请输入正文'
@@ -228,4 +223,34 @@ export const options: IEditorOption = {
     tipDisabled: false
   },
   maskMargin: [60, 0, 30, 0] // 菜单栏高度60，底部工具栏30为遮盖层
+}
+export const report = {
+  textVariables: {
+    dataTimeRange: '2024年11月01日 01:00:00~2024年11月18日 00:00:00',
+    dataDateRange: '2024年11月01日~2024年11月18日',
+    systemDateWithCharacter: '2024年11月21日',
+    systemDateWithDot: '2024.11.21',
+    projectName: '川藏铁路-3（3#斜井）',
+    workingName: '-',
+    allTotal: 578,
+    validTotal: 578,
+    massiveCount: 124,
+    latestFace: '-',
+    nearStrong24: 128,
+    nearMedium24: 66,
+    riskLevel: '强烈',
+    maxEnergy: 182727.0062883581,
+    minEnergy: 232.26394068589275,
+    totalEnergy: 11143781.851726934,
+    energyCount001: 0,
+    energyCount015: 145,
+    energyCount530: 309,
+    energyCount30500: 124,
+    energyCount500: 0
+  },
+  imgVariables: {
+    DailyGLEvents24: '',
+    DailyGLEvents7: ''
+  },
+  tableVariables: {}
 }

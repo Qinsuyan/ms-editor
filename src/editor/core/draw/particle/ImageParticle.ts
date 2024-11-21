@@ -156,7 +156,8 @@ export class ImageParticle {
             height,
             element.label,
             element.type === ElementType.IMG_VARIABLE
-              ? typeof this.draw.imgVariables[element.key!] === 'string'
+              ? typeof this.draw.imgVariables[element.key!] === 'string' ||
+                typeof this.draw.imgVariables[element.key!] === 'undefined'
                 ? (this.draw.imgVariables[element.key!] as string)
                 : this.draw.imgVariables[element.key!][element.loopIndex!] || ''
               : ''
@@ -165,7 +166,7 @@ export class ImageParticle {
             ctx.drawImage(fallbackImage, x, y, width, height)
             this.imageCache.set(element.id!, fallbackImage)
           }
-          fallbackImage.onerror = (e) => {
+          fallbackImage.onerror = e => {
             reject(e)
           }
         }
