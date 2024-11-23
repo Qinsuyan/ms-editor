@@ -2,7 +2,7 @@
   "name": "@qinsuyan/ms-editor",
   "author": "Hufe",
   "license": "MIT",
-  "version": "0.6.2",
+  "version": "0.6.4",
   "description": "rich text editor by canvas/svg",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",

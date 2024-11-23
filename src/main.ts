@@ -424,7 +424,7 @@ window.onload = function () {
   }
   tablePanel.onclick = function () {
     // 应用选择
-    instance.command.executeInsertTable(rowIndex, colIndex)
+    instance.command.executeInsertTable(rowIndex, colIndex,5)
     recoveryTable()
   }
 

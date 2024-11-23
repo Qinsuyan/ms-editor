@@ -774,12 +774,12 @@ export class CommandAdapt {
     this.draw.render({ curIndex, isSetCursor })
   }
 
-  public insertTable(row: number, col: number) {
+  public insertTable(row: number, col: number, outBorderWidth?: number) {
     const isDisabled = this.draw.isReadonly() || this.draw.isDisabled()
     if (isDisabled) return
     const activeControl = this.control.getActiveControl()
     if (activeControl) return
-    this.tableOperate.insertTable(row, col)
+    this.tableOperate.insertTable(row, col,outBorderWidth)
   }
 
   public insertTableTopRow() {
@@ -2186,7 +2186,7 @@ export class CommandAdapt {
     this.draw.insertImgVariable(def)
   }
   //循环
-  public insertLoop(type:'start'|'end'){
+  public insertLoop(type: 'start' | 'end') {
     this.draw.insertLoop(type)
   }
 }
