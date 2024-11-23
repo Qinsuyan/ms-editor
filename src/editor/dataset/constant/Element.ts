@@ -76,7 +76,8 @@ export const EDITOR_ELEMENT_ZIP_ATTR: Array<keyof IElement> = [
   'externalId',
   'label',
   'key',
-  'loopType'
+  'loopType',
+  'dataKey'
 ]
 
 export const TABLE_TD_ZIP_ATTR: Array<keyof ITd> = [

@@ -47,7 +47,6 @@ const elementList: IElement[] = [
           {
             colspan: 1,
             rowspan: 1,
-
             value: [
               {
                 value: '年龄'
@@ -57,7 +56,6 @@ const elementList: IElement[] = [
           {
             colspan: 1,
             rowspan: 1,
-
             value: [
               {
                 value: '性别'
@@ -88,7 +86,6 @@ const elementList: IElement[] = [
           {
             colspan: 1,
             rowspan: 1,
-
             value: [
               {
                 type: ElementType.IMAGE,
