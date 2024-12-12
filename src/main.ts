@@ -1,4 +1,4 @@
-import {  options, report } from './mock'
+import { data, options } from './mock'
 import './style.css'
 import prism from 'prismjs'
 import Editor, {
@@ -24,8 +24,6 @@ import { Dialog } from './components/dialog/Dialog'
 import { formatPrismToken } from './utils/prism'
 import { Signature } from './components/signature/Signature'
 import { debounce, nextTick } from './utils'
-import { IMarkType } from './editor/interface/Editor'
-import { imgSide, imgV } from './test'
 
 window.onload = function () {
   const isApple =
@@ -33,35 +31,7 @@ window.onload = function () {
 
   // 1. 初始化编辑器
   const container = document.querySelector<HTMLDivElement>('.editor')!
-  const instance = new Editor(
-    container,
-    {
-      header: [
-        // {
-        //   value: '第一人民医院',
-        //   size: 32,
-        //   rowFlex: RowFlex.CENTER
-        // },
-        // {
-        //   value: '\n门诊病历',
-        //   size: 18,
-        //   rowFlex: RowFlex.CENTER
-        // },
-        // {
-        //   value: '\n',
-        //   type: ElementType.SEPARATOR
-        // }
-      ],
-      main: <IElement[]>[],
-      footer: [
-        // {
-        //   value: 'canvas-editor',
-        //   size: 12
-        // }
-      ]
-    },
-    options
-  )
+  const instance = new Editor(container, data as any, options)
   console.log('实例: ', instance)
   // cypress使用
   Reflect.set(window, 'editor', instance)
@@ -424,7 +394,7 @@ window.onload = function () {
   }
   tablePanel.onclick = function () {
     // 应用选择
-    instance.command.executeInsertTable(rowIndex, colIndex,5)
+    instance.command.executeInsertTable(rowIndex, colIndex, 5)
     recoveryTable()
   }
 
@@ -1922,134 +1892,142 @@ window.onload = function () {
       }
     }
   ])
-  // 11. 自定义标记功能: 直线、箭头
-  const makeLine = document.querySelector<HTMLDivElement>('.menu-item__line')!
-  makeLine.title = `直线标记`
-  makeLine.onclick = function () {
-    instance.command.executeStartMark(IMarkType.LINE)
+  const setAllVariable = document.querySelector<HTMLDivElement>(
+    '.menu-item__variable_all'
+  )!
+  setAllVariable.title = '设置变量'
+  setAllVariable.onclick = () => {
+    console.log('设置变量')
   }
-  const makeArrow = document.querySelector<HTMLDivElement>('.menu-item__arrow')!
-  makeArrow.title = `箭头标记`
-  makeArrow.onclick = function () {
-    instance.command.executeStartMark(IMarkType.ARROW)
-  }
-  // 12. 设置变量
-  instance.command.executeSetTextVariable({
-    projectName: '我的测试项目',
-    loopIndex: ['1', '2', '3', '4']
-  })
 
-  instance.command.executeSetImgVariable({
-    imgPattern: imgV
-  })
-  instance.command.executeSetTableVariables({
-    personsData: [
-      ['张三', '18', '男'],
-      ['李四', '19', '女'],
-      ['王五', '20', '男'],
-      ['赵六', '21', '男'],
-      ['钱七', '22', '男']
-    ]
-  })
-  const variableSetText = document.querySelector<HTMLDivElement>(
-    '.menu-item__variable_set_text'
-  )!
-  variableSetText.title = `设置文字变量`
-  variableSetText.onclick = function () {
-    instance.command.executeSetTextVariable({
-      projectName: '我的测试项目22222'
-    })
-  }
-  const variableSetImg = document.querySelector<HTMLDivElement>(
-    '.menu-item__variable_set_img'
-  )!
-  variableSetImg.title = `设置图片变量`
-  variableSetImg.onclick = function () {
-    instance.command.executeSetImgVariable({
-      imgPattern: imgSide
-    })
-  }
+  // 11. 自定义标记功能: 直线、箭头
+  // const makeLine = document.querySelector<HTMLDivElement>('.menu-item__line')!
+  // makeLine.title = `直线标记`
+  // makeLine.onclick = function () {
+  //   instance.command.executeStartMark(IMarkType.LINE)
+  // }
+  // const makeArrow = document.querySelector<HTMLDivElement>('.menu-item__arrow')!
+  // makeArrow.title = `箭头标记`
+  // makeArrow.onclick = function () {
+  //   instance.command.executeStartMark(IMarkType.ARROW)
+  // }
+  // 12. 设置变量
+  // instance.command.executeSetTextVariable({
+  //   projectName: '我的测试项目',
+  //   loopIndex: ['1', '2', '3', '4']
+  // })
+
+  // instance.command.executeSetImgVariable({
+  //   imgPattern: imgV
+  // })
+  // instance.command.executeSetTableVariables({
+  //   personsData: [
+  //     ['张三', '18', '男'],
+  //     ['李四', '19', '女'],
+  //     ['王五', '20', '男'],
+  //     ['赵六', '21', '男'],
+  //     ['钱七', '22', '男']
+  //   ]
+  // })
+  // const variableSetText = document.querySelector<HTMLDivElement>(
+  //   '.menu-item__variable_set_text'
+  // )!
+  // variableSetText.title = `设置文字变量`
+  // variableSetText.onclick = function () {
+  //   instance.command.executeSetTextVariable({
+  //     projectName: '我的测试项目22222'
+  //   })
+  // }
+  // const variableSetImg = document.querySelector<HTMLDivElement>(
+  //   '.menu-item__variable_set_img'
+  // )!
+  // variableSetImg.title = `设置图片变量`
+  // variableSetImg.onclick = function () {
+  //   instance.command.executeSetImgVariable({
+  //     imgPattern: imgSide
+  //   })
+  // }
   // 13. 变量文字
-  const variableText = document.querySelector<HTMLDivElement>(
-    '.menu-item__variable_text'
-  )!
-  variableText.title = `变量文字`
-  variableText.onclick = function () {
-    instance.command.executeInsertTextVariable({
-      label: '项目名称',
-      key: 'projectName'
-    })
-  }
+  // const variableText = document.querySelector<HTMLDivElement>(
+  //   '.menu-item__variable_text'
+  // )!
+  // variableText.title = `变量文字`
+  // variableText.onclick = function () {
+  //   instance.command.executeInsertTextVariable({
+  //     label: '项目名称',
+  //     key: 'projectName'
+  //   })
+  // }
   //14. 变量图片
-  const variableImg = document.querySelector<HTMLDivElement>(
-    '.menu-item__variable_img'
-  )!
-  variableImg.title = `变量图片`
-  variableImg.onclick = function () {
-    instance.command.executeInsertImgVariable({
-      label: '花纹图片',
-      key: 'imgPattern',
-      width: 500,
-      height: 500
-    })
-  }
+  // const variableImg = document.querySelector<HTMLDivElement>(
+  //   '.menu-item__variable_img'
+  // )!
+  // variableImg.title = `变量图片`
+  // variableImg.onclick = function () {
+  //   instance.command.executeInsertImgVariable({
+  //     label: '花纹图片',
+  //     key: 'imgPattern',
+  //     width: 500,
+  //     height: 500
+  //   })
+  // }
   //15. 循环
-  const loopStart = document.querySelector<HTMLDivElement>(
-    '.menu-item__loop_start'
-  )!
-  loopStart.title = `循环开始`
-  loopStart.onclick = function () {
-    instance.command.executeInsertLoop('start')
-  }
-  const loopEnd = document.querySelector<HTMLDivElement>(
-    '.menu-item__loop_end'
-  )!
-  loopEnd.title = `循环结束`
-  loopEnd.onclick = function () {
-    instance.command.executeInsertLoop('end')
-  }
-  const setV = document.querySelector<HTMLDivElement>(
-    '.menu-item__set_variable'
-  )!
-  setV.title = `设置变量`
-  setV.onclick = function () {
-    instance.command.executeSetImgVariable(report.imgVariables)
-  }
-  const img24 = document.querySelector<HTMLDivElement>(
-    '.menu-item__insert_img_24'
-  )!
-  img24.title = `24小时内微震事件分布情况`
-  img24.onclick = function () {
-    instance.command.executeInsertElementList([
-      {
-        type: ElementType.IMG_VARIABLE,
-        value: '',
-        label: '24小时内微震事件分布情况',
-        key: 'DailyGLEvents24',
-        width: 760,
-        height: 350
-      }
-    ])
-  }
-  const img7 = document.querySelector<HTMLDivElement>(
-    '.menu-item__insert_img_7'
-  )!
-  img7.title = `7日内微震事件分布情况`
-  img7.onclick = function () {
-    instance.command.executeInsertElementList([
-      {
-        type: ElementType.IMG_VARIABLE,
-        value: '',
-        label: '7日内微震事件分布情况',
-        key: 'DailyGLEvents7',
-        width: 760,
-        height: 350
-      }
-    ])
-  }
-  const getV = document.querySelector<HTMLDivElement>('.menu-item__getValue')!
-  getV.title = `GET VALUE`
-  getV.onclick = function () {
-    console.log(instance.command.getValue())
-  }
+  // const loopStart = document.querySelector<HTMLDivElement>(
+  //   '.menu-item__loop_start'
+  // )!
+  // loopStart.title = `循环开始`
+  // loopStart.onclick = function () {
+  //   instance.command.executeInsertLoop('start')
+  // }
+  // const loopEnd = document.querySelector<HTMLDivElement>(
+  //   '.menu-item__loop_end'
+  // )!
+  // loopEnd.title = `循环结束`
+  // loopEnd.onclick = function () {
+  //   instance.command.executeInsertLoop('end')
+  // }
+  // const setV = document.querySelector<HTMLDivElement>(
+  //   '.menu-item__set_variable'
+  // )!
+  // setV.title = `设置变量`
+  // setV.onclick = function () {
+  //   // instance.command.executeSetImgVariable(report.imgVariables)
+  // }
+  // const img24 = document.querySelector<HTMLDivElement>(
+  //   '.menu-item__insert_img_24'
+  // )!
+  // img24.title = `24小时内微震事件分布情况`
+  // img24.onclick = function () {
+  //   instance.command.executeInsertElementList([
+  //     {
+  //       type: ElementType.IMG_VARIABLE,
+  //       value: '',
+  //       label: '24小时内微震事件分布情况',
+  //       key: 'DailyGLEvents24',
+  //       width: 760,
+  //       height: 350
+  //     }
+  //   ])
+  // }
+  // const img7 = document.querySelector<HTMLDivElement>(
+  //   '.menu-item__insert_img_7'
+  // )!
+  // img7.title = `7日内微震事件分布情况`
+  // img7.onclick = function () {
+  //   instance.command.executeInsertElementList([
+  //     {
+  //       type: ElementType.IMG_VARIABLE,
+  //       value: '',
+  //       label: '7日内微震事件分布情况',
+  //       key: 'DailyGLEvents7',
+  //       width: 760,
+  //       height: 350
+  //     }
+  //   ])
+  // }
+  // const getV = document.querySelector<HTMLDivElement>('.menu-item__getValue')!
+  // getV.title = `GET VALUE`
+  // getV.onclick = function () {
+  //   console.log(instance.command.getValue())
+  // }
 }
