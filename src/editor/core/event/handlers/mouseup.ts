@@ -43,7 +43,18 @@ function moveImgPosition(
       pageNo: draw.getPageNo()
     }
   }
+  if (element.type === ElementType.MARK) {
+    const moveX = evt.offsetX - host.mouseDownStartPosition!.x!
+    const moveY = evt.offsetY - host.mouseDownStartPosition!.y!
+    element.start!.x += moveX
+    element.start!.y += moveY
+    element.end!.x += moveX
+    element.end!.y += moveY
+    element.pageIndex = draw.getPageNo()
+  }
+
   draw.getImageParticle().destroyFloatImage()
+  draw.getMarkParticle().destroyFloatImage()
 }
 
 export function mouseup(evt: MouseEvent, host: CanvasEvent) {
@@ -85,13 +96,15 @@ export function mouseup(evt: MouseEvent, host: CanvasEvent) {
         const dragElement = cacheElementList[cacheEndIndex]
         if (
           dragElement.type === ElementType.IMAGE ||
-          dragElement.type === ElementType.LATEX
+          dragElement.type === ElementType.LATEX ||
+          dragElement.type === ElementType.MARK
         ) {
           moveImgPosition(dragElement, evt, host)
           if (
             dragElement.imgDisplay === ImageDisplay.SURROUND ||
             dragElement.imgDisplay === ImageDisplay.FLOAT_TOP ||
-            dragElement.imgDisplay === ImageDisplay.FLOAT_BOTTOM
+            dragElement.imgDisplay === ImageDisplay.FLOAT_BOTTOM ||
+            dragElement.type === ElementType.MARK
           ) {
             draw.getPreviewer().drawResizer(dragElement)
             isSubmitHistory = true
@@ -287,7 +300,8 @@ export function mouseup(evt: MouseEvent, host: CanvasEvent) {
       const dragElement = elementList[rangeEndIndex]
       if (
         dragElement.type === ElementType.IMAGE ||
-        dragElement.type === ElementType.LATEX
+        dragElement.type === ElementType.LATEX ||
+        dragElement.type === ElementType.MARK
       ) {
         moveImgPosition(dragElement, evt, host)
         imgElement = dragElement

@@ -210,6 +210,25 @@ export class Position {
             zone
           })
         }
+        if (element.type == ElementType.MARK) {
+          // 浮动元素使用上一位置信息
+          const prePosition = positionList[positionList.length - 1]
+          if (prePosition) {
+            positionItem.metrics = prePosition.metrics
+            positionItem.coordinate = prePosition.coordinate
+          }
+          this.floatPositionList.push({
+            pageNo: element.pageIndex!,
+            element,
+            position: positionItem,
+            isTable: payload.isTable,
+            index: payload.index,
+            tdIndex: payload.tdIndex,
+            trIndex: payload.trIndex,
+            tdValueIndex: index,
+            zone
+          })
+        }
         positionList.push(positionItem)
         index++
         x += metrics.width
@@ -705,6 +724,42 @@ export class Position {
             index: position.index,
             isDirectHit: true,
             isImage: true
+          }
+        }
+      }
+      if (
+        currentPageNo === pageNo &&
+        element.type === ElementType.MARK &&
+        payload.imgDisplays.includes(ImageDisplay.FLOAT_TOP)
+      ) {
+        const leftX = Math.min(element.start!.x, element.end!.x)
+        const width = Math.abs(element.start!.x - element.end!.x)
+        const topY = Math.min(element.start!.y, element.end!.y)
+        const height = Math.abs(element.start!.y - element.end!.y)
+        if (
+          x >= leftX &&
+          x <= leftX + width &&
+          y >= topY &&
+          y <= topY + height!
+        ) {
+          if (isTable) {
+            return {
+              index: index!,
+              isDirectHit: true,
+              isMark: true,
+              isTable,
+              trIndex,
+              tdIndex,
+              tdValueIndex,
+              tdId: element.tdId,
+              trId: element.trId,
+              tableId: element.tableId
+            }
+          }
+          return {
+            index: position.index,
+            isDirectHit: true,
+            isMark: true
           }
         }
       }

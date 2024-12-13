@@ -131,3 +131,8 @@ export interface ISetValueOption {
 export interface IFocusOption {
   position?: LocationPosition
 }
+
+export enum IMarkType {
+  LINE = 'line',
+  ARROW = 'arrow'
+}

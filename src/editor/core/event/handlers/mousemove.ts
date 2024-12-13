@@ -37,9 +37,15 @@ export function mousemove(evt: MouseEvent, host: CanvasEvent) {
       ) {
         draw.getPreviewer().clearResizer()
         draw.getImageParticle().dragFloatImage(evt.movementX, evt.movementY)
+      } else if (dragElement?.type === ElementType.MARK) {
+        draw.getPreviewer().clearResizer()
+        draw.getMarkParticle().dragFloatImage(evt.movementX, evt.movementY)
       }
+      host.dragover(evt, dragElement?.type === ElementType.MARK)
+    } else {
+      host.dragover(evt)
     }
-    host.dragover(evt)
+
     host.isAllowDrop = true
     return
   }

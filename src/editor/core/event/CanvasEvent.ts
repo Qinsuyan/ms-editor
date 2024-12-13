@@ -195,7 +195,7 @@ export class CanvasEvent {
     drop(evt, this)
   }
 
-  public dragover(evt: DragEvent | MouseEvent) {
-    drag.dragover(evt, this)
+  public dragover(evt: DragEvent | MouseEvent, noCursor = false) {
+    drag.dragover(evt, this,noCursor)
   }
 }

@@ -1,7 +1,11 @@
 import { findParent } from '../../../utils'
 import { CanvasEvent } from '../CanvasEvent'
 
-function dragover(evt: DragEvent | MouseEvent, host: CanvasEvent) {
+function dragover(
+  evt: DragEvent | MouseEvent,
+  host: CanvasEvent,
+  noCursor = false
+) {
   const draw = host.getDraw()
   const isReadonly = draw.isReadonly()
   if (isReadonly) return
@@ -39,11 +43,13 @@ function dragover(evt: DragEvent | MouseEvent, host: CanvasEvent) {
   const {
     cursor: { dragColor, dragWidth }
   } = draw.getOptions()
-  cursor.drawCursor({
-    width: dragWidth,
-    color: dragColor,
-    isBlink: false
-  })
+  if (!noCursor) {
+    cursor.drawCursor({
+      width: dragWidth,
+      color: dragColor,
+      isBlink: false
+    })
+  }
 }
 
 export default {

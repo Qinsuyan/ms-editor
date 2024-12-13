@@ -15,7 +15,9 @@
   box-sizing: border-box;
   pointer-events: initial;
 }
-
+.ce-resizer-selection .resizer-handle.hide {
+  display: none;
+}
 .ce-resizer-selection .handle-0 {
   cursor: nw-resize;
 }
@@ -46,6 +48,14 @@
 
 .ce-resizer-selection .handle-7 {
   cursor: w-resize;
+}
+.ce-resizer-selection .handle-8 {
+  cursor: pointer;
+  background-color: rgb(65, 130, 217);
+}
+.ce-resizer-selection .handle-9 {
+  cursor: pointer;
+  background-color: rgb(65, 130, 217);
 }
 
 .ce-resizer-size-view {

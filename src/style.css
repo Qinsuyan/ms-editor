@@ -782,6 +782,14 @@ ul {
 .editor>div {
   margin: 80px auto;
 }
+.ce-mark-wrap {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  cursor: crosshair;
+}
 
 .ce-page-container canvas {
   box-shadow: rgb(158 161 165 / 40%) 0px 2px 12px 0px;

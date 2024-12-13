@@ -56,6 +56,7 @@ import {
   IEditorResult,
   IEditorText,
   IFocusOption,
+  IMarkType,
   ISetValueOption,
   IUpdateOption
 } from '../../interface/Editor'
@@ -2362,5 +2363,10 @@ export class CommandAdapt {
 
   public setAreaProperties(payload: ISetAreaPropertiesOption) {
     this.draw.getArea().setAreaProperties(payload)
+  }
+  //自定义功能
+  //直线标记
+  public startMark(type: IMarkType) {
+    this.draw.startToMark(type)
   }
 }

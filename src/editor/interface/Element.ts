@@ -9,6 +9,7 @@ import { IArea } from './Area'
 import { IBlock } from './Block'
 import { ICheckbox } from './Checkbox'
 import { IControl } from './Control'
+import { IMarkType } from './Editor'
 import { IRadio } from './Radio'
 import { ITextDecoration } from './Text'
 import { ITitle } from './Title'
@@ -133,6 +134,13 @@ export interface IAreaElement {
   area?: IArea
 }
 
+export interface IMarkElement {
+  markType?: IMarkType
+  pageIndex?: number
+  start?: { x: number; y: number }
+  end?: { x: number; y: number }
+}
+
 export type IElement = IElementBasic &
   IElementStyle &
   IElementGroup &
@@ -149,7 +157,8 @@ export type IElement = IElementBasic &
   IBlockElement &
   ITitleElement &
   IListElement &
-  IAreaElement
+  IAreaElement &
+  IMarkElement
 
 export interface IElementMetrics {
   width: number

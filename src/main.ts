@@ -26,6 +26,7 @@ import { Dialog } from './components/dialog/Dialog'
 import { formatPrismToken } from './utils/prism'
 import { Signature } from './components/signature/Signature'
 import { debounce, nextTick, scrollIntoView } from './utils'
+import { IMarkType } from './editor/interface/Editor'
 
 window.onload = function () {
   const isApple =
@@ -1239,6 +1240,62 @@ window.onload = function () {
   printDom.onclick = function () {
     console.log('print')
     instance.command.executePrint()
+  }
+  //自定义功能
+  //文本控件
+  const textVariableDom = document.querySelector<HTMLDivElement>(
+    '.menu-item__textVariable'
+  )!
+  textVariableDom.title = '文本控件'
+  textVariableDom.onclick = function () {
+    instance.command.executeInsertControl({
+      type: ElementType.CONTROL,
+      value: '',
+      control: {
+        conceptId: 'ipAddr',
+        type: ControlType.TEXT,
+        value: [
+          {
+            value: '192.168.1.1'
+          }
+        ],
+        placeholder: 'IP地址'
+      }
+    })
+  }
+  //设置文本控件的值
+  const setTextVariableDom = document.querySelector<HTMLDivElement>(
+    '.menu-item__setTextVariable'
+  )!
+  setTextVariableDom.title = '设置文本控件值'
+  setTextVariableDom.onclick = function () {
+    instance.command.executeSetControlValue({
+      conceptId: 'ipAddr',
+      value: '192.168.1.2'
+    })
+  }
+  //直线标记
+  const markLineDom = document.querySelector<HTMLDivElement>(
+    '.menu-item__markLine'
+  )!
+  markLineDom.title = '直线标记'
+  markLineDom.onclick = function () {
+    instance.command.executeStartMark(IMarkType.LINE)
+  }
+  //直线标记
+  const markArrowDom = document.querySelector<HTMLDivElement>(
+    '.menu-item__markArrow'
+  )!
+  markArrowDom.title = '箭头标记'
+  markArrowDom.onclick = function () {
+    instance.command.executeStartMark(IMarkType.ARROW)
+  }
+
+  //打印数据
+  const logDom = document.querySelector<HTMLDivElement>('.menu-item__log')!
+  logDom.title = '获取数据'
+  logDom.onclick = function () {
+    console.log(instance.command.getValue())
   }
 
   // 6. 目录显隐 | 页面模式 | 纸张缩放 | 纸张大小 | 纸张方向 | 页边距 | 全屏 | 设置

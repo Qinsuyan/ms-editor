@@ -83,6 +83,7 @@ export function mousedown(evt: MouseEvent, host: CanvasEvent) {
   }
   const target = evt.target as HTMLDivElement
   const pageIndex = target.dataset.index
+
   // 设置pageNo
   if (pageIndex) {
     draw.setPageNo(Number(pageIndex))
@@ -101,6 +102,7 @@ export function mousedown(evt: MouseEvent, host: CanvasEvent) {
     isCheckbox,
     isRadio,
     isImage,
+    isMark,
     isTable,
     tdValueIndex,
     hitLineStartIndex
@@ -118,6 +120,7 @@ export function mousedown(evt: MouseEvent, host: CanvasEvent) {
   const curElement = elementList[curIndex]
   // 绘制
   const isDirectHitImage = !!(isDirectHit && isImage)
+  const isDirectHitMark = !!(isDirectHit && isMark)
   const isDirectHitCheckbox = !!(isDirectHit && isCheckbox)
   const isDirectHitRadio = !!(isDirectHit && isRadio)
   if (~index) {
@@ -168,7 +171,10 @@ export function mousedown(evt: MouseEvent, host: CanvasEvent) {
         isCompute: false,
         isSubmitHistory: false,
         isSetCursor:
-          !isDirectHitImage && !isDirectHitCheckbox && !isDirectHitRadio
+          !isDirectHitImage &&
+          !isDirectHitCheckbox &&
+          !isDirectHitRadio &&
+          !isDirectHitMark
       })
     }
     // 首字需定位到行首，非上一行最后一个字后
@@ -181,7 +187,7 @@ export function mousedown(evt: MouseEvent, host: CanvasEvent) {
   // 预览工具组件
   const previewer = draw.getPreviewer()
   previewer.clearResizer()
-  if (isDirectHitImage) {
+  if (isDirectHitImage || isDirectHitMark) {
     const previewerDrawOption: IPreviewerDrawOption = {
       // 只读或控件外表单模式禁用拖拽
       dragDisable:
@@ -197,14 +203,23 @@ export function mousedown(evt: MouseEvent, host: CanvasEvent) {
       positionList[curIndex],
       previewerDrawOption
     )
-    // 光标事件代理丢失，重新定位
-    draw.getCursor().drawCursor({
-      isShow: false
-    })
+    if (curElement.type === ElementType.MARK) {
+      
+      rangeManager.setRange(curIndex, curIndex)
+      draw.setPageNo(curElement.pageIndex!)
+    } else {
+      // 光标事件代理丢失，重新定位
+      draw.getCursor().drawCursor({
+        isShow: false
+      })
+    }
+
     // 点击图片允许拖拽调整位置
     setRangeCache(host)
     // 浮动元素创建镜像图片
-    if (
+    if (curElement.type === ElementType.MARK) {
+      draw.getMarkParticle().createFloatImage(curElement)
+    } else if (
       curElement.imgDisplay === ImageDisplay.SURROUND ||
       curElement.imgDisplay === ImageDisplay.FLOAT_TOP ||
       curElement.imgDisplay === ImageDisplay.FLOAT_BOTTOM
@@ -228,6 +243,7 @@ export function mousedown(evt: MouseEvent, host: CanvasEvent) {
       hyperlinkParticle.drawHyperlinkPopup(curElement, positionList[curIndex])
     }
   }
+
   // 日期控件
   const dateParticle = draw.getDateParticle()
   dateParticle.clearDatePicker()

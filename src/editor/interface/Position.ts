@@ -12,6 +12,7 @@ export interface ICurrentPosition {
   isRadio?: boolean
   isControl?: boolean
   isImage?: boolean
+  isMark?: boolean
   isTable?: boolean
   isDirectHit?: boolean
   trIndex?: number
@@ -45,6 +46,7 @@ export interface IPositionContext {
   isRadio?: boolean
   isControl?: boolean
   isImage?: boolean
+  isMark?: boolean
   isDirectHit?: boolean
   index?: number
   trIndex?: number
