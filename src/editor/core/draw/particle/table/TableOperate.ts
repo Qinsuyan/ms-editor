@@ -34,7 +34,7 @@ export class TableOperate {
     this.options = draw.getOptions()
   }
 
-  public insertTable(row: number, col: number) {
+  public insertTable(row: number, col: number,outBorderWidth?: number) {
     const { startIndex, endIndex } = this.range.getRange()
     if (!~startIndex && !~endIndex) return
     const { defaultTrMinHeight } = this.options.table
@@ -77,7 +77,7 @@ export class TableOperate {
       type: ElementType.TABLE,
       value: '',
       colgroup,
-      trList
+      trList,outBorderWidth: outBorderWidth || 1
     }
     // 格式化element
     formatElementList([element], {

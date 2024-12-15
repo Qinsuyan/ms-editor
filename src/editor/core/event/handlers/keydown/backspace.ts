@@ -7,6 +7,7 @@ export function backspace(evt: KeyboardEvent, host: CanvasEvent) {
   // 可输入性验证
   const rangeManager = draw.getRange()
   if (!rangeManager.getIsCanInput()) return
+  console.log('???')
   const { startIndex, endIndex, isCrossRowCol } = rangeManager.getRange()
   const control = draw.getControl()
   let curIndex: number | null

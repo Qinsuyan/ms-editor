@@ -94,6 +94,7 @@ export class Command {
   public executeLocationGroup: CommandAdapt['locationGroup']
   public executeSetZone: CommandAdapt['setZone']
   public executeSetControlValue: CommandAdapt['setControlValue']
+  // public executeSetControlValueByBatch: CommandAdapt['setControlValueByBatch']
   public executeSetControlExtension: CommandAdapt['setControlExtension']
   public executeSetControlProperties: CommandAdapt['setControlProperties']
   public executeSetControlHighlight: CommandAdapt['setControlHighlight']
@@ -130,6 +131,8 @@ export class Command {
   public getElementById: CommandAdapt['getElementById']
   //自定义
   public executeStartMark: CommandAdapt['startMark']
+  public executeImageData: CommandAdapt['setImageData']
+  public executeTableData: CommandAdapt['setTableData']
 
   constructor(adapt: CommandAdapt) {
     // 全局命令
@@ -263,6 +266,7 @@ export class Command {
     this.getElementById = adapt.getElementById.bind(adapt)
     // 控件
     this.executeSetControlValue = adapt.setControlValue.bind(adapt)
+    // this.executeSetControlValueByBatch = adapt.setControlValueByBatch.bind(adapt)
     this.executeSetControlExtension = adapt.setControlExtension.bind(adapt)
     this.executeSetControlProperties = adapt.setControlProperties.bind(adapt)
     this.executeSetControlHighlight = adapt.setControlHighlight.bind(adapt)
@@ -271,7 +275,11 @@ export class Command {
     this.executeLocationControl = adapt.locationControl.bind(adapt)
     this.executeInsertControl = adapt.insertControl.bind(adapt)
     //自定义
-    //直线标记
+    //标记
     this.executeStartMark = adapt.startMark.bind(adapt)
+    //图片变量
+    this.executeImageData = adapt.setImageData.bind(adapt)
+    //表格变量
+    this.executeTableData = adapt.setTableData.bind(adapt)
   }
 }

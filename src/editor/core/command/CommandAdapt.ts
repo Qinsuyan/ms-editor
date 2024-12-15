@@ -894,12 +894,12 @@ export class CommandAdapt {
     this.draw.render({ curIndex, isSetCursor })
   }
 
-  public insertTable(row: number, col: number) {
+  public insertTable(row: number, col: number, outBorderWidth?: number) {
     const isDisabled = this.draw.isReadonly() || this.draw.isDisabled()
     if (isDisabled) return
     const activeControl = this.control.getActiveControl()
     if (activeControl) return
-    this.tableOperate.insertTable(row, col)
+    this.tableOperate.insertTable(row, col, outBorderWidth)
   }
 
   public insertTableTopRow() {
@@ -2041,6 +2041,20 @@ export class CommandAdapt {
     this.draw.getControl().setValueById(payload)
   }
 
+  // public setControlValueByBatch(payload: Record<string, string | string[]>) {
+  //   for (const id in payload) {
+  //     if (typeof payload[id] === 'string') {
+  //       this.draw
+  //         .getControl()
+  //         .setValueById({ conceptId: id, value: payload[id] })
+  //     } else {
+  //       this.draw
+  //         .getControl()
+  //         .setValueById({ conceptId: id, values: payload[id], value: '' })
+  //     }
+  //   }
+  // }
+
   public setControlExtension(payload: ISetControlExtensionOption) {
     this.draw.getControl().setExtensionById(payload)
   }
@@ -2368,5 +2382,13 @@ export class CommandAdapt {
   //直线标记
   public startMark(type: IMarkType) {
     this.draw.startToMark(type)
+  }
+  //设置变量图片
+  public setImageData(payload: Record<string | number, string>) {
+    this.draw.setImageData(payload)
+  }
+  //设置变量表格
+  public setTableData(payload: Record<string | number, (string | number)[][]>) {
+    this.draw.setTableData(payload)
   }
 }

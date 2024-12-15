@@ -26,7 +26,7 @@ import { Dialog } from './components/dialog/Dialog'
 import { formatPrismToken } from './utils/prism'
 import { Signature } from './components/signature/Signature'
 import { debounce, nextTick, scrollIntoView } from './utils'
-import { IMarkType } from './editor/interface/Editor'
+import { testImgData, imgScatter } from './mockValue'
 
 window.onload = function () {
   const isApple =
@@ -37,29 +37,9 @@ window.onload = function () {
   const instance = new Editor(
     container,
     {
-      header: [
-        {
-          value: '第一人民医院',
-          size: 32,
-          rowFlex: RowFlex.CENTER
-        },
-        {
-          value: '\n门诊病历',
-          size: 18,
-          rowFlex: RowFlex.CENTER
-        },
-        {
-          value: '\n',
-          type: ElementType.SEPARATOR
-        }
-      ],
+      header: [],
       main: <IElement[]>data,
-      footer: [
-        {
-          value: 'canvas-editor',
-          size: 12
-        }
-      ]
+      footer: []
     },
     options
   )
@@ -1246,8 +1226,9 @@ window.onload = function () {
   const textVariableDom = document.querySelector<HTMLDivElement>(
     '.menu-item__textVariable'
   )!
-  textVariableDom.title = '文本控件'
+  textVariableDom.title = '文本变量'
   textVariableDom.onclick = function () {
+    //TODO：改造text变量
     instance.command.executeInsertControl({
       type: ElementType.CONTROL,
       value: '',
@@ -1269,28 +1250,58 @@ window.onload = function () {
   )!
   setTextVariableDom.title = '设置文本控件值'
   setTextVariableDom.onclick = function () {
-    instance.command.executeSetControlValue({
-      conceptId: 'ipAddr',
-      value: '192.168.1.2'
-    })
+    // instance.command.executeSetControlValueByBatch(textDict)
   }
-  //直线标记
-  const markLineDom = document.querySelector<HTMLDivElement>(
-    '.menu-item__markLine'
+  // //直线标记
+  // const markLineDom = document.querySelector<HTMLDivElement>(
+  //   '.menu-item__markLine'
+  // )!
+  // markLineDom.title = '直线标记'
+  // markLineDom.onclick = function () {
+  //   instance.command.executeStartMark(IMarkType.LINE)
+  // }
+  // //直线标记
+  // const markArrowDom = document.querySelector<HTMLDivElement>(
+  //   '.menu-item__markArrow'
+  // )!
+  // markArrowDom.title = '箭头标记'
+  // markArrowDom.onclick = function () {
+  //   instance.command.executeStartMark(IMarkType.ARROW)
+  // }
+  //粗边框表格
+  const insetTableWithBorderDom = document.querySelector<HTMLDivElement>(
+    '.menu-item__tableWithBorder'
   )!
-  markLineDom.title = '直线标记'
-  markLineDom.onclick = function () {
-    instance.command.executeStartMark(IMarkType.LINE)
-  }
-  //直线标记
-  const markArrowDom = document.querySelector<HTMLDivElement>(
-    '.menu-item__markArrow'
-  )!
-  markArrowDom.title = '箭头标记'
-  markArrowDom.onclick = function () {
-    instance.command.executeStartMark(IMarkType.ARROW)
+  insetTableWithBorderDom.title = '插入表格(带边框)'
+  insetTableWithBorderDom.onclick = function () {
+    instance.command.executeInsertTable(1, 2, 4)
   }
 
+  //变量图片
+  const imageVariableDom = document.querySelector<HTMLDivElement>(
+    '.menu-item__imageVariable'
+  )!
+  imageVariableDom.title = '插入变量图片'
+  imageVariableDom.onclick = function () {
+    instance.command.executeImage({
+      width: 500,
+      height: 500,
+      dataKey: 'imgTest',
+      placeHolder: '测试图片',
+      value: ''
+    })
+  }
+  //设置变量图片
+  const setImageVariableDom = document.querySelector<HTMLDivElement>(
+    '.menu-item__setImageVariable'
+  )!
+  setImageVariableDom.title = '设置图片变量'
+  setImageVariableDom.onclick = function () {
+    instance.command.executeImageData({
+      imgTest: testImgData,
+      imgScatter: imgScatter
+    })
+  }
   //打印数据
   const logDom = document.querySelector<HTMLDivElement>('.menu-item__log')!
   logDom.title = '获取数据'

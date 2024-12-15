@@ -22,6 +22,8 @@ export interface IDrawImagePayload {
   width: number
   height: number
   value: string
+  dataKey?: string
+  placeHolder?: string
   imgDisplay?: ImageDisplay
 }
 

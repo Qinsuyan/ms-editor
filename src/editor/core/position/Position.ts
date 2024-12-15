@@ -152,11 +152,12 @@ export class Position {
         const offsetY =
           (element.imgDisplay !== ImageDisplay.INLINE &&
             element.type === ElementType.IMAGE) ||
-          element.type === ElementType.LATEX
+          element.type === ElementType.LATEX ||
+          element.type === ElementType.MARK
             ? curRow.ascent - metrics.height
             : curRow.ascent
         // 偏移量
-        if (element.left) {
+        if (element.type!== ElementType.MARK&&element.left) {
           x += element.left
         }
         const positionItem: IElementPosition = {
@@ -456,12 +457,19 @@ export class Position {
         // 图片区域均为命中
         if (
           element.type === ElementType.IMAGE ||
-          element.type === ElementType.LATEX
+          element.type === ElementType.LATEX 
         ) {
           return {
             index: curPositionIndex,
             isDirectHit: true,
             isImage: true
+          }
+        }
+        if(element.type === ElementType.MARK){
+          return {
+            index: curPositionIndex,
+            isDirectHit: true,
+            isMark: true
           }
         }
         if (

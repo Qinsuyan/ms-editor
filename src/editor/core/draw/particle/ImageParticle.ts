@@ -71,20 +71,46 @@ export class ImageParticle {
     this.draw.getImageObserver().add(promise)
   }
 
-  protected getFallbackImage(width: number, height: number): HTMLImageElement {
+  protected getFallbackImage(
+    width: number,
+    height: number,
+    placeholder?: string,
+    value?: string
+  ): HTMLImageElement {
     const tileSize = 8
     const x = (width - Math.ceil(width / tileSize) * tileSize) / 2
     const y = (height - Math.ceil(height / tileSize) * tileSize) / 2
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
-                  <rect width="${width}" height="${height}" fill="url(#mosaic)" />
-                  <defs>
-                    <pattern id="mosaic" x="${x}" y="${y}" width="${
-      tileSize * 2
-    }" height="${tileSize * 2}" patternUnits="userSpaceOnUse">
-                      <rect width="${tileSize}" height="${tileSize}" fill="#cccccc" />
-                      <rect width="${tileSize}" height="${tileSize}" fill="#cccccc" transform="translate(${tileSize}, ${tileSize})" />
-                    </pattern>
-                  </defs>
+                  ${
+                    value
+                      ? `<image href="${value}" width="${width}" height="${height}" opacity="0.6" preserveAspectRatio="none" />`
+                      : `<rect width="${width}" height="${height}" fill="url(#mosaic)" />`
+                  }
+                  ${
+                    !value && placeholder
+                      ? `<text x="${width / 2}" y="${
+                          height / 2 + 5
+                        }" fill="black" font-size="${
+                          Math.min(width, height) / placeholder?.length
+                        }" text-anchor="middle" dominant-baseline="middle">
+                        ${placeholder}</text>`
+                      : ''
+                  }
+                  ${
+                    !value
+                      ? ` <defs>
+                        <pattern id="mosaic" x="${x}" y="${y}" width="${
+                          tileSize * 2
+                        }" height="${
+                          tileSize * 2
+                        }" patternUnits="userSpaceOnUse">
+                          <rect width="${tileSize}" height="${tileSize}" fill="#cccccc" />
+                          <rect width="${tileSize}" height="${tileSize}" fill="#cccccc" transform="translate(${tileSize}, ${tileSize})" />
+                        </pattern>
+                      </defs>`
+                      : ''
+                  }
+                   
                 </svg>`
     const fallbackImage = new Image()
     fallbackImage.src = `data:image/svg+xml;base64,${convertStringToBase64(
@@ -124,16 +150,45 @@ export class ImageParticle {
             ctx.drawImage(img, x, y, width, height)
           }
         }
-        img.onerror = error => {
-          const fallbackImage = this.getFallbackImage(width, height)
+        img.onerror = () => {
+          let imgSrc = ''
+          if (element.dataKey) {
+            const value = this.draw.getImageData(element.dataKey)
+            if (element.loopId) {
+              imgSrc = value[element.loopIndex!] || ''
+            } else {
+              if (typeof value === 'string') {
+                imgSrc = value
+              } else {
+                imgSrc = ''
+              }
+            }
+          }
+          const fallbackImage = this.getFallbackImage(
+            width,
+            height,
+            element.placeHolder,
+            imgSrc
+          )
           fallbackImage.onload = () => {
             ctx.drawImage(fallbackImage, x, y, width, height)
             this.imageCache.set(element.id!, fallbackImage)
           }
-          reject(error)
+          fallbackImage.onerror = e => {
+            reject(e)
+          }
         }
       })
       this.addImageObserver(imageLoadPromise)
     }
+  }
+
+  public clearCache() {
+    this.imageCache.clear()
+  }
+  public clearCacheByIds(ids: string[]){
+    ids.forEach(id=>{
+      this.imageCache.delete(id)
+    })
   }
 }

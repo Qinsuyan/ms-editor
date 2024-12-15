@@ -161,6 +161,7 @@ export interface ISetControlValueOption {
   conceptId?: string
   areaId?: string
   value: string | IElement[]
+  values?: string[]
 }
 
 export interface ISetControlExtensionOption {

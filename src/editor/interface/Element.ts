@@ -22,6 +22,8 @@ export interface IElementBasic {
   value: string
   extension?: unknown
   externalId?: string
+  loopId?: string
+  loopIndex?: number
 }
 
 export interface IElementStyle {
@@ -61,10 +63,12 @@ export interface IListElement {
 }
 
 export interface ITableAttr {
+  dataKey?: string
   colgroup?: IColgroup[]
   trList?: ITr[]
   borderType?: TableBorder
   borderColor?: string
+  outBorderWidth?: number
 }
 
 export interface ITableElement {
@@ -116,6 +120,8 @@ export interface IDateElement {
 }
 
 export interface IImageElement {
+  dataKey?: string
+  placeHolder?: string
   imgDisplay?: ImageDisplay
   imgFloatPosition?: {
     x: number
@@ -141,6 +147,10 @@ export interface IMarkElement {
   end?: { x: number; y: number }
 }
 
+export interface ILoopElement {
+  loopType?: 'start' | 'end'
+}
+
 export type IElement = IElementBasic &
   IElementStyle &
   IElementGroup &
@@ -158,7 +168,8 @@ export type IElement = IElementBasic &
   ITitleElement &
   IListElement &
   IAreaElement &
-  IMarkElement
+  IMarkElement &
+  ILoopElement
 
 export interface IElementMetrics {
   width: number

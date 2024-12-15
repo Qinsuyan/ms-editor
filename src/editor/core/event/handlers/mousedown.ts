@@ -126,6 +126,7 @@ export function mousedown(evt: MouseEvent, host: CanvasEvent) {
   if (~index) {
     let startIndex = curIndex
     let endIndex = curIndex
+
     // shift激活时进行选区处理
     if (evt.shiftKey) {
       const { startIndex: oldStartIndex } = rangeManager.getRange()
@@ -140,8 +141,10 @@ export function mousedown(evt: MouseEvent, host: CanvasEvent) {
         }
       }
     }
+
     rangeManager.setRange(startIndex, endIndex)
     position.setCursorPosition(positionList[curIndex])
+
     // 复选框
     if (isDirectHitCheckbox && !isReadonly) {
       hitCheckbox(curElement, draw)
@@ -203,17 +206,10 @@ export function mousedown(evt: MouseEvent, host: CanvasEvent) {
       positionList[curIndex],
       previewerDrawOption
     )
-    if (curElement.type === ElementType.MARK) {
-      
-      rangeManager.setRange(curIndex, curIndex)
-      draw.setPageNo(curElement.pageIndex!)
-    } else {
-      // 光标事件代理丢失，重新定位
-      draw.getCursor().drawCursor({
-        isShow: false
-      })
-    }
-
+    // 光标事件代理丢失，重新定位
+    draw.getCursor().drawCursor({
+      isShow: false
+    })
     // 点击图片允许拖拽调整位置
     setRangeCache(host)
     // 浮动元素创建镜像图片

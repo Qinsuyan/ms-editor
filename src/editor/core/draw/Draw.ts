@@ -186,6 +186,9 @@ export class Draw {
   private intersectionPageNo: number
   private lazyRenderIntersectionObserver: IntersectionObserver | null
   private printModeData: Required<IEditorData> | null
+  private imageValues: Record<string | number, string | string[]>
+  private textValues: Record<string | number, string | string[]>
+  private tableValues: Record<string | number, (string | number)[][]>
 
   constructor(
     rootContainer: HTMLElement,
@@ -280,6 +283,9 @@ export class Draw {
     this.intersectionPageNo = 0
     this.lazyRenderIntersectionObserver = null
     this.printModeData = null
+    this.imageValues = {}
+    this.tableValues = {}
+    this.textValues = {}
 
     this.render({
       isInit: true,
@@ -708,6 +714,7 @@ export class Draw {
         curIndex -= 1
       }
     }
+
     if (~curIndex) {
       this.range.setRange(curIndex, curIndex)
       this.render({
@@ -735,16 +742,10 @@ export class Draw {
       curIndex = this.elementList.length - 1
     }
     this.range.setRange(curIndex, curIndex)
-    if (elementList.length === 1 && elementList[0].type === ElementType.MARK) {
-      this.render({
-        curIndex,
-        isSetCursor: false
-      })
-    } else {
-      this.render({
-        curIndex
-      })
-    }
+
+    this.render({
+      curIndex
+    })
   }
 
   public spliceElementList(
@@ -1332,13 +1333,15 @@ export class Draw {
       y += isStartElement ? curRow.offsetY || 0 : 0
       if (
         element.type === ElementType.IMAGE ||
-        element.type === ElementType.LATEX
+        element.type === ElementType.LATEX ||
+        element.type === ElementType.MARK
       ) {
         // 浮动图片无需计算数据
         if (
           element.imgDisplay === ImageDisplay.SURROUND ||
           element.imgDisplay === ImageDisplay.FLOAT_TOP ||
-          element.imgDisplay === ImageDisplay.FLOAT_BOTTOM
+          element.imgDisplay === ImageDisplay.FLOAT_BOTTOM ||
+          element.type === ElementType.MARK
         ) {
           metrics.width = 0
           metrics.height = 0
@@ -2077,6 +2080,9 @@ export class Draw {
         } else if (element.type === ElementType.LATEX) {
           this.textParticle.complete()
           this.laTexParticle.render(ctx, element, x, y + offsetY)
+        } else if (element.type === ElementType.MARK) {
+          this.textParticle.complete()
+          console.log('djaiwdhawoihd ')
         } else if (element.type === ElementType.TABLE) {
           if (isCrossRowCol) {
             rangeRecord.x = x
@@ -2397,11 +2403,7 @@ export class Draw {
         )
       }
       //渲染标记
-      if (
-        element.type === ElementType.MARK &&
-        element.pageIndex === pageNo &&
-        imgDisplays.includes(ImageDisplay.FLOAT_TOP)
-      ) {
+      if (element.type === ElementType.MARK && element.pageIndex === pageNo) {
         this.markParticle.render(ctx, element)
       }
     }
@@ -2521,6 +2523,7 @@ export class Draw {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           const index = Number((<HTMLCanvasElement>entry.target).dataset.index)
+
           this._drawPage({
             elementList,
             positionList,
@@ -2538,6 +2541,7 @@ export class Draw {
   private _immediateRender() {
     const positionList = this.position.getOriginalMainPositionList()
     const elementList = this.getOriginalMainElementList()
+
     for (let i = 0; i < this.pageRowList.length; i++) {
       this._drawPage({
         elementList,
@@ -2791,13 +2795,11 @@ export class Draw {
     canvas.style.top = '0'
     canvas.style.left = '0'
     parentEl.appendChild(canvas)
-
     // 获取 canvas 上下文
     const ctx = canvas.getContext('2d')
     if (!ctx) {
       throw new Error('无法获取 canvas 的 2D 上下文')
     }
-
     // 绘制直线的函数
     const drawLine = (
       start: { x: number; y: number },
@@ -2806,7 +2808,6 @@ export class Draw {
     ) => {
       // 清空画布
       ctx.clearRect(0, 0, canvas.width, canvas.height)
-
       // 绘制红色直线
       ctx.beginPath()
       ctx.moveTo(start.x, start.y)
@@ -2837,10 +2838,8 @@ export class Draw {
       }
       ctx.stroke()
     }
-
     // 初始绘制
     drawLine(start, end, type)
-
     // 更新端点位置的方法
     const updatePosition = (
       newStart: { x: number; y: number },
@@ -2848,11 +2847,9 @@ export class Draw {
     ) => {
       drawLine(newStart, newEnd, type)
     }
-
     return { element: canvas, updatePosition }
   }
   public startToMark(type: IMarkType) {
-    const previousMode = this.getMode()
     const marks = {
       type,
       startPosition: { x: 0, y: 0 },
@@ -2863,6 +2860,7 @@ export class Draw {
     const handleMarkMouseDown = (e: MouseEvent, index: number) => {
       e.stopPropagation()
       e.preventDefault()
+      this.setPageNo(index)
       marks.startPosition = { x: e.offsetX, y: e.offsetY }
       marks.pageIndex = index
     }
@@ -2882,23 +2880,28 @@ export class Draw {
       marks.endPosition = { x: e.offsetX, y: e.offsetY }
       document.body.removeEventListener('mousemove', handleMarkMouseMove)
       document.body.removeEventListener('mouseup', handleMarkMouseUp)
-      //恢复模式
-      this.setMode(previousMode)
-      // //添加标记元素到元素列表
+      //添加标记元素到元素列表
+      const positionResult = this.position.adjustPositionContext({
+        x: e.offsetX,
+        y: e.offsetY,
+        pageNo: marks.pageIndex
+      })
+      if (!positionResult) return
 
-      this.appendElementList(
-        [
-          {
-            type: ElementType.MARK,
-            value: '',
-            markType: marks.type,
-            pageIndex: marks.pageIndex,
-            start: marks.startPosition,
-            end: marks.endPosition
-          }
-        ],
-        {}
-      )
+      const { index } = positionResult
+      const curIndex = index
+      this.range.setRange(curIndex, curIndex)
+      this.position.setCursorPosition(this.position.getPositionList()[curIndex])
+      this.insertElementList([
+        {
+          type: ElementType.MARK,
+          value: 'MARK',
+          markType: marks.type,
+          pageIndex: marks.pageIndex,
+          start: marks.startPosition,
+          end: marks.endPosition
+        }
+      ])
       //删除添加的dom
       this.pageList.forEach(canvas => {
         canvas.parentElement?.lastElementChild?.remove()
@@ -2906,7 +2909,6 @@ export class Draw {
     }
     document.body.addEventListener('mousemove', handleMarkMouseMove)
     document.body.addEventListener('mouseup', handleMarkMouseUp)
-    this.setMode(EditorMode.PRINT)
     this.pageList.forEach((canvas, index) => {
       const parent = canvas.parentElement!
       const markWrap = document.createElement('div')
@@ -2919,5 +2921,54 @@ export class Draw {
         this._makeMarkEl({ x: 0, y: 0 }, { x: 0, y: 0 }, type, markWrap)
       )
     })
+  }
+  //设置文字变量
+  public setTextData(payload: Record<string | number, string | string[]>) {
+    this.textValues = {
+      ...this.textValues,
+      ...payload
+    }
+  }
+  public getTextData(key: string | number) {
+    return this.textValues[key]
+  }
+  //设置图片变量
+  public setImageData(payload: Record<string | number, string>) {
+    this.imageValues = {
+      ...this.imageValues,
+      ...payload
+    }
+    let startIndex = -1
+    console.log(this.elementList)
+    console.log(Object.keys(payload))
+    const elements = this.elementList.filter((el, index) => {
+      if (
+        el.type === ElementType.IMAGE &&
+        el.id &&
+        el.dataKey &&
+        Object.keys(payload).includes(el.dataKey)
+      ) {
+        if (startIndex < 0) {
+          startIndex = index
+        }
+        return true
+      }
+      return false
+    })
+
+    const ids = elements.map(el => el.id)
+    console.log(elements)
+    this.imageParticle.clearCacheByIds(ids as string[])
+    this.render({ curIndex: startIndex })
+  }
+  public getImageData(key: string | number) {
+    return this.imageValues[key]
+  }
+  //设置表格变量
+  public setTableData(payload: Record<string | number, (string | number)[][]>) {
+    this.tableValues = {
+      ...this.tableValues,
+      ...payload
+    }
   }
 }
